@@ -1382,6 +1382,8 @@ function simulate(p) {
             v2 = Math.max(0, v2*(1-f)); v3 = Math.max(0, v3*(1-f));
             marginLoanBal -= repay;
           }
+          // If LTV still above trigger after repayment, forced liquidation
+          if (marginLoanBal > (v0+v1+v2+v3) * mg.liqLtv) { alive = false; break; }
         }
       }
       if (initDebt.liqEn && initLoanBal > 0) {
@@ -1767,7 +1769,8 @@ function computeHistPaths(p, useGrossAsset, T, K) {
 
       if (mg.en&&marginLoanBal>0) {
         const ta=v0+v1+v2+v3,ml=ta*mg.liqLtv;
-        if(marginLoanBal>ml){const rep=Math.min(marginLoanBal-ml*0.9,ta);if(rep>0){const f=rep/Math.max(ta,1e-9);v0=Math.max(0,v0*(1-f));v1=Math.max(0,v1*(1-f));v2=Math.max(0,v2*(1-f));v3=Math.max(0,v3*(1-f));marginLoanBal-=rep;}}
+        if(marginLoanBal>ml){const rep=Math.min(marginLoanBal-ml*0.9,ta);if(rep>0){const f=rep/Math.max(ta,1e-9);v0=Math.max(0,v0*(1-f));v1=Math.max(0,v1*(1-f));v2=Math.max(0,v2*(1-f));v3=Math.max(0,v3*(1-f));marginLoanBal-=rep;}
+          if(marginLoanBal>(v0+v1+v2+v3)*mg.liqLtv){alive=false;break;}}
       }
       if (initDebt.liqEn&&initLoanBal>0) {
         const ta=v0+v1+v2+v3,ml=ta*initDebt.liqLtv;
