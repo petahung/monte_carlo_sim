@@ -7,18 +7,18 @@
     "description": "內嵌資料，可離線使用"
   },
   {
-    "key": "tsla",
-    "label": "TSLA",
-    "file": "tsla_leveraged.csv",
-    "lev2": "2x TSLA",
-    "lev3": "3x TSLA"
-  },
-  {
     "key": "_gspc",
     "label": "S&P500",
     "file": "_gspc_leveraged.csv",
     "lev2": "2x S&P500",
     "lev3": "3x S&P500"
+  },
+  {
+    "key": "tsla",
+    "label": "TSLA",
+    "file": "tsla_leveraged.csv",
+    "lev2": "2x TSLA",
+    "lev3": "3x TSLA"
   },
   {
     "key": "nvda",
