@@ -1,3 +1,26 @@
+"""
+build_leveraged_etf.py
+======================
+功能：從 Investing.com 下載的 NDX 原始 CSV，產生模擬 2x/3x 槓桿指數的 CSV。
+      此為簡化版本（不含無風險利率調整），完整版請使用 build_leveraged_etf.ps1。
+
+前置需求：
+    pip install pandas
+
+使用方式：
+    python build_leveraged_etf.py
+
+輸入檔案：
+    Nasdaq 100 Historical Data*.csv   從 Investing.com 手動下載的 NDX 原始資料
+
+輸出檔案：
+    ndx_leveraged.csv   包含 NDX、NDX2L（2x）、NDX3L（3x）每日報酬與累積指數
+                        （注意：不含 RF 利率調整欄位，僅適合基本使用）
+
+建議：
+    日常更新請改用 update_data.py，可自動抓取最新資料且包含完整 RF 調整。
+"""
+
 import pandas as pd
 import glob
 import os

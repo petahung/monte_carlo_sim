@@ -1,4 +1,28 @@
 # build_leveraged_etf.ps1
+#
+# 功能：從 Investing.com 下載的 NDX 原始 CSV，結合無風險利率資料，
+#       產生包含模擬 2x/3x 槓桿指數的 ndx_leveraged.csv。
+#
+# 前置需求：
+#   - Windows PowerShell 5.1+ 或 PowerShell 7+
+#
+# 使用方式：
+#   cd C:\path\to\monte_carlo_ndx
+#   .\build_leveraged_etf.ps1
+#
+# 輸入檔案：
+#   Nasdaq 100 Historical Data*.csv   從 Investing.com 手動下載的原始 NDX 價格資料
+#   美元貨幣市場基金利率趨勢.csv        無風險利率年度錨點（用於插值計算每日 RF）
+#
+# 輸出檔案：
+#   ndx_leveraged.csv   包含 NDX、NDX2L、NDX3L 每日報酬與累積指數（含費用率調整）
+#
+# 欄位說明：
+#   NDX2L_Adj / NDX3L_Adj  扣除借貸成本（RF + 2%）與費用率後的淨報酬
+#   RF_Annual_Pct           當日年化無風險利率（線性插值自年底錨點）
+#
+# 注意：日常更新請改用 update_data.py（自動抓取，無需手動下載）
+#
 $dir = Split-Path $MyInvocation.MyCommand.Path
 
 # ── 1. Load NDX data ──────────────────────────────────────────

@@ -1,4 +1,28 @@
-# compare_leverage.ps1  - compare simulated vs actual leveraged ETFs
+# compare_leverage.ps1
+#
+# 功能：比較模擬的 NDX2L/NDX3L 與實際 ETF（QLD/TQQQ）的歷史報酬，
+#       驗證模擬數據的準確性，輸出相關係數、CAGR 誤差等統計。
+#
+# 前置需求：
+#   - Windows PowerShell 5.1+ 或 PowerShell 7+
+#   - 已執行 download_etf.ps1（產生 QLD.csv、TQQQ.csv）
+#   - 已執行 build_leveraged_etf.ps1 或 update_data.py（產生 ndx_leveraged.csv）
+#
+# 使用方式：
+#   cd C:\path\to\monte_carlo_ndx
+#   .\download_etf.ps1        # 先下載實際 ETF 資料（若尚未下載）
+#   .\compare_leverage.ps1    # 執行比較
+#
+# 輸入檔案：
+#   ndx_leveraged.csv   模擬的槓桿指數資料
+#   QLD.csv             QLD 實際歷史收盤價
+#   TQQQ.csv            TQQQ 實際歷史收盤價
+#
+# 輸出：
+#   終端機印出逐年 CAGR 比對、相關係數、累積誤差等統計
+#   compare_NDX2L_vs_QLD.csv    每日對照表
+#   compare_NDX3L_vs_TQQQ.csv   每日對照表
+#
 $dir = Split-Path $MyInvocation.MyCommand.Path
 
 # ── Load simulation data ───────────────────────────────────────

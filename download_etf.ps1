@@ -1,4 +1,20 @@
-# download_etf.ps1 - 用 Yahoo Finance v8 JSON API 下載 QLD / TQQQ
+# download_etf.ps1
+#
+# 功能：從 Yahoo Finance 下載 QLD（2x NDX ETF）和 TQQQ（3x NDX ETF）
+#       的完整歷史調整後收盤價，儲存為 CSV，供 compare_leverage.ps1 使用。
+#
+# 前置需求：
+#   - Windows PowerShell 5.1+ 或 PowerShell 7+
+#   - 網路連線（連接 Yahoo Finance API）
+#
+# 使用方式：
+#   cd C:\path\to\monte_carlo_ndx
+#   .\download_etf.ps1
+#
+# 輸出檔案：
+#   QLD.csv    QLD 每日調整後收盤價（自 2006-06-22 起）
+#   TQQQ.csv   TQQQ 每日調整後收盤價（自 2010-02-12 起）
+#
 $dir = Split-Path $MyInvocation.MyCommand.Path
 
 $sv = New-Object Microsoft.PowerShell.Commands.WebRequestSession
