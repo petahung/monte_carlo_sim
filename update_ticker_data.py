@@ -27,7 +27,7 @@ update_ticker_data.py — 任意標的歷史資料產生器
     --lev3-name  3x 版本顯示名稱（預設 "3x {name}"）
     --er2        2x 費用率 %/yr（預設 0.95，同 QLD）
     --er3        3x 費用率 %/yr（預設 0.88，同 TQQQ）
-    --start      起始日期（預設 2000-01-01）
+    --start      起始日期（預設從標的有資料的最早日期）
     --rebuild    忽略現有檔案，重新全量下載
 
 輸出檔案：
@@ -200,8 +200,8 @@ def main():
                     help='2x 費用率 %%/yr（預設 0.95，同 QLD）')
     ap.add_argument('--er3',       type=float, default=0.88,
                     help='3x 費用率 %%/yr（預設 0.88，同 TQQQ）')
-    ap.add_argument('--start',     default='2000-01-01',
-                    help='起始日期（全量下載用），預設 2000-01-01')
+    ap.add_argument('--start',     default='1900-01-01',
+                    help='起始日期（全量下載用），預設從標的有資料的最早日期')
     ap.add_argument('--rebuild',   action='store_true',
                     help='忽略現有檔案，重新全量下載')
     args = ap.parse_args()
