@@ -43,17 +43,13 @@ update_ticker_data.py — 任意標的歷史資料產生器
     加密貨幣（-USD 結尾）自動採用 365 日年化；其他標的採用 252 交易日。
 """
 
-import os, sys, argparse, re, time, json, ssl
+import os, sys, argparse, re, time, json
 from datetime import datetime, timedelta, date
 from math import isnan
-from urllib.request import urlopen, Request
-from urllib.error import URLError
 import pandas as pd
 
-# Windows 上 TWSE SSL 憑證驗證常失敗，建立忽略驗證的 context
-_SSL_CTX = ssl.create_default_context()
-_SSL_CTX.check_hostname = False
-_SSL_CTX.verify_mode = ssl.CERT_NONE
+import requests
+requests.packages.urllib3.disable_warnings()   # 關閉 InsecureRequestWarning
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 ROOT       = os.path.dirname(SCRIPT_DIR)
@@ -66,7 +62,8 @@ def is_crypto(ticker: str) -> bool:
     return any(ticker.upper().endswith(s) for s in CRYPTO_SUFFIXES)
 
 def sanitize_filename(ticker: str) -> str:
-    return re.sub(r'[^\w\-]', '_', ticker).lower()
+    s = re.sub(r'[^\w\-]', '_', ticker).lower()
+    return s.lstrip('_') or 'asset'   # Jekyll ignores _-prefixed files on GitHub Pages
 
 # ── 資料抓取：TWSE（台灣證交所） ───────────────────────────────
 
@@ -92,12 +89,9 @@ def fetch_twse(stock_no: str, start_date: str, end_date: str):
         url = (f'https://www.twse.com.tw/exchangeReport/STOCK_DAY'
                f'?response=json&date={date_str}&stockNo={stock_no}')
         try:
-            req = Request(url, headers={
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'
-            })
-            with urlopen(req, timeout=15, context=_SSL_CTX) as resp:
-                payload = json.loads(resp.read().decode('utf-8'))
-
+            resp    = requests.get(url, timeout=15, verify=False,
+                                   headers={'User-Agent': 'Mozilla/5.0'})
+            payload = resp.json()
             if payload.get('stat') == 'OK' and 'data' in payload:
                 fields    = payload.get('fields', [])
                 close_idx = fields.index('收盤價') if '收盤價' in fields else 6
@@ -111,7 +105,7 @@ def fetch_twse(stock_no: str, start_date: str, end_date: str):
                             rows.append({'Date': dt, 'Price': price})
                     except (ValueError, IndexError):
                         pass
-        except URLError as e:
+        except Exception as e:
             print(f"  TWSE {date_str}: {e}")
 
         fetched += 1

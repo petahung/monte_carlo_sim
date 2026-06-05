@@ -7,9 +7,9 @@
     "description": "內嵌資料，可離線使用"
   },
   {
-    "key": "_gspc",
+    "key": "gspc",
     "label": "S&P500",
-    "file": "_gspc_leveraged.csv",
+    "file": "gspc_leveraged.csv",
     "lev2": "2x S&P500",
     "lev3": "3x S&P500"
   },
