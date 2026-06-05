@@ -342,10 +342,13 @@ def main():
 
     # ── 抓取價格 ─────────────────────────────────────────────
     fetch_end = (datetime.now() + timedelta(days=1)).strftime('%Y-%m-%d')
-    is_tw = ticker.upper().endswith('.TW') or ticker.upper().endswith('.TWO')
+    _tw_suffix = ticker.upper().endswith('.TW') or ticker.upper().endswith('.TWO')
+    _stock_no  = re.sub(r'\.(TW|TWO)$', '', ticker.upper(), flags=re.IGNORECASE)
+    # 台股代碼為純數字（2330、0050）；含英文字母的（IR0001）是指數，走 yfinance
+    is_tw = _tw_suffix and _stock_no.isdigit()
 
     if is_tw:
-        stock_no = re.sub(r'\.(TW|TWO)$', '', ticker.upper(), flags=re.IGNORECASE)
+        stock_no = _stock_no
         print(f"台股標的，使用 TWSE API 抓取 {stock_no}（{fetch_from} → {today}）")
         print(f"  ※ TWSE 資料為未還原股價，除息日含價格跌幅（不含配息回報）")
         print(f"  正在逐月抓取，請稍候 ...")
