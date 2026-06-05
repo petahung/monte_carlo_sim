@@ -33,5 +33,12 @@
     "file": "nvda_leveraged.csv",
     "lev2": "2x NVDA",
     "lev3": "3x NVDA"
+  },
+  {
+    "key": "ir0001_tw",
+    "label": "加權報酬指數",
+    "file": "ir0001_tw_leveraged.csv",
+    "lev2": "2x 加權報酬指數",
+    "lev3": "3x 加權報酬指數"
   }
 ]
