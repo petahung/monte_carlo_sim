@@ -65,9 +65,9 @@ def sanitize_filename(ticker: str) -> str:
     s = re.sub(r'[^\w\-]', '_', ticker).lower()
     return s.lstrip('_') or 'asset'   # Jekyll ignores _-prefixed files on GitHub Pages
 
-# .TW 非數字代碼 → 對應的 TWSE 指數端點
+# .TW 非數字代碼 → (TWSE 指數端點, 資料起始日)
 TWSE_INDEX_ENDPOINTS = {
-    'IR0001': 'MFI94U',   # 發行量加權股價報酬指數
+    'IR0001': ('MFI94U', '2003-01-01'),   # 發行量加權股價報酬指數
 }
 
 # ── 資料抓取：TWSE 指數（報酬指數等） ──────────────────────────
@@ -413,7 +413,10 @@ def main():
     is_twse_index = _tw_suffix and _stock_no in TWSE_INDEX_ENDPOINTS
 
     if is_twse_index:
-        endpoint = TWSE_INDEX_ENDPOINTS[_stock_no]
+        endpoint, index_start = TWSE_INDEX_ENDPOINTS[_stock_no]
+        # 如果使用者沒指定 --start，自動套用該指數的已知起始日
+        if fetch_from == '1900-01-01':
+            fetch_from = index_start
         print(f"TWSE 指數，使用 {endpoint} API 抓取 {_stock_no}（{fetch_from} → {today}）")
         print(f"  正在逐月抓取，請稍候 ...")
         prices = fetch_twse_index(endpoint, fetch_from, fetch_end)
