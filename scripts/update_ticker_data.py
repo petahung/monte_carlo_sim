@@ -65,7 +65,67 @@ def sanitize_filename(ticker: str) -> str:
     s = re.sub(r'[^\w\-]', '_', ticker).lower()
     return s.lstrip('_') or 'asset'   # Jekyll ignores _-prefixed files on GitHub Pages
 
-# ── 資料抓取：TWSE（台灣證交所） ───────────────────────────────
+# .TW 非數字代碼 → 對應的 TWSE 指數端點
+TWSE_INDEX_ENDPOINTS = {
+    'IR0001': 'MFI94U',   # 發行量加權股價報酬指數
+}
+
+# ── 資料抓取：TWSE 指數（報酬指數等） ──────────────────────────
+
+def fetch_twse_index(endpoint: str, start_date: str, end_date: str):
+    """從 TWSE indicesReport 端點逐月抓取指數歷史收盤點位。"""
+    start_d = datetime.strptime(start_date[:10], '%Y-%m-%d').date()
+    end_d   = min(datetime.strptime(end_date[:10], '%Y-%m-%d').date(),
+                  datetime.now().date())
+
+    rows = []
+    cur  = date(start_d.year, start_d.month, 1)
+    end_month   = date(end_d.year, end_d.month, 1)
+    total_months = (end_d.year - start_d.year) * 12 + (end_d.month - start_d.month) + 1
+    fetched = 0
+
+    while cur <= end_month:
+        date_str = cur.strftime('%Y%m%d')
+        url = (f'https://www.twse.com.tw/indicesReport/{endpoint}'
+               f'?response=json&date={date_str}')
+        try:
+            resp    = requests.get(url, timeout=15, verify=False,
+                                   headers={'User-Agent': 'Mozilla/5.0'})
+            payload = resp.json()
+            if payload.get('stat') == 'OK' and 'data' in payload:
+                for row in payload['data']:
+                    try:
+                        roc_y, m, d_ = row[0].replace('　', '').replace(' ', '').split('/')
+                        dt    = datetime(int(roc_y) + 1911, int(m), int(d_))
+                        price = float(row[1].replace(',', '').strip())
+                        if price > 0:
+                            rows.append({'Date': dt, 'Price': price})
+                    except (ValueError, IndexError):
+                        pass
+        except Exception as e:
+            print(f"  TWSE {date_str}: {e}")
+
+        fetched += 1
+        if fetched % 12 == 0:
+            print(f"  TWSE 進度: {fetched}/{total_months} 個月", end='\r')
+
+        if cur.month == 12:
+            cur = date(cur.year + 1, 1, 1)
+        else:
+            cur = date(cur.year, cur.month + 1, 1)
+        time.sleep(0.4)
+
+    print()
+    if not rows:
+        return None
+
+    df = pd.DataFrame(rows).set_index('Date').sort_index()
+    df = df[~df.index.duplicated(keep='last')]
+    df = df.dropna()
+    df = df[df['Price'] > 0]
+    return df
+
+# ── 資料抓取：TWSE 個股/ETF ──────────────────────────────────────
 
 def fetch_twse(stock_no: str, start_date: str, end_date: str):
     """
@@ -344,12 +404,24 @@ def main():
 
     # ── 抓取價格 ─────────────────────────────────────────────
     fetch_end = (datetime.now() + timedelta(days=1)).strftime('%Y-%m-%d')
-    _tw_suffix = ticker.upper().endswith('.TW') or ticker.upper().endswith('.TWO')
-    _stock_no  = re.sub(r'\.(TW|TWO)$', '', ticker.upper(), flags=re.IGNORECASE)
-    # 台股代碼為純數字（2330、0050）；含英文字母的（IR0001）是指數，走 yfinance
-    is_tw = _tw_suffix and _stock_no.isdigit()
+    _tw_suffix   = ticker.upper().endswith('.TW') or ticker.upper().endswith('.TWO')
+    _stock_no    = re.sub(r'\.(TW|TWO)$', '', ticker.upper(), flags=re.IGNORECASE)
+    # 純數字代碼（2330、0050）→ TWSE 個股 API
+    # 已知指數代碼（IR0001）   → TWSE 指數 API
+    # 其他含英文字母的         → yfinance
+    is_tw         = _tw_suffix and _stock_no.isdigit()
+    is_twse_index = _tw_suffix and _stock_no in TWSE_INDEX_ENDPOINTS
 
-    if is_tw:
+    if is_twse_index:
+        endpoint = TWSE_INDEX_ENDPOINTS[_stock_no]
+        print(f"TWSE 指數，使用 {endpoint} API 抓取 {_stock_no}（{fetch_from} → {today}）")
+        print(f"  正在逐月抓取，請稍候 ...")
+        prices = fetch_twse_index(endpoint, fetch_from, fetch_end)
+        if prices is None or prices.empty:
+            print("  TWSE 指數抓取失敗，請確認端點或日期範圍。")
+            return
+
+    elif is_tw:
         stock_no = _stock_no
         print(f"台股標的，使用 TWSE API 抓取 {stock_no}（{fetch_from} → {today}）")
         print(f"  ※ TWSE 資料為未還原股價，除息日含價格跌幅（不含配息回報）")
