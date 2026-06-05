@@ -1,3 +1,4 @@
 .claude/
 *.b64
 *.zip
+__pycache__/
