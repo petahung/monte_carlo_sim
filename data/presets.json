@@ -40,5 +40,12 @@
     "file": "ir0001_tw_leveraged.csv",
     "lev2": "2x 加權報酬指數",
     "lev3": "3x 加權報酬指數"
+  },
+  {
+    "key": "btc-usd",
+    "label": "bitcoin",
+    "file": "btc-usd_leveraged.csv",
+    "lev2": "2x bitcoin",
+    "lev3": "3x bitcoin"
   }
 ]
