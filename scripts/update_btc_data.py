@@ -36,7 +36,10 @@ from datetime import datetime, timedelta
 import urllib.request
 import pandas as pd
 
-DIR = os.path.dirname(os.path.abspath(__file__))
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+ROOT       = os.path.dirname(SCRIPT_DIR)
+DATA_DIR   = os.path.join(ROOT, 'data')
+DIR        = DATA_DIR
 
 # ── 費用率（每日） ─────────────────────────────────────────────
 ER2   = 0.0185 / 365.0   # BITX 1.85%/yr

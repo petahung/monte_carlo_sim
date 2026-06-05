@@ -25,8 +25,11 @@ import pandas as pd
 import glob
 import os
 
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+DATA_DIR   = os.path.join(os.path.dirname(SCRIPT_DIR), 'data')
+
 # --- 讀取所有 NDX CSV 檔案 ---
-csv_files = glob.glob(os.path.join(os.path.dirname(__file__), "Nasdaq 100 Historical Data*.csv"))
+csv_files = glob.glob(os.path.join(DATA_DIR, "Nasdaq 100 Historical Data*.csv"))
 
 frames = []
 for f in csv_files:
@@ -69,7 +72,7 @@ result.columns = [
     "NDX2L_DailyReturn", "NDX3L_DailyReturn",
 ]
 
-output_path = os.path.join(os.path.dirname(__file__), "ndx_leveraged.csv")
+output_path = os.path.join(DATA_DIR, "ndx_leveraged.csv")
 result.to_csv(output_path, index=False, float_format="%.6f")
 
 # --- 統計摘要 ---

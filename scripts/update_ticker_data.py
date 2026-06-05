@@ -50,7 +50,10 @@ from urllib.request import urlopen, Request
 from urllib.error import URLError
 import pandas as pd
 
-DIR = os.path.dirname(os.path.abspath(__file__))
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+ROOT       = os.path.dirname(SCRIPT_DIR)
+DATA_DIR   = os.path.join(ROOT, 'data')
+DIR        = DATA_DIR
 
 CRYPTO_SUFFIXES = ('-USD', '-EUR', '-GBP', '-USDT')
 

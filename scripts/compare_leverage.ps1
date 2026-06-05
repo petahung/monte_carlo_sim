@@ -23,7 +23,9 @@
 #   compare_NDX2L_vs_QLD.csv    每日對照表
 #   compare_NDX3L_vs_TQQQ.csv   每日對照表
 #
-$dir = Split-Path $MyInvocation.MyCommand.Path
+$scriptDir = Split-Path $MyInvocation.MyCommand.Path
+$root      = Split-Path $scriptDir
+$dir       = Join-Path $root "data"
 
 # ── Load simulation data ───────────────────────────────────────
 $sim = @{}

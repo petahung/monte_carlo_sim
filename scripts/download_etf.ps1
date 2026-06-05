@@ -15,7 +15,9 @@
 #   QLD.csv    QLD 每日調整後收盤價（自 2006-06-22 起）
 #   TQQQ.csv   TQQQ 每日調整後收盤價（自 2010-02-12 起）
 #
-$dir = Split-Path $MyInvocation.MyCommand.Path
+$scriptDir = Split-Path $MyInvocation.MyCommand.Path
+$root      = Split-Path $scriptDir
+$dir       = Join-Path $root "data"
 
 $sv = New-Object Microsoft.PowerShell.Commands.WebRequestSession
 $sv.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120"

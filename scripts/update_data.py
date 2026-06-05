@@ -18,7 +18,10 @@ from datetime import datetime, timedelta
 import urllib.request, ssl
 import pandas as pd
 
-DIR = os.path.dirname(os.path.abspath(__file__))
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+ROOT       = os.path.dirname(SCRIPT_DIR)   # repo root
+DATA_DIR   = os.path.join(ROOT, 'data')
+DIR        = DATA_DIR   # backward-compat alias
 
 # ── Constants ──────────────────────────────────────────────────
 ER2  = 0.0095 / 252.0   # QLD  0.95%/yr expense ratio
@@ -303,7 +306,7 @@ def main():
         print("Re-embedding existing data into index.html ...")
         existing_str = existing.copy()
         existing_str['Date'] = existing_str['Date'].dt.strftime('%Y-%m-%d')
-        embed_csv_in_html(os.path.join(DIR, 'index.html'),
+        embed_csv_in_html(os.path.join(ROOT, 'index.html'),
                           existing_str.to_csv(index=False))
         print("Done.")
         return
@@ -356,7 +359,7 @@ def main():
           f"(last: {new_rows[-1]['Date']})")
 
     # ── F. Embed into index.html ───────────────────────────────
-    html_path = os.path.join(DIR, 'index.html')
+    html_path = os.path.join(ROOT, 'index.html')
     embed_csv_in_html(html_path, updated.to_csv(index=False))
 
     print(f"\n✓ Done. Data now covers up to {new_rows[-1]['Date']}.")

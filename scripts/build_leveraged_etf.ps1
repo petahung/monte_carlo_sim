@@ -23,7 +23,9 @@
 #
 # 注意：日常更新請改用 update_data.py（自動抓取，無需手動下載）
 #
-$dir = Split-Path $MyInvocation.MyCommand.Path
+$scriptDir = Split-Path $MyInvocation.MyCommand.Path
+$root      = Split-Path $scriptDir
+$dir       = Join-Path $root "data"
 
 # ── 1. Load NDX data ──────────────────────────────────────────
 $csvFiles = Get-ChildItem $dir -Filter "Nasdaq 100 Historical Data*.csv"
