@@ -43,12 +43,17 @@ update_ticker_data.py — 任意標的歷史資料產生器
     加密貨幣（-USD 結尾）自動採用 365 日年化；其他標的採用 252 交易日。
 """
 
-import os, sys, argparse, re, time, json
+import os, sys, argparse, re, time, json, ssl
 from datetime import datetime, timedelta, date
 from math import isnan
 from urllib.request import urlopen, Request
 from urllib.error import URLError
 import pandas as pd
+
+# Windows 上 TWSE SSL 憑證驗證常失敗，建立忽略驗證的 context
+_SSL_CTX = ssl.create_default_context()
+_SSL_CTX.check_hostname = False
+_SSL_CTX.verify_mode = ssl.CERT_NONE
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 ROOT       = os.path.dirname(SCRIPT_DIR)
@@ -90,7 +95,7 @@ def fetch_twse(stock_no: str, start_date: str, end_date: str):
             req = Request(url, headers={
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'
             })
-            with urlopen(req, timeout=15) as resp:
+            with urlopen(req, timeout=15, context=_SSL_CTX) as resp:
                 payload = json.loads(resp.read().decode('utf-8'))
 
             if payload.get('stat') == 'OK' and 'data' in payload:
