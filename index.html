@@ -1684,11 +1684,14 @@ function renderResults(res) {
   document.getElementById('res-title').textContent =
     `${allocLabel(p)} ｜ ${p.years} 年 ｜ ${p.numSims.toLocaleString()} 次 ｜ ${rebalLabel(p)}`;
 
-  // Derived arrays
-  const cagrArr = Float64Array.from(finalV, v =>
-    v > 0 ? (Math.pow(v/init, 1/years)-1)*100 : -100);
+  // Derived arrays — clamp extreme/NaN values so stats display correctly
+  const cagrArr = Float64Array.from(finalV, v => {
+    if (!isFinite(v) || isNaN(v)) return v > 0 ? 9999 : -100;
+    return v > 0 ? (Math.pow(v/init, 1/years)-1)*100 : -100;
+  });
   const mwrrArr    = computeMWRR(finalV, p);
-  const mulArr     = Float64Array.from(finalV, v => v/init);
+  const mulArr     = Float64Array.from(finalV, v =>
+    isFinite(v) && !isNaN(v) ? v/init : (v > 0 ? 1e6 : 0));
   const volPctArr  = Float64Array.from(volArr,     v => v*100);
   const meanRetPct = Float64Array.from(meanRetArr,  v => v*100);
 
@@ -2799,9 +2802,11 @@ async function askAI(tabId) {
   } else if (tabId === 'res' && lastResult) {
     const { finalV, mddArr, volArr, sharpArr, survRate, years, p } = lastResult;
     const init = p.initVal;
-    const cagrArr = Float64Array.from(finalV, v => v>0 ? (Math.pow(v/init,1/years)-1)*100 : -100);
+    const cagrArr = Float64Array.from(finalV, v =>
+      (!isFinite(v)||isNaN(v)) ? (v>0?9999:-100) : v>0?(Math.pow(v/init,1/years)-1)*100:-100);
     const mwrrArr = computeMWRR(finalV, p);
-    const mulArr  = Float64Array.from(finalV, v => v/init);
+    const mulArr  = Float64Array.from(finalV, v =>
+      isFinite(v)&&!isNaN(v) ? v/init : (v>0?1e6:0));
     const volPct  = Float64Array.from(volArr, v => v*100);
 
     prompt = `根據以下蒙地卡羅模擬結果，用繁體中文撰寫三個章節，各約150字。

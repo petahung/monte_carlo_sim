@@ -71,6 +71,8 @@ def fetch_yfinance(ticker, start, end):
         df = raw[['Close']].copy()
         df.index = pd.to_datetime(df.index).tz_localize(None)
         df.columns = ['Price']
+        df = df.dropna()
+        df = df[df['Price'] > 0]
         return df
     except Exception as e:
         print(f"  yfinance error: {e}")
