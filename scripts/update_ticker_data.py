@@ -134,9 +134,16 @@ def fetch_twse(stock_no: str, start_date: str, end_date: str):
 def fetch_yfinance(ticker, start, end):
     try:
         import yfinance as yf
-        raw = yf.download(ticker, start=start, end=end,
-                          auto_adjust=True, progress=False,
-                          multi_level_index=False)
+        # Yahoo Finance limits daily data to ~100 years; use period='max' for old start dates
+        cutoff = (datetime.now() - timedelta(days=365 * 99)).strftime('%Y-%m-%d')
+        if start < cutoff:
+            raw = yf.download(ticker, period='max',
+                              auto_adjust=True, progress=False,
+                              multi_level_index=False)
+        else:
+            raw = yf.download(ticker, start=start, end=end,
+                              auto_adjust=True, progress=False,
+                              multi_level_index=False)
         if raw.empty:
             return None
         df = raw[['Close']].copy()
