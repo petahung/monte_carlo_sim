@@ -12,5 +12,19 @@
     "file": "tsla_leveraged.csv",
     "lev2": "2x TSLA",
     "lev3": "3x TSLA"
+  },
+  {
+    "key": "_gspc",
+    "label": "S&P500",
+    "file": "_gspc_leveraged.csv",
+    "lev2": "2x S&P500",
+    "lev3": "3x S&P500"
+  },
+  {
+    "key": "nvda",
+    "label": "NVDA",
+    "file": "nvda_leveraged.csv",
+    "lev2": "2x NVDA",
+    "lev3": "3x NVDA"
   }
 ]
