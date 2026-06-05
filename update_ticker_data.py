@@ -15,7 +15,9 @@ update_ticker_data.py — 任意標的歷史資料產生器
     python update_ticker_data.py --ticker TSLA --er2 0.95 --er3 0.88 --rebuild
 
 常用 Yahoo Finance 標的代碼：
-    股票  : NVDA  TSLA  MSFT  AAPL  TSM（台積電 ADR）  2330.TW（台積電原股）
+    股票  : NVDA  TSLA  MSFT  AAPL  TSM（台積電 ADR）
+    台股  : 2330.TW（台積電）  0050.TW（元大台50）  006208.TW（富邦台50）
+              ↑ 台股自動使用 TWSE API，資料從上市日起（非還原股價）
     指數  : ^GSPC（S&P 500）  ^IXIC（Nasdaq Comp）  ^DJI（Dow Jones）  ^NDX（NDX 100）
     加密  : BTC-USD  ETH-USD  SOL-USD
     債券  : TLT  IEF  HYG
@@ -41,8 +43,11 @@ update_ticker_data.py — 任意標的歷史資料產生器
     加密貨幣（-USD 結尾）自動採用 365 日年化；其他標的採用 252 交易日。
 """
 
-import os, sys, argparse, re
-from datetime import datetime, timedelta
+import os, sys, argparse, re, time, json
+from datetime import datetime, timedelta, date
+from math import isnan
+from urllib.request import urlopen, Request
+from urllib.error import URLError
 import pandas as pd
 
 DIR = os.path.dirname(os.path.abspath(__file__))
@@ -55,7 +60,74 @@ def is_crypto(ticker: str) -> bool:
 def sanitize_filename(ticker: str) -> str:
     return re.sub(r'[^\w\-]', '_', ticker).lower()
 
-# ── 資料抓取 ────────────────────────────────────────────────────
+# ── 資料抓取：TWSE（台灣證交所） ───────────────────────────────
+
+def fetch_twse(stock_no: str, start_date: str, end_date: str):
+    """
+    從 TWSE 公開 API 逐月抓取上市股票歷史收盤價。
+    支援股票（2330）、ETF（0050）等上市有價證券。
+    注意：回傳的是「未還原股價」，除息日當天股價含除息跌幅。
+          若需還原股價，請另行下載除息資料進行調整。
+    """
+    start_d = datetime.strptime(start_date[:10], '%Y-%m-%d').date()
+    end_d   = min(datetime.strptime(end_date[:10], '%Y-%m-%d').date(),
+                  datetime.now().date())
+
+    rows = []
+    cur  = date(start_d.year, start_d.month, 1)
+    end_month = date(end_d.year, end_d.month, 1)
+    total_months = (end_d.year - start_d.year) * 12 + (end_d.month - start_d.month) + 1
+    fetched = 0
+
+    while cur <= end_month:
+        date_str = cur.strftime('%Y%m%d')
+        url = (f'https://www.twse.com.tw/exchangeReport/STOCK_DAY'
+               f'?response=json&date={date_str}&stockNo={stock_no}')
+        try:
+            req = Request(url, headers={
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'
+            })
+            with urlopen(req, timeout=15) as resp:
+                payload = json.loads(resp.read().decode('utf-8'))
+
+            if payload.get('stat') == 'OK' and 'data' in payload:
+                fields    = payload.get('fields', [])
+                close_idx = fields.index('收盤價') if '收盤價' in fields else 6
+                for row in payload['data']:
+                    try:
+                        roc_y, m, d_ = row[0].replace(' ', '').split('/')
+                        dt    = datetime(int(roc_y) + 1911, int(m), int(d_))
+                        price_str = row[close_idx].replace(',', '').strip()
+                        price = float(price_str)
+                        if price > 0:
+                            rows.append({'Date': dt, 'Price': price})
+                    except (ValueError, IndexError):
+                        pass
+        except URLError as e:
+            print(f"  TWSE {date_str}: {e}")
+
+        fetched += 1
+        if fetched % 12 == 0:
+            print(f"  TWSE 進度: {fetched}/{total_months} 個月", end='\r')
+
+        # 下一個月
+        if cur.month == 12:
+            cur = date(cur.year + 1, 1, 1)
+        else:
+            cur = date(cur.year, cur.month + 1, 1)
+        time.sleep(0.4)   # 避免被 TWSE 封鎖
+
+    print()
+    if not rows:
+        return None
+
+    df = pd.DataFrame(rows).set_index('Date').sort_index()
+    df = df[~df.index.duplicated(keep='last')]
+    df = df.dropna()
+    df = df[df['Price'] > 0]
+    return df
+
+# ── 資料抓取：yfinance ──────────────────────────────────────────
 
 def fetch_yfinance(ticker, start, end):
     try:
@@ -244,11 +316,24 @@ def main():
 
     # ── 抓取價格 ─────────────────────────────────────────────
     fetch_end = (datetime.now() + timedelta(days=1)).strftime('%Y-%m-%d')
-    print(f"Fetching {ticker}  {fetch_from} → {today} ...")
-    prices = fetch_yfinance(ticker, fetch_from, fetch_end)
+    is_tw = ticker.upper().endswith('.TW') or ticker.upper().endswith('.TWO')
+
+    if is_tw:
+        stock_no = re.sub(r'\.(TW|TWO)$', '', ticker.upper(), flags=re.IGNORECASE)
+        print(f"台股標的，使用 TWSE API 抓取 {stock_no}（{fetch_from} → {today}）")
+        print(f"  ※ TWSE 資料為未還原股價，除息日含價格跌幅（不含配息回報）")
+        print(f"  正在逐月抓取，請稍候 ...")
+        prices = fetch_twse(stock_no, fetch_from, fetch_end)
+        if prices is None or prices.empty:
+            print("  TWSE 抓取失敗，改用 yfinance（資料可能從 2009 年起）...")
+            prices = fetch_yfinance(ticker, fetch_from, fetch_end)
+    else:
+        print(f"Fetching {ticker}  {fetch_from} → {today} ...")
+        prices = fetch_yfinance(ticker, fetch_from, fetch_end)
+
     if prices is None or prices.empty:
         print(f"無法取得 {ticker} 資料。請確認：")
-        print(f"  1. ticker 代碼是否正確（可在 finance.yahoo.com 搜尋確認）")
+        print(f"  1. ticker 代碼是否正確")
         print(f"  2. 網路連線是否正常")
         print(f"  3. yfinance 版本：pip install --upgrade yfinance")
         sys.exit(1)
