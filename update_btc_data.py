@@ -223,7 +223,7 @@ def main():
 
     # ── 判斷增量 or 全量 ──────────────────────────────────────
     if os.path.exists(btc_path):
-        existing   = pd.read_csv(btc_path)
+        existing   = pd.read_csv(btc_path, comment='#')
         existing['Date'] = pd.to_datetime(existing['Date'])
         last_date  = existing['Date'].iloc[-1]
         fetch_from = (last_date + timedelta(days=1)).strftime('%Y-%m-%d')
@@ -310,13 +310,12 @@ def main():
                 existing_str[col] = 0.0
         updated = pd.concat([existing_str[COLS], new_df], ignore_index=True)
     else:
-        # 全量：加入第一筆（基準行，報酬=0）
-        base_price = float(prices.index[0] if False else
-                           pd.read_csv(io.StringIO(''))['Price'].iloc[0]
-                           if False else cum_state['prev_price'])
         updated = new_df
 
-    updated.to_csv(btc_path, index=False)
+    # 寫入：第一行為元資料注釋（供 index.html 自動套用標籤）
+    with open(btc_path, 'w', encoding='utf-8') as f:
+        f.write('# ASSET=BTC-USD,NAME=BTC,LEV2=2x BTC,LEV3=3x BTC\n')
+        f.write(updated.to_csv(index=False))
     print(f"Saved btc_leveraged.csv: {len(updated)} rows "
           f"(last: {new_rows[-1]['Date']})")
 
