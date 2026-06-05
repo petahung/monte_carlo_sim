@@ -1,0 +1,15 @@
+[
+  {
+    "key": "ndx",
+    "label": "NDX Nasdaq 100",
+    "file": null,
+    "embedded": true,
+    "description": "內嵌資料，可離線使用"
+  },
+  {
+    "key": "ndx_1999",
+    "label": "NDX (from 1999)",
+    "file": "ndx_leveraged_1999.csv",
+    "description": "1985 年起 NDX 資料"
+  }
+]

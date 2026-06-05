@@ -323,6 +323,25 @@ def main():
         f.write(updated.to_csv(index=False))
     print(f"Saved btc_leveraged.csv: {len(updated)} rows "
           f"(last: {new_rows[-1]['Date']})")
+    _register_btc_preset()
+
+def _register_btc_preset():
+    import json
+    presets_path = os.path.join(DATA_DIR, 'presets.json')
+    presets = []
+    if os.path.exists(presets_path):
+        with open(presets_path, 'r', encoding='utf-8') as f:
+            presets = json.load(f)
+    entry = {'key': 'btc_usd', 'label': 'BTC-USD', 'file': 'btc_leveraged.csv',
+             'lev2': '2x BTC', 'lev3': '3x BTC'}
+    idx = next((i for i, p in enumerate(presets) if p['key'] == 'btc_usd'), None)
+    if idx is not None:
+        presets[idx] = entry
+    else:
+        presets.append(entry)
+    with open(presets_path, 'w', encoding='utf-8') as f:
+        json.dump(presets, f, ensure_ascii=False, indent=2)
+    print("  已登記至 presets.json（選單 key: btc_usd）")
 
     # ── 摘要統計 ──────────────────────────────────────────────
     n_years = (pd.to_datetime(new_rows[-1]['Date']) -

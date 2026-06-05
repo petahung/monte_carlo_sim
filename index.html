@@ -55,6 +55,9 @@ input[type=number],input[type=text]{background:#0f172a;border:1px solid #374151;
 .btn-primary:disabled{background:#1e3356;color:#4b5563;cursor:not-allowed}
 .btn-sm{padding:4px 10px;font-size:0.75rem;border-radius:4px;border:1px solid #374151;background:#1f2937;color:#94a3b8;cursor:pointer}
 .btn-sm:hover{background:#273549;color:#cbd5e1}
+.preset-sel{padding:4px 6px;font-size:0.75rem;border-radius:4px;border:1px solid #374151;background:#1f2937;color:#94a3b8;cursor:pointer;max-width:160px}
+.preset-sel:hover{background:#273549;color:#cbd5e1}
+.preset-sel option{background:#1f2937;color:#cbd5e1}
 .btn-danger{border-color:#7f1d1d;color:#fca5a5;background:#1f0808}
 .btn-danger:hover{background:#450a0a}
 .row-btns{display:flex;gap:6px;margin-top:10px}
@@ -156,7 +159,10 @@ tr:hover td{background:#1a2540}
   <h1 id="main-title">NDX Monte Carlo Portfolio Simulator</h1>
   <span id="ds-badge" class="badge warn">載入中…</span>
   <span id="ds-range" style="font-size:0.75rem;color:#4b5563"></span>
-  <button class="btn-sm" onclick="document.getElementById('csv-file').click()" title="自動載入失敗時手動選取">📂 手動載入</button>
+  <select id="preset-sel" class="preset-sel" onchange="loadPreset(this.value)" title="選擇預載標的">
+    <option value="">📋 預載標的…</option>
+  </select>
+  <button class="btn-sm" onclick="document.getElementById('csv-file').click()" title="手動選取本機 CSV 檔案">📂 手動載入</button>
   <input type="file" id="csv-file" accept=".csv" style="display:none" onchange="handleFile(this)">
 </div>
 
@@ -564,6 +570,73 @@ function handleFile(inp) {
   r.readAsText(f, 'utf-8');
 }
 
+// ── 預載標的 ────────────────────────────────────────────────────
+const DATA_BASE = (() => {
+  // 在 GitHub Pages / 本機 server 下用相對路徑；file:// 時為空
+  if (location.protocol === 'file:') return null;
+  return location.pathname.replace(/\/[^/]*$/, '') + '/data/';
+})();
+
+function loadPresets() {
+  const sel = document.getElementById('preset-sel');
+  if (!sel) return;
+
+  // 永遠加入內嵌 NDX（離線可用）
+  const embedded = document.getElementById('csv-data')?.textContent?.trim();
+  if (embedded) {
+    const opt = new Option('NDX Nasdaq 100（內嵌）', '__embedded__');
+    sel.appendChild(opt);
+  }
+
+  // 若在 server 環境，抓取 presets.json
+  if (!DATA_BASE) return;
+  fetch(DATA_BASE + 'presets.json', { cache: 'no-cache' })
+    .then(r => r.ok ? r.json() : [])
+    .then(list => {
+      list.forEach(p => {
+        if (p.embedded) return;       // NDX 內嵌已加過
+        if (!p.file)   return;
+        const opt = new Option(p.label, p.key);
+        opt.dataset.file = p.file;
+        sel.appendChild(opt);
+      });
+    })
+    .catch(() => {});                 // 靜默失敗（離線）
+}
+
+function loadPreset(val) {
+  const sel = document.getElementById('preset-sel');
+  setTimeout(() => { sel.value = ''; }, 600);   // 選完後重置顯示
+
+  if (!val) return;
+
+  if (val === '__embedded__') {
+    const text = document.getElementById('csv-data')?.textContent?.trim();
+    if (text) parseData(text, 'ndx_leveraged.csv');
+    return;
+  }
+
+  // 從 presets.json 找到對應 file
+  if (!DATA_BASE) {
+    alert('預載標的需要透過網頁伺服器開啟，請改用「手動載入」。');
+    return;
+  }
+  const opt = sel.querySelector(`option[value="${val}"]`);
+  const file = opt?.dataset?.file;
+  if (!file) return;
+
+  const badge = document.getElementById('ds-badge');
+  badge.textContent = '載入中…'; badge.className = 'badge warn';
+
+  fetch(DATA_BASE + file, { cache: 'no-cache' })
+    .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.text(); })
+    .then(text => parseData(text, file))
+    .catch(err => {
+      badge.textContent = '載入失敗'; badge.className = 'badge err';
+      alert(`無法載入 ${file}：${err.message}\n請使用「手動載入」。`);
+    });
+}
+
 function parseData(text, name) {
   let lines = text.split(/\r?\n/).filter(l => l.trim());
   // Parse optional asset metadata from first comment line: # ASSET=X,NAME=Y,LEV2=Z,LEV3=W
@@ -699,6 +772,7 @@ function resetDateFilter() {
 
 // ── Auto-load (invoked after csv-data tag is parsed) ───────────
 function autoLoad() {
+  loadPresets();
   const el = document.getElementById('csv-data');
   if (el) { parseData(el.textContent.trim(), 'ndx_leveraged.csv'); return; }
   // Fallback for server deployments where csv-data tag was stripped

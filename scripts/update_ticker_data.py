@@ -203,8 +203,32 @@ def make_interp(anchor: list):
         return pcts[prev_i] + (pcts[next_i] - pcts[prev_i]) * frac
     return interp
 
-# ── 計算槓桿報酬 ────────────────────────────────────────────────
+# ── Preset 登記 ─────────────────────────────────────────────────
 
+def register_preset(data_dir: str, ticker: str, display_name: str,
+                    lev2_name: str, lev3_name: str, filename: str):
+    """將新產生的 CSV 登記到 data/presets.json，供 index.html 下拉選單使用。"""
+    import json
+    presets_path = os.path.join(data_dir, 'presets.json')
+    presets = []
+    if os.path.exists(presets_path):
+        with open(presets_path, 'r', encoding='utf-8') as f:
+            presets = json.load(f)
+
+    key = sanitize_filename(ticker)
+    entry = {'key': key, 'label': display_name,
+             'file': filename, 'lev2': lev2_name, 'lev3': lev3_name}
+    idx = next((i for i, p in enumerate(presets) if p['key'] == key), None)
+    if idx is not None:
+        presets[idx] = entry
+    else:
+        presets.append(entry)
+
+    with open(presets_path, 'w', encoding='utf-8') as f:
+        json.dump(presets, f, ensure_ascii=False, indent=2)
+    print(f"  已登記至 presets.json（選單 key: {key}）")
+
+# ── 計算槓桿報酬 ────────────────────────────────────────────────
 COLS = [
     'Date', 'Asset_Close',
     'NDX_DailyReturn',
@@ -396,6 +420,7 @@ def main():
 
     print(f"Saved {out_name}: {len(updated)} rows "
           f"(last: {new_rows[-1]['Date']})")
+    register_preset(DATA_DIR, ticker, display_name, lev2_name, lev3_name, out_name)
 
     # ── 摘要統計 ──────────────────────────────────────────────
     n_years = (pd.to_datetime(new_rows[-1]['Date']) -
