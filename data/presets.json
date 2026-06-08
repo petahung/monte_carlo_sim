@@ -47,5 +47,12 @@
     "file": "btc-usd_leveraged.csv",
     "lev2": "2x bitcoin",
     "lev3": "3x bitcoin"
+  },
+  {
+    "key": "vt",
+    "label": "VT",
+    "file": "vt_leveraged.csv",
+    "lev2": "2x VT",
+    "lev3": "3x VT"
   }
 ]
