@@ -1,35 +1,51 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <!-- Background circle (dark) -->
-  <circle cx="32" cy="32" r="30" fill="#1a1a2e" stroke="#4a4a6a" stroke-width="2"/>
+  <!-- Outer rim (wood brown) -->
+  <circle cx="32" cy="32" r="31" fill="#8B4513"/>
+  <!-- Metal track ring -->
+  <circle cx="32" cy="32" r="27" fill="#c8a96e" stroke="#a07840" stroke-width="1"/>
+  <!-- Number pockets ring -->
+  <circle cx="32" cy="32" r="24" fill="#1a1a1a"/>
 
-  <!-- Revolver cylinder (6 chambers) -->
-  <circle cx="32" cy="32" r="18" fill="#2a2a4a" stroke="#6a6a9a" stroke-width="2"/>
+  <!-- 36 colored segments (alternating red/black, plus green for 0) -->
+  <!-- Using 37 segments: 0=green, 1-36 alternating red/black -->
+  <!-- Each segment = 360/37 ≈ 9.73 degrees -->
+  <!-- Simplified: draw red and black alternating sectors, one green -->
 
-  <!-- 6 chamber holes -->
-  <!-- Top -->
-  <circle cx="32" cy="17" r="4.5" fill="#0a0a1a" stroke="#8a8aaa" stroke-width="1.2"/>
-  <!-- Top-right -->
-  <circle cx="44" cy="24" r="4.5" fill="#0a0a1a" stroke="#8a8aaa" stroke-width="1.2"/>
-  <!-- Bottom-right -->
-  <circle cx="44" cy="40" r="4.5" fill="#0a0a1a" stroke="#8a8aaa" stroke-width="1.2"/>
-  <!-- Bottom -->
-  <circle cx="32" cy="47" r="4.5" fill="#0a0a1a" stroke="#8a8aaa" stroke-width="1.2"/>
-  <!-- Bottom-left -->
-  <circle cx="20" cy="40" r="4.5" fill="#0a0a1a" stroke="#8a8aaa" stroke-width="1.2"/>
-  <!-- Top-left -->
-  <circle cx="20" cy="24" r="4.5" fill="#0a0a1a" stroke="#8a8aaa" stroke-width="1.2"/>
+  <!-- Black sectors -->
+  <path d="M32 32 L32 8 A24 24 0 0 1 43.9 11.6 Z" fill="#1a1a1a"/>
+  <path d="M32 32 L43.9 11.6 A24 24 0 0 1 52.4 20.1 Z" fill="#cc0000"/>
+  <path d="M32 32 L52.4 20.1 A24 24 0 0 1 56 32 Z" fill="#1a1a1a"/>
+  <path d="M32 32 L56 32 A24 24 0 0 1 52.4 43.9 Z" fill="#cc0000"/>
+  <path d="M32 32 L52.4 43.9 A24 24 0 0 1 43.9 52.4 Z" fill="#1a1a1a"/>
+  <path d="M32 32 L43.9 52.4 A24 24 0 0 1 32 56 Z" fill="#cc0000"/>
+  <path d="M32 32 L32 56 A24 24 0 0 1 20.1 52.4 Z" fill="#1a1a1a"/>
+  <path d="M32 32 L20.1 52.4 A24 24 0 0 1 11.6 43.9 Z" fill="#cc0000"/>
+  <path d="M32 32 L11.6 43.9 A24 24 0 0 1 8 32 Z" fill="#1a1a1a"/>
+  <path d="M32 32 L8 32 A24 24 0 0 1 11.6 20.1 Z" fill="#cc0000"/>
+  <path d="M32 32 L11.6 20.1 A24 24 0 0 1 20.1 11.6 Z" fill="#1a1a1a"/>
+  <!-- Green zero sector -->
+  <path d="M32 32 L20.1 11.6 A24 24 0 0 1 32 8 Z" fill="#006400"/>
 
-  <!-- One bullet (red highlight in top chamber) -->
-  <circle cx="32" cy="17" r="2.5" fill="#e63946"/>
+  <!-- Dividers between pockets -->
+  <circle cx="32" cy="32" r="24" fill="none" stroke="#c8a96e" stroke-width="0.8"/>
 
-  <!-- Center pin -->
-  <circle cx="32" cy="32" r="3.5" fill="#6a6a9a" stroke="#aaaacc" stroke-width="1"/>
+  <!-- Inner cone (green felt) -->
+  <circle cx="32" cy="32" r="15" fill="#2d6a2d" stroke="#c8a96e" stroke-width="1"/>
 
-  <!-- Gun barrel pointing right -->
-  <rect x="48" y="29.5" width="13" height="5" rx="2" fill="#3a3a5a" stroke="#6a6a9a" stroke-width="1"/>
-  <!-- Barrel tip -->
-  <rect x="59" y="28" width="3" height="8" rx="1" fill="#2a2a4a" stroke="#6a6a9a" stroke-width="1"/>
+  <!-- Diamond pattern on inner cone -->
+  <circle cx="32" cy="32" r="12" fill="none" stroke="#3d8a3d" stroke-width="0.5"/>
+  <circle cx="32" cy="32" r="9" fill="#1e4d1e" stroke="#c8a96e" stroke-width="0.8"/>
 
-  <!-- Grip handle (bottom left) -->
-  <path d="M16 38 Q10 42 9 50 Q10 56 14 57 Q18 58 20 54 L22 44 Z" fill="#3a2a1a" stroke="#5a4a3a" stroke-width="1"/>
+  <!-- Spokes -->
+  <line x1="32" y1="23" x2="32" y2="41" stroke="#c8a96e" stroke-width="1"/>
+  <line x1="23" y1="32" x2="41" y2="32" stroke="#c8a96e" stroke-width="1"/>
+  <line x1="25.6" y1="25.6" x2="38.4" y2="38.4" stroke="#c8a96e" stroke-width="1"/>
+  <line x1="38.4" y1="25.6" x2="25.6" y2="38.4" stroke="#c8a96e" stroke-width="1"/>
+
+  <!-- Center hub -->
+  <circle cx="32" cy="32" r="4" fill="#c8a96e" stroke="#8B4513" stroke-width="1"/>
+  <circle cx="32" cy="32" r="2" fill="#8B4513"/>
+
+  <!-- Ball (white) on the track -->
+  <circle cx="52" cy="32" r="2.5" fill="white" stroke="#cccccc" stroke-width="0.5"/>
 </svg>
