@@ -6,6 +6,7 @@
 <title>NDX Monte Carlo Simulator</title>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@sgratzl/chartjs-chart-boxplot@4.4.0/build/index.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -431,11 +432,17 @@ tr:hover td{background:#1a2540}
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
         <div class="chart-box">
-          <div class="chart-title" style="margin-bottom:6px">最終資產分佈 Histogram</div>
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+            <span class="chart-title" style="margin:0">最終資產分佈 Histogram</span>
+            <select id="hist-yscale" style="font-size:0.75rem" onchange="redrawHistScale()">
+              <option value="linear">線性軸</option>
+              <option value="logarithmic">對數軸</option>
+            </select>
+          </div>
           <canvas id="hist-chart" height="200"></canvas>
         </div>
         <div class="chart-box">
-          <div class="chart-title" style="margin-bottom:6px">Maximum Drawdown Histogram</div>
+          <div class="chart-title" style="margin-bottom:6px">最大回撤分佈 Histogram</div>
           <canvas id="dd-chart" height="200"></canvas>
         </div>
       </div>
@@ -2082,7 +2089,11 @@ function drawFan(res) {
   });
 }
 
+let histCache = null;
+function redrawHistScale() { if (histCache) drawHist(histCache.finalV, histCache.init); }
+
 function drawHist(finalV, init) {
+  histCache = {finalV, init};
   const sorted = Array.from(finalV).filter(isFinite).sort((a,b)=>a-b);
   const n = sorted.length;
   const pct = q => sorted[Math.min(Math.floor(q*n), n-1)];
@@ -2099,14 +2110,26 @@ function drawHist(finalV, init) {
   const midpoints = Array.from({length:BINS}, (_,i) => minV + (i+0.5)*bw);
   const fmtK = v => v>=1e6 ? (v/1e6).toFixed(1)+'M' : v>=1e3 ? (v/1e3).toFixed(0)+'K' : v.toFixed(0);
   const labels = midpoints.map(v => fmtK(v));
-  const colors = midpoints.map(v =>
-    v < init ? '#ef4444cc' : v < p25 ? '#f97316cc' : v < p75 ? '#fbbf24cc' : '#4ade80cc'
-  );
+  // 單一顏色（藍色），以初始資金為界分淺深
+  const colors = midpoints.map(v => v < init ? '#f87171cc' : '#60a5facc');
+
+  // P10/P50/P90 轉換為最近的 bin index，用垂直線 dataset 表示
+  const pLine = (val) => {
+    const idx = Math.min(Math.floor((val - minV) / bw), BINS-1);
+    return idx;
+  };
+
+  const useLog = document.getElementById('hist-yscale')?.value === 'logarithmic';
 
   if (CHARTS.hist) CHARTS.hist.destroy();
   CHARTS.hist = new Chart(document.getElementById('hist-chart'), {
     type:'bar',
-    data:{labels, datasets:[{data:counts, backgroundColor:colors, borderWidth:0, barPercentage:1, categoryPercentage:1}]},
+    data:{
+      labels,
+      datasets:[
+        {data:counts, backgroundColor:colors, borderWidth:0, barPercentage:1, categoryPercentage:1, order:2},
+      ]
+    },
     options:{
       animation:false, responsive:true,
       plugins:{
@@ -2114,49 +2137,64 @@ function drawHist(finalV, init) {
         tooltip:{callbacks:{
           title: (items) => {
             const i = items[0].dataIndex;
-            const lo = fmtK(minV + i*bw), hi = fmtK(minV + (i+1)*bw);
-            return `${lo} – ${hi}`;
+            return `${fmtK(minV + i*bw)} – ${fmtK(minV + (i+1)*bw)}`;
           },
           label: c => `${c.raw} 次 (${(c.raw/n*100).toFixed(1)}%)`
         }},
         annotation:{
           annotations:{
-            lp10:{type:'line',xMin:p10,xMax:p10,borderColor:'#6366f1',borderWidth:1.5,borderDash:[4,3],
-              label:{content:'P10',display:true,position:'start',color:'#6366f1',font:{size:9}}},
-            lp50:{type:'line',xMin:p50,xMax:p50,borderColor:'#4ade80',borderWidth:2,
-              label:{content:'P50',display:true,position:'start',color:'#4ade80',font:{size:9}}},
-            lp90:{type:'line',xMin:p90,xMax:p90,borderColor:'#f59e0b',borderWidth:1.5,borderDash:[4,3],
-              label:{content:'P90',display:true,position:'start',color:'#f59e0b',font:{size:9}}}
+            lp10:{type:'line',xMin:pLine(p10)-0.5,xMax:pLine(p10)-0.5,
+              borderColor:'#a78bfa',borderWidth:1.5,borderDash:[4,3],
+              label:{content:'P10',display:true,position:'start',color:'#a78bfa',font:{size:9},backgroundColor:'transparent'}},
+            lp50:{type:'line',xMin:pLine(p50)-0.5,xMax:pLine(p50)-0.5,
+              borderColor:'#4ade80',borderWidth:2,
+              label:{content:'P50',display:true,position:'start',color:'#4ade80',font:{size:9},backgroundColor:'transparent'}},
+            lp90:{type:'line',xMin:pLine(p90)-0.5,xMax:pLine(p90)-0.5,
+              borderColor:'#fbbf24',borderWidth:1.5,borderDash:[4,3],
+              label:{content:'P90',display:true,position:'start',color:'#fbbf24',font:{size:9},backgroundColor:'transparent'}}
           }
         }
       },
       scales:{
         x:{ticks:{color:'#4b5563',maxTicksLimit:8,font:{size:10}},grid:{display:false}},
-        y:{ticks:{color:'#4b5563',font:{size:10}},grid:{color:'#1f2937'}}
+        y:{
+          type: useLog ? 'logarithmic' : 'linear',
+          ticks:{color:'#4b5563',font:{size:10}},
+          grid:{color:'#1f2937'}
+        }
       }
     }
   });
 }
 
 function drawDD(mddArr) {
-  const vals = Array.from(mddArr, v => v*100).filter(isFinite).sort((a,b)=>a-b); // negative %
+  // mddArr 為負小數，例如 -0.57 代表 -57%
+  const vals = Array.from(mddArr, v => v * 100).filter(isFinite).sort((a,b)=>a-b);
   const n = vals.length;
+  if (!n) return;
   const pct = q => vals[Math.min(Math.floor(q*n), n-1)];
-  const p10=pct(.10), p25=pct(.25), p50=pct(.50), p75=pct(.75), p90=pct(.90);
+  const p10=pct(.10), p50=pct(.50), p90=pct(.90);
 
-  const minV = Math.floor(vals[0] / 5) * 5;   // e.g. -100
-  const maxV = Math.min(0, Math.ceil(vals[n-1] / 5) * 5);
-  const BINS = 30, bw = (maxV - minV) / BINS;
+  // 範圍：最嚴重(最負)到接近0
+  const minV = Math.floor(vals[0] / 5) * 5;         // 例：-80
+  const maxV = Math.min(-1, Math.ceil(vals[n-1] / 5) * 5); // 例：-5（排除0避免空bin）
+  const BINS = 30;
+  const bw = (maxV - minV) / BINS;                  // 正值 bin 寬
   const counts = new Array(BINS).fill(0);
   for (const v of vals) {
-    const idx = Math.min(Math.floor((v - minV) / bw), BINS-1);
-    if (idx >= 0) counts[idx]++;
+    const idx = Math.max(0, Math.min(Math.floor((v - minV) / bw), BINS-1));
+    counts[idx]++;
   }
-  const midpoints = Array.from({length:BINS}, (_,i) => minV + (i+0.5)*bw);
-  const labels = midpoints.map(v => v.toFixed(0)+'%');
-  const colors = midpoints.map(v =>
+  // X 軸標籤：負值百分比，由左（最嚴重）到右（最輕微）
+  const labels = Array.from({length:BINS}, (_,i) => (minV + (i+0.5)*bw).toFixed(0)+'%');
+
+  // 顏色：依嚴重程度
+  const midpts = Array.from({length:BINS}, (_,i) => minV + (i+0.5)*bw);
+  const colors = midpts.map(v =>
     v < -70 ? '#7f1d1dcc' : v < -50 ? '#ef4444cc' : v < -30 ? '#f97316cc' : '#fbbf24cc'
   );
+
+  const pLine = (val) => Math.min(Math.max(Math.floor((val - minV) / bw), 0), BINS-1);
 
   if (CHARTS.dd) CHARTS.dd.destroy();
   CHARTS.dd = new Chart(document.getElementById('dd-chart'), {
@@ -2175,17 +2213,20 @@ function drawDD(mddArr) {
         }},
         annotation:{
           annotations:{
-            lp10:{type:'line',xMin:p10,xMax:p10,borderColor:'#6366f1',borderWidth:1.5,borderDash:[4,3],
-              label:{content:'P10',display:true,position:'end',color:'#6366f1',font:{size:9}}},
-            lp50:{type:'line',xMin:p50,xMax:p50,borderColor:'#4ade80',borderWidth:2,
-              label:{content:'P50',display:true,position:'end',color:'#4ade80',font:{size:9}}},
-            lp90:{type:'line',xMin:p90,xMax:p90,borderColor:'#f59e0b',borderWidth:1.5,borderDash:[4,3],
-              label:{content:'P90',display:true,position:'end',color:'#f59e0b',font:{size:9}}}
+            lp10:{type:'line',xMin:pLine(p10)-0.5,xMax:pLine(p10)-0.5,
+              borderColor:'#a78bfa',borderWidth:1.5,borderDash:[4,3],
+              label:{content:'P10',display:true,position:'end',color:'#a78bfa',font:{size:9},backgroundColor:'transparent'}},
+            lp50:{type:'line',xMin:pLine(p50)-0.5,xMax:pLine(p50)-0.5,
+              borderColor:'#4ade80',borderWidth:2,
+              label:{content:'P50',display:true,position:'end',color:'#4ade80',font:{size:9},backgroundColor:'transparent'}},
+            lp90:{type:'line',xMin:pLine(p90)-0.5,xMax:pLine(p90)-0.5,
+              borderColor:'#fbbf24',borderWidth:1.5,borderDash:[4,3],
+              label:{content:'P90',display:true,position:'end',color:'#fbbf24',font:{size:9},backgroundColor:'transparent'}}
           }
         }
       },
       scales:{
-        x:{ticks:{color:'#4b5563',maxTicksLimit:8,font:{size:10}},grid:{display:false}},
+        x:{ticks:{color:'#4b5563',maxTicksLimit:10,font:{size:10}},grid:{display:false}},
         y:{ticks:{color:'#4b5563',font:{size:10}},grid:{color:'#1f2937'}}
       }
     }
