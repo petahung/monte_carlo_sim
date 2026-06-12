@@ -3910,7 +3910,7 @@ function kellyAnimDraw(idx) {
   }
 
   // ── 軸標籤 ──
-  ctx.fillStyle = '#cbd5e1'; ctx.font = 'bold 11px sans-serif'; ctx.textAlign = 'right';
+  ctx.fillStyle = '#94a3b8'; ctx.font = 'bold 12px sans-serif'; ctx.textAlign = 'right';
   // 動態 y 軸刻度：約 5 條，對齊到整數 %
   const yStep = Math.ceil((YMAX - YMIN) / 5 * 100) / 100;
   const yStart = Math.ceil(YMIN / yStep) * yStep;
@@ -3922,7 +3922,7 @@ function kellyAnimDraw(idx) {
   }
   ctx.textAlign = 'center';
   for (let b = 0; b <= BMAX; b++) {
-    ctx.fillStyle = '#cbd5e1'; ctx.font = 'bold 11px sans-serif';
+    ctx.fillStyle = '#94a3b8'; ctx.font = 'bold 12px sans-serif';
     ctx.fillText(b + '×', xOf(b), PAD.t + ch + 12);
   }
 
