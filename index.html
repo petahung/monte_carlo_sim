@@ -3691,7 +3691,6 @@ function renderDataTab() {
               title:{ display:true, text:'指數點位', color:'#fbbf24', font:{size:10} },
               ticks:{ color:'#fbbf24', callback: v=>v>=1000?f2(v/1000,1)+'K':v }, grid:{ color:_gc } },
         yR: { position:'right', afterFit(s){s.width=46},
-              title:{ display:true, text:'年報酬率 %', color:_tc, font:{size:10} },
               ticks:{ color:_tc, callback: v=>v+'%' }, grid:{ drawOnChartArea:false } },
       },
       plugins: {
@@ -3756,7 +3755,6 @@ function renderDataTab() {
               title:{ display:true, text:'兆 USD', color:'#8b5cf6', font:{size:10} },
               ticks:{ color:'#8b5cf6', callback: v=>v.toFixed(0)+'T' }, grid:{ color:_gc } },
         yG: { position:'right', afterFit(s){s.width=46},
-              title:{ display:true, text:'年增率 %', color:'#f472b6', font:{size:10} },
               ticks:{ color:'#f472b6', callback: v=>v+'%' }, grid:{ drawOnChartArea:false } },
       },
       plugins: {
