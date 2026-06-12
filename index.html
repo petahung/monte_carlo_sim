@@ -1325,9 +1325,63 @@ function paramKey(p) {
 }
 
 // ╔══════════════════════════════════════════════════════════════╗
-//   SIMULATION ENGINE
+//   SIMULATION ENGINE  (also duplicated inside the Blob worker)
 // ╚══════════════════════════════════════════════════════════════╝
-function simulate(p) {
+
+// ── Blob Web Worker ─────────────────────────────────────────────
+const _WORKER_CODE = `
+function doFixedRebal(alloc, tv, loan) {
+  loan = loan || 0;
+  const gross = tv + loan;
+  return [gross*alloc[0], gross*alloc[1], gross*alloc[2], gross*alloc[3]];
+}
+
+function doAnnualRebal(s, alloc, v0,v1,v2,v3, ys0,ys1,ys2,ys3, gainPct, downPct) {
+  const levNow   = v1+v2;
+  const levStart = ys1+ys2;
+  const upYear   = levNow > levStart;
+  const tv       = v0+v1+v2+v3;
+
+  if (s === 4) {
+    if (upYear) {
+      const gain = levNow - levStart;
+      const move = gain * gainPct;
+      const r3 = levStart > 0 ? ys1/levStart : 0.5;
+      v1 -= move * r3; v2 -= move * (1-r3); v3 += move;
+    } else {
+      const move = Math.min(tv * downPct, v3);
+      const r3 = alloc[1]+alloc[2] > 0 ? alloc[1]/(alloc[1]+alloc[2]) : 0.5;
+      v3 -= move; v1 += move*r3; v2 += move*(1-r3);
+    }
+  } else if (s === 5) {
+    if (upYear) {
+      const g1 = Math.max(0, v1-ys1), g2 = Math.max(0, v2-ys2);
+      const move = (g1+g2) * gainPct;
+      const share1 = g1+g2 > 0 ? g1/(g1+g2) : 0.5;
+      v1 -= move*share1; v2 -= move*(1-share1); v3 += move;
+    } else {
+      const move = Math.min(tv * downPct, v0);
+      const r3 = alloc[1]+alloc[2] > 0 ? alloc[1]/(alloc[1]+alloc[2]) : 0.5;
+      v0 -= move; v1 += move*r3; v2 += move*(1-r3);
+    }
+  } else if (s === 6) {
+    if (upYear) {
+      const g1 = Math.max(0, v1-ys1), g2 = Math.max(0, v2-ys2);
+      const move = (g1+g2) * gainPct;
+      const share1 = g1+g2 > 0 ? g1/(g1+g2) : 0.5;
+      v1 -= move*share1; v2 -= move*(1-share1); v0 += move;
+    } else {
+      const move = Math.min(tv * downPct * 1.5, v3);
+      const r3 = alloc[1]+alloc[2] > 0 ? alloc[1]/(alloc[1]+alloc[2]) : 0.5;
+      v3 -= move; v1 += move*r3; v2 += move*(1-r3);
+    }
+  }
+
+  v0=Math.max(0,v0); v1=Math.max(0,v1); v2=Math.max(0,v2); v3=Math.max(0,v3);
+  return [v0,v1,v2,v3];
+}
+
+function simulate(p, D) {
   const { alloc, years, numSims, sampling, initVal, cashReinvest, rebal, dca, wd, mg, initDebt } = p;
   const { N, ndxR, rfD, ndx2lR, ndx3lR, blocks } = D;
 
@@ -1657,8 +1711,350 @@ function simulate(p) {
            survRate: surv.reduce((a,b)=>a+b,0)/numSims };
 }
 
-function doFixedRebal(alloc, tv, loan=0) {
-  const gross = tv + loan; // rebalance on gross assets, not net equity
+// ── worker onmessage handler ──────────────────────────────────────
+self.onmessage = function(e) {
+  const { type, params, dataset } = e.data;
+  if (type !== 'run') return;
+
+  // Reconstruct typed arrays transferred from main thread
+  const D = {
+    N:      dataset.N,
+    ndxR:   new Float64Array(dataset.ndxR),
+    rfD:    new Float64Array(dataset.rfD),
+    ndx2lR: new Float64Array(dataset.ndx2lR),
+    ndx3lR: new Float64Array(dataset.ndx3lR),
+    blocks: dataset.blocks,
+  };
+
+  const numSims = params.numSims;
+  const PROGRESS_INTERVAL = Math.max(1, Math.floor(numSims / 20));
+
+  // Patch simulate to emit progress
+  const origSimulate = simulate;
+  const result = (function() {
+    const { alloc, years, sampling, initVal, cashReinvest, rebal, dca, wd, mg, initDebt } = params;
+    const { N, ndxR, rfD, ndx2lR, ndx3lR, blocks } = D;
+
+    const days = years * 252;
+    const tgtBeta = alloc[0]*1 + alloc[1]*2 + alloc[2]*3;
+
+    const K = Math.max(1, Math.floor(days / 200));
+    const T = Math.floor(days / K) + 1;
+
+    const TRACKS = Math.min(numSims, 200);
+    const fanData       = new Float64Array(TRACKS * T);
+    const wdFanData     = new Float64Array(TRACKS * T);
+    const loanFanData   = new Float64Array(TRACKS * T);
+    const betaNetFanData= new Float64Array(TRACKS * T);
+    const betaGrsFanData= new Float64Array(TRACKS * T);
+
+    const finalV    = new Float64Array(numSims);
+    const mddArr    = new Float64Array(numSims);
+    const recArr    = new Float32Array(numSims);
+    const betaArr      = new Float64Array(numSims);
+    const betaGrossArr = new Float64Array(numSims);
+    const volArr    = new Float64Array(numSims);
+    const sharpArr  = new Float64Array(numSims);
+    const meanRetArr= new Float64Array(numSims);
+    const surv      = new Uint8Array(numSims);
+    const totalWdArr  = new Float64Array(numSims);
+    const totalLoanArr= new Float64Array(numSims);
+
+    const rfMeanAnn = rfD.reduce((a,v)=>a+v,0) / N * 252;
+
+    function isBankrupt(g, iLB, mLB) {
+      return (mg.en         && g <= mLB) ||
+             (initDebt.liqEn && g <= iLB + mLB) ||
+             (!mg.en && !initDebt.liqEn && g <= 0);
+    }
+
+    for (let s = 0; s < numSims; s++) {
+      if (s > 0 && s % PROGRESS_INTERVAL === 0) {
+        self.postMessage({ type: 'progress', pct: s / numSims });
+      }
+
+      let initLoanBal   = initDebt.amount || 0;
+      let marginLoanBal = 0;
+      const startAssets = initVal + initLoanBal;
+      let [v0, v1, v2, v3] = alloc.map(a => a * startAssets);
+      let totalInvested = initVal;
+      let cumWd = 0;
+
+      let peak = initVal;
+      let maxDD = 0, maxRec = 0;
+      let inDD = false, ddStart = 0;
+      let betaSum = 0, betaCount = 0, betaGrossSum = 0;
+
+      let ys0=v0, ys1=v1, ys2=v2, ys3=v3;
+      let daysSince = 0;
+
+      const annRets = new Float64Array(years + 1);
+      let annRetCount = 0;
+      let yearStartTv = initVal;
+
+      let blkSeq = null;
+      if (sampling === 'year') {
+        blkSeq = new Int32Array(years + 1);
+        for (let y = 0; y <= years; y++)
+          blkSeq[y] = Math.floor(Math.random() * blocks.length);
+      }
+
+      let alive = true;
+
+      for (let d = 0; d < days; d++) {
+        let ri;
+        if (sampling === 'day') {
+          ri = Math.floor(Math.random() * N);
+        } else {
+          const yi = Math.min(Math.floor(d / 252), years-1);
+          const blk = blocks[blkSeq[yi]];
+          const dayInBlk = d % 252;
+          ri = blk.s + (dayInBlk % (blk.e - blk.s));
+        }
+
+        const rN = ndxR[ri];
+        const r2 = ndx2lR[ri];
+        const r3 = ndx3lR[ri];
+        const rf = rfD[ri];
+
+        v0 *= (1+rN); if (v0 < 0) v0 = 0;
+        v1 *= (1+r2); if (v1 < 0) v1 = 0;
+        v2 *= (1+r3); if (v2 < 0) v2 = 0;
+
+        const cashInterest = v3 * rf;
+        v3 += cashInterest;
+
+        if (cashReinvest && cashInterest > 0) {
+          const riskTgt = alloc[0]+alloc[1]+alloc[2];
+          if (riskTgt > 0) {
+            const add = cashInterest;
+            v0 += add * (alloc[0]/riskTgt);
+            v1 += add * (alloc[1]/riskTgt);
+            v2 += add * (alloc[2]/riskTgt);
+            v3 -= add;
+          }
+        }
+
+        if (initLoanBal   > 0) initLoanBal   *= (1 + rf + mg.spread/252);
+        if (marginLoanBal > 0) marginLoanBal *= (1 + rf + mg.spread/252);
+
+        daysSince++;
+
+        let tv = v0 + v1 + v2 + v3 - initLoanBal - marginLoanBal;
+        if (isBankrupt(v0+v1+v2+v3, initLoanBal, marginLoanBal)) { alive = false; break; }
+
+        const bGross = (v0*1 + v1*2 + v2*3) / Math.max(v0+v1+v2+v3, 1e-9);
+        betaGrossSum += bGross; betaCount++;
+        if (tv > 0) betaSum += (v0*1 + v1*2 + v2*3) / tv;
+
+        const isYearEnd = (d+1) % 252 === 0;
+
+        const totalLoan = initLoanBal + marginLoanBal;
+        if (rebal.s === 2 && daysSince >= rebal.interval) {
+          [v0,v1,v2,v3] = doFixedRebal(alloc, tv, totalLoan);
+          daysSince = 0;
+
+        } else if (rebal.s === 3) {
+          const curBeta = (v0*1 + v1*2 + v2*3) / Math.max(v0+v1+v2+v3, 1e-9);
+          if (daysSince >= 5 && Math.abs(curBeta - tgtBeta) > rebal.betaThr) {
+            [v0,v1,v2,v3] = doFixedRebal(alloc, tv, totalLoan);
+            daysSince = 0;
+          }
+
+        } else if (rebal.s === 7 && daysSince >= rebal.interval) {
+          const frac = Math.min(d / days, 1.0);
+          const raw  = alloc.map((a, i) => a * (1 - frac) + rebal.glideEnd[i] * frac);
+          const tsum = raw.reduce((a, b) => a + b, 0) || 1;
+          const tgt  = raw.map(v => v / tsum);
+          [v0,v1,v2,v3] = doFixedRebal(tgt, tv, totalLoan);
+          daysSince = 0;
+
+        } else if (isYearEnd && (rebal.s === 4 || rebal.s === 5 || rebal.s === 6)) {
+          const res = doAnnualRebal(rebal.s, alloc, v0,v1,v2,v3, ys0,ys1,ys2,ys3, rebal.gainPct, rebal.downPct);
+          v0=res[0]; v1=res[1]; v2=res[2]; v3=res[3];
+          ys0=v0; ys1=v1; ys2=v2; ys3=v3;
+        }
+
+        if (mg.en && marginLoanBal > 0) {
+          const totalAssets = v0+v1+v2+v3;
+          const maxLoan = totalAssets * mg.liqLtv;
+          if (marginLoanBal > maxLoan) {
+            const repay = Math.min(marginLoanBal - maxLoan * 0.9, totalAssets);
+            if (repay > 0) {
+              const f = repay / Math.max(totalAssets, 1e-9);
+              v0 = Math.max(0, v0*(1-f)); v1 = Math.max(0, v1*(1-f));
+              v2 = Math.max(0, v2*(1-f)); v3 = Math.max(0, v3*(1-f));
+              marginLoanBal -= repay;
+            }
+            if (marginLoanBal > (v0+v1+v2+v3) * mg.liqLtv) { alive = false; break; }
+          }
+        }
+        if (initDebt.liqEn && initLoanBal > 0) {
+          const totalAssets = v0+v1+v2+v3;
+          const maxLoan = totalAssets * initDebt.liqLtv;
+          if (initLoanBal > maxLoan) {
+            const repay = Math.min(initLoanBal - maxLoan * 0.9, totalAssets);
+            if (repay > 0) {
+              const f = repay / Math.max(totalAssets, 1e-9);
+              v0 = Math.max(0, v0*(1-f)); v1 = Math.max(0, v1*(1-f));
+              v2 = Math.max(0, v2*(1-f)); v3 = Math.max(0, v3*(1-f));
+              initLoanBal -= repay;
+            }
+          }
+        }
+
+        if (dca.en && dca.amt > 0 && (d+1) % dca.int === 0) {
+          let invest = dca.amt;
+          if (initDebt.repayDebt && initLoanBal > 0) {
+            const repaid = Math.min(invest, initLoanBal);
+            initLoanBal -= repaid;
+            invest -= repaid;
+          }
+          if (invest > 0) {
+            v0 += invest * alloc[0];
+            v1 += invest * alloc[1];
+            v2 += invest * alloc[2];
+            v3 += invest * alloc[3];
+          }
+          totalInvested += dca.amt;
+        }
+
+        if (wd.en && !mg.en) {
+          let wAmt = 0;
+          if (wd.type === 'pct') {
+            wAmt = tv * (wd.val/100) / 252;
+          } else {
+            if ((d+1) % wd.int === 0) wAmt = wd.val;
+          }
+          if (wAmt > 0) {
+            const gross = v0+v1+v2+v3;
+            if (gross > wAmt) {
+              const f = wAmt / gross;
+              v0*=(1-f); v1*=(1-f); v2*=(1-f); v3*=(1-f);
+              if (initDebt.repayDebt && initLoanBal > 0) {
+                const repaid = Math.min(wAmt, initLoanBal);
+                initLoanBal -= repaid;
+                cumWd += wAmt - repaid;
+              } else {
+                cumWd += wAmt;
+              }
+            } else { alive = false; break; }
+          }
+        }
+
+        if (mg.en && mg.wdAmt > 0 && (d+1) % 21 === 0) {
+          if (initDebt.repayDebt && initLoanBal > 0) {
+            const repay = Math.min(mg.wdAmt, initLoanBal);
+            const gross = v0+v1+v2+v3;
+            if (gross > repay) {
+              const f = repay / Math.max(gross, 1e-9);
+              v0*=(1-f); v1*=(1-f); v2*=(1-f); v3*=(1-f);
+              initLoanBal -= repay;
+            }
+          } else {
+            const maxLoan = v0*mg.ltv[0] + v1*mg.ltv[1] + v2*mg.ltv[2] + v3*mg.ltv[3];
+            const canBorrow = Math.max(0, maxLoan - marginLoanBal);
+            const borrow = Math.min(mg.wdAmt, canBorrow);
+            marginLoanBal += borrow;
+            cumWd += borrow;
+          }
+        }
+
+        tv = v0+v1+v2+v3 - initLoanBal - marginLoanBal;
+        if (isBankrupt(v0+v1+v2+v3, initLoanBal, marginLoanBal)) { alive = false; break; }
+
+        if (tv > peak) {
+          if (inDD) {
+            const rec = (d - ddStart) / 21;
+            if (rec > maxRec) maxRec = rec;
+            inDD = false;
+          }
+          peak = tv;
+        } else {
+          const dd = (peak - tv) / peak;
+          if (dd > maxDD) maxDD = dd;
+          if (!inDD) { inDD = true; ddStart = d; }
+        }
+
+        if (s < TRACKS && d % K === 0) {
+          const ti = Math.floor(d/K);
+          fanData[s * T + ti]       = tv;
+          wdFanData[s * T + ti]     = cumWd;
+          loanFanData[s * T + ti]   = initLoanBal + marginLoanBal;
+          betaNetFanData[s * T + ti]= tv > 0 ? (v0*1+v1*2+v2*3) / tv : NaN;
+          betaGrsFanData[s * T + ti]= (v0*1+v1*2+v2*3) / Math.max(v0+v1+v2+v3, 1e-9);
+        }
+
+        if ((d+1) % 252 === 0 && yearStartTv > 0) {
+          annRets[annRetCount++] = tv / yearStartTv - 1;
+          yearStartTv = tv;
+        }
+      }
+
+      const finalTv = alive ? Math.max(0, v0+v1+v2+v3-initLoanBal-marginLoanBal) : 0;
+
+      const nY = annRetCount;
+      let sumR = 0;
+      for (let i = 0; i < nY; i++) sumR += annRets[i];
+      const meanR = nY > 0 ? sumR / nY : 0;
+      let varR = 0;
+      for (let i = 0; i < nY; i++) { const d2 = annRets[i]-meanR; varR += d2*d2; }
+      const vol    = nY > 1 ? Math.sqrt(varR / (nY-1)) : 0;
+      const sharpe = vol > 0 ? (meanR - rfMeanAnn) / vol : 0;
+
+      finalV[s]     = finalTv;
+      mddArr[s]     = maxDD;
+      recArr[s]     = maxRec;
+      betaArr[s]      = betaCount > 0 ? betaSum/betaCount : 0;
+      betaGrossArr[s] = betaCount > 0 ? betaGrossSum/betaCount : 0;
+      volArr[s]     = vol;
+      sharpArr[s]   = sharpe;
+      meanRetArr[s] = meanR;
+      surv[s]       = alive ? 1 : 0;
+
+      if (s < TRACKS) {
+        const ftvN = Math.max(finalTv, 0);
+        const gross = v0+v1+v2+v3;
+        fanData[s*T + T-1]        = ftvN;
+        wdFanData[s*T + T-1]      = cumWd;
+        loanFanData[s*T + T-1]    = initLoanBal + marginLoanBal;
+        betaNetFanData[s*T + T-1] = ftvN > 0 ? (v0*1+v1*2+v2*3) / ftvN : NaN;
+        betaGrsFanData[s*T + T-1] = (v0*1+v1*2+v2*3) / Math.max(gross, 1e-9);
+      }
+      totalWdArr[s]   = cumWd;
+      totalLoanArr[s] = initLoanBal + marginLoanBal;
+    }
+
+    return { finalV, mddArr, recArr, betaArr, betaGrossArr, volArr, sharpArr, meanRetArr, surv,
+             fanData, wdFanData, loanFanData, betaNetFanData, betaGrsFanData, totalWdArr, totalLoanArr,
+             T, K, days, years: params.years, p: params,
+             survRate: surv.reduce((a,b)=>a+b,0)/numSims };
+  })();
+
+  // Transfer typed arrays back to avoid copying
+  const transfers = [
+    result.finalV.buffer, result.mddArr.buffer, result.recArr.buffer,
+    result.betaArr.buffer, result.betaGrossArr.buffer, result.volArr.buffer,
+    result.sharpArr.buffer, result.meanRetArr.buffer, result.surv.buffer,
+    result.fanData.buffer, result.wdFanData.buffer, result.loanFanData.buffer,
+    result.betaNetFanData.buffer, result.betaGrsFanData.buffer,
+    result.totalWdArr.buffer, result.totalLoanArr.buffer,
+  ];
+  self.postMessage({ type: 'done', result }, transfers);
+};
+`;
+
+// ── Create Blob worker URL once ──────────────────────────────────
+const _WORKER_BLOB = new Blob([_WORKER_CODE], { type: 'application/javascript' });
+const _WORKER_URL  = URL.createObjectURL(_WORKER_BLOB);
+let   _activeWorker = null;
+
+// ── Main-thread copies of computation helpers (used by doCompRun) ─
+// These mirror the worker code exactly but run synchronously on the
+// main thread with access to the global D dataset.
+function doFixedRebal(alloc, tv, loan) {
+  loan = loan || 0;
+  const gross = tv + loan;
   return [gross*alloc[0], gross*alloc[1], gross*alloc[2], gross*alloc[3]];
 }
 
@@ -1668,41 +2064,35 @@ function doAnnualRebal(s, alloc, v0,v1,v2,v3, ys0,ys1,ys2,ys3, gainPct, downPct)
   const upYear   = levNow > levStart;
   const tv       = v0+v1+v2+v3;
 
-  if (s === 4) { // 智能調整
+  if (s === 4) {
     if (upYear) {
-      // gainPct of leverage gain → cash
       const gain = levNow - levStart;
       const move = gain * gainPct;
       const r3 = levStart > 0 ? ys1/levStart : 0.5;
       v1 -= move * r3; v2 -= move * (1-r3); v3 += move;
     } else {
-      // downPct of total from cash → leverage
       const move = Math.min(tv * downPct, v3);
       const r3 = alloc[1]+alloc[2] > 0 ? alloc[1]/(alloc[1]+alloc[2]) : 0.5;
       v3 -= move; v1 += move*r3; v2 += move*(1-r3);
     }
-  } else if (s === 5) { // 彈性防守
+  } else if (s === 5) {
     if (upYear) {
-      // leverage gains → cash (protect cash buffer)
       const g1 = Math.max(0, v1-ys1), g2 = Math.max(0, v2-ys2);
       const move = (g1+g2) * gainPct;
       const share1 = g1+g2 > 0 ? g1/(g1+g2) : 0.5;
       v1 -= move*share1; v2 -= move*(1-share1); v3 += move;
     } else {
-      // sell base fund (NDX) → leverage, don't touch cash
       const move = Math.min(tv * downPct, v0);
       const r3 = alloc[1]+alloc[2] > 0 ? alloc[1]/(alloc[1]+alloc[2]) : 0.5;
       v0 -= move; v1 += move*r3; v2 += move*(1-r3);
     }
-  } else if (s === 6) { // 彈性進取
+  } else if (s === 6) {
     if (upYear) {
-      // leverage gains → base fund (NDX) to maintain beta
       const g1 = Math.max(0, v1-ys1), g2 = Math.max(0, v2-ys2);
       const move = (g1+g2) * gainPct;
       const share1 = g1+g2 > 0 ? g1/(g1+g2) : 0.5;
       v1 -= move*share1; v2 -= move*(1-share1); v0 += move;
     } else {
-      // cash → leverage (aggressive, don't sell base)
       const move = Math.min(tv * downPct * 1.5, v3);
       const r3 = alloc[1]+alloc[2] > 0 ? alloc[1]/(alloc[1]+alloc[2]) : 0.5;
       v3 -= move; v1 += move*r3; v2 += move*(1-r3);
@@ -1711,6 +2101,302 @@ function doAnnualRebal(s, alloc, v0,v1,v2,v3, ys0,ys1,ys2,ys3, gainPct, downPct)
 
   v0=Math.max(0,v0); v1=Math.max(0,v1); v2=Math.max(0,v2); v3=Math.max(0,v3);
   return [v0,v1,v2,v3];
+}
+
+// Synchronous simulate used by the comparison panel (doCompRun).
+// Uses the global D dataset directly (no worker).
+function simulate(p) {
+  return (function _sim(p, D) {
+    const { alloc, years, numSims, sampling, initVal, cashReinvest, rebal, dca, wd, mg, initDebt } = p;
+    const { N, ndxR, rfD, ndx2lR, ndx3lR, blocks } = D;
+
+    const days = years * 252;
+    const tgtBeta = alloc[0]*1 + alloc[1]*2 + alloc[2]*3;
+
+    const K = Math.max(1, Math.floor(days / 200));
+    const T = Math.floor(days / K) + 1;
+
+    const TRACKS = Math.min(numSims, 200);
+    const fanData       = new Float64Array(TRACKS * T);
+    const wdFanData     = new Float64Array(TRACKS * T);
+    const loanFanData   = new Float64Array(TRACKS * T);
+    const betaNetFanData= new Float64Array(TRACKS * T);
+    const betaGrsFanData= new Float64Array(TRACKS * T);
+
+    const finalV    = new Float64Array(numSims);
+    const mddArr    = new Float64Array(numSims);
+    const recArr    = new Float32Array(numSims);
+    const betaArr      = new Float64Array(numSims);
+    const betaGrossArr = new Float64Array(numSims);
+    const volArr    = new Float64Array(numSims);
+    const sharpArr  = new Float64Array(numSims);
+    const meanRetArr= new Float64Array(numSims);
+    const surv      = new Uint8Array(numSims);
+    const totalWdArr  = new Float64Array(numSims);
+    const totalLoanArr= new Float64Array(numSims);
+
+    const rfMeanAnn = rfD.reduce((a,v)=>a+v,0) / N * 252;
+
+    function isBankrupt(g, iLB, mLB) {
+      return (mg.en         && g <= mLB) ||
+             (initDebt.liqEn && g <= iLB + mLB) ||
+             (!mg.en && !initDebt.liqEn && g <= 0);
+    }
+
+    for (let s = 0; s < numSims; s++) {
+      let initLoanBal   = initDebt.amount || 0;
+      let marginLoanBal = 0;
+      const startAssets = initVal + initLoanBal;
+      let [v0, v1, v2, v3] = alloc.map(a => a * startAssets);
+      let totalInvested = initVal;
+      let cumWd = 0;
+
+      let peak = initVal;
+      let maxDD = 0, maxRec = 0;
+      let inDD = false, ddStart = 0;
+      let betaSum = 0, betaCount = 0, betaGrossSum = 0;
+
+      let ys0=v0, ys1=v1, ys2=v2, ys3=v3;
+      let daysSince = 0;
+
+      const annRets = new Float64Array(years + 1);
+      let annRetCount = 0;
+      let yearStartTv = initVal;
+
+      let blkSeq = null;
+      if (sampling === 'year') {
+        blkSeq = new Int32Array(years + 1);
+        for (let y = 0; y <= years; y++)
+          blkSeq[y] = Math.floor(Math.random() * blocks.length);
+      }
+
+      let alive = true;
+
+      for (let d = 0; d < days; d++) {
+        let ri;
+        if (sampling === 'day') {
+          ri = Math.floor(Math.random() * N);
+        } else {
+          const yi = Math.min(Math.floor(d / 252), years-1);
+          const blk = blocks[blkSeq[yi]];
+          const dayInBlk = d % 252;
+          ri = blk.s + (dayInBlk % (blk.e - blk.s));
+        }
+
+        const rN = ndxR[ri];
+        const r2 = ndx2lR[ri];
+        const r3 = ndx3lR[ri];
+        const rf = rfD[ri];
+
+        v0 *= (1+rN); if (v0 < 0) v0 = 0;
+        v1 *= (1+r2); if (v1 < 0) v1 = 0;
+        v2 *= (1+r3); if (v2 < 0) v2 = 0;
+
+        const cashInterest = v3 * rf;
+        v3 += cashInterest;
+
+        if (cashReinvest && cashInterest > 0) {
+          const riskTgt = alloc[0]+alloc[1]+alloc[2];
+          if (riskTgt > 0) {
+            const add = cashInterest;
+            v0 += add * (alloc[0]/riskTgt);
+            v1 += add * (alloc[1]/riskTgt);
+            v2 += add * (alloc[2]/riskTgt);
+            v3 -= add;
+          }
+        }
+
+        if (initLoanBal   > 0) initLoanBal   *= (1 + rf + mg.spread/252);
+        if (marginLoanBal > 0) marginLoanBal *= (1 + rf + mg.spread/252);
+
+        daysSince++;
+
+        let tv = v0 + v1 + v2 + v3 - initLoanBal - marginLoanBal;
+        if (isBankrupt(v0+v1+v2+v3, initLoanBal, marginLoanBal)) { alive = false; break; }
+
+        const bGross = (v0*1 + v1*2 + v2*3) / Math.max(v0+v1+v2+v3, 1e-9);
+        betaGrossSum += bGross; betaCount++;
+        if (tv > 0) betaSum += (v0*1 + v1*2 + v2*3) / tv;
+
+        const isYearEnd = (d+1) % 252 === 0;
+
+        const totalLoan = initLoanBal + marginLoanBal;
+        if (rebal.s === 2 && daysSince >= rebal.interval) {
+          [v0,v1,v2,v3] = doFixedRebal(alloc, tv, totalLoan);
+          daysSince = 0;
+        } else if (rebal.s === 3) {
+          const curBeta = (v0*1 + v1*2 + v2*3) / Math.max(v0+v1+v2+v3, 1e-9);
+          if (daysSince >= 5 && Math.abs(curBeta - tgtBeta) > rebal.betaThr) {
+            [v0,v1,v2,v3] = doFixedRebal(alloc, tv, totalLoan);
+            daysSince = 0;
+          }
+        } else if (rebal.s === 7 && daysSince >= rebal.interval) {
+          const frac = Math.min(d / days, 1.0);
+          const raw  = alloc.map((a, i) => a * (1 - frac) + rebal.glideEnd[i] * frac);
+          const tsum = raw.reduce((a, b) => a + b, 0) || 1;
+          const tgt  = raw.map(v => v / tsum);
+          [v0,v1,v2,v3] = doFixedRebal(tgt, tv, totalLoan);
+          daysSince = 0;
+        } else if (isYearEnd && (rebal.s === 4 || rebal.s === 5 || rebal.s === 6)) {
+          const res = doAnnualRebal(rebal.s, alloc, v0,v1,v2,v3, ys0,ys1,ys2,ys3, rebal.gainPct, rebal.downPct);
+          v0=res[0]; v1=res[1]; v2=res[2]; v3=res[3];
+          ys0=v0; ys1=v1; ys2=v2; ys3=v3;
+        }
+
+        if (mg.en && marginLoanBal > 0) {
+          const totalAssets = v0+v1+v2+v3;
+          const maxLoan = totalAssets * mg.liqLtv;
+          if (marginLoanBal > maxLoan) {
+            const repay = Math.min(marginLoanBal - maxLoan * 0.9, totalAssets);
+            if (repay > 0) {
+              const f = repay / Math.max(totalAssets, 1e-9);
+              v0 = Math.max(0, v0*(1-f)); v1 = Math.max(0, v1*(1-f));
+              v2 = Math.max(0, v2*(1-f)); v3 = Math.max(0, v3*(1-f));
+              marginLoanBal -= repay;
+            }
+            if (marginLoanBal > (v0+v1+v2+v3) * mg.liqLtv) { alive = false; break; }
+          }
+        }
+        if (initDebt.liqEn && initLoanBal > 0) {
+          const totalAssets = v0+v1+v2+v3;
+          const maxLoan = totalAssets * initDebt.liqLtv;
+          if (initLoanBal > maxLoan) {
+            const repay = Math.min(initLoanBal - maxLoan * 0.9, totalAssets);
+            if (repay > 0) {
+              const f = repay / Math.max(totalAssets, 1e-9);
+              v0 = Math.max(0, v0*(1-f)); v1 = Math.max(0, v1*(1-f));
+              v2 = Math.max(0, v2*(1-f)); v3 = Math.max(0, v3*(1-f));
+              initLoanBal -= repay;
+            }
+          }
+        }
+
+        if (dca.en && dca.amt > 0 && (d+1) % dca.int === 0) {
+          let invest = dca.amt;
+          if (initDebt.repayDebt && initLoanBal > 0) {
+            const repaid = Math.min(invest, initLoanBal);
+            initLoanBal -= repaid;
+            invest -= repaid;
+          }
+          if (invest > 0) {
+            v0 += invest * alloc[0];
+            v1 += invest * alloc[1];
+            v2 += invest * alloc[2];
+            v3 += invest * alloc[3];
+          }
+          totalInvested += dca.amt;
+        }
+
+        if (wd.en && !mg.en) {
+          let wAmt = 0;
+          if (wd.type === 'pct') {
+            wAmt = tv * (wd.val/100) / 252;
+          } else {
+            if ((d+1) % wd.int === 0) wAmt = wd.val;
+          }
+          if (wAmt > 0) {
+            const gross = v0+v1+v2+v3;
+            if (gross > wAmt) {
+              const f = wAmt / gross;
+              v0*=(1-f); v1*=(1-f); v2*=(1-f); v3*=(1-f);
+              if (initDebt.repayDebt && initLoanBal > 0) {
+                const repaid = Math.min(wAmt, initLoanBal);
+                initLoanBal -= repaid;
+                cumWd += wAmt - repaid;
+              } else {
+                cumWd += wAmt;
+              }
+            } else { alive = false; break; }
+          }
+        }
+
+        if (mg.en && mg.wdAmt > 0 && (d+1) % 21 === 0) {
+          if (initDebt.repayDebt && initLoanBal > 0) {
+            const repay = Math.min(mg.wdAmt, initLoanBal);
+            const gross = v0+v1+v2+v3;
+            if (gross > repay) {
+              const f = repay / Math.max(gross, 1e-9);
+              v0*=(1-f); v1*=(1-f); v2*=(1-f); v3*=(1-f);
+              initLoanBal -= repay;
+            }
+          } else {
+            const maxLoan = v0*mg.ltv[0] + v1*mg.ltv[1] + v2*mg.ltv[2] + v3*mg.ltv[3];
+            const canBorrow = Math.max(0, maxLoan - marginLoanBal);
+            const borrow = Math.min(mg.wdAmt, canBorrow);
+            marginLoanBal += borrow;
+            cumWd += borrow;
+          }
+        }
+
+        tv = v0+v1+v2+v3 - initLoanBal - marginLoanBal;
+        if (isBankrupt(v0+v1+v2+v3, initLoanBal, marginLoanBal)) { alive = false; break; }
+
+        if (tv > peak) {
+          if (inDD) {
+            const rec = (d - ddStart) / 21;
+            if (rec > maxRec) maxRec = rec;
+            inDD = false;
+          }
+          peak = tv;
+        } else {
+          const dd = (peak - tv) / peak;
+          if (dd > maxDD) maxDD = dd;
+          if (!inDD) { inDD = true; ddStart = d; }
+        }
+
+        if (s < TRACKS && d % K === 0) {
+          const ti = Math.floor(d/K);
+          fanData[s * T + ti]       = tv;
+          wdFanData[s * T + ti]     = cumWd;
+          loanFanData[s * T + ti]   = initLoanBal + marginLoanBal;
+          betaNetFanData[s * T + ti]= tv > 0 ? (v0*1+v1*2+v2*3) / tv : NaN;
+          betaGrsFanData[s * T + ti]= (v0*1+v1*2+v2*3) / Math.max(v0+v1+v2+v3, 1e-9);
+        }
+
+        if ((d+1) % 252 === 0 && yearStartTv > 0) {
+          annRets[annRetCount++] = tv / yearStartTv - 1;
+          yearStartTv = tv;
+        }
+      }
+
+      const finalTv = alive ? Math.max(0, v0+v1+v2+v3-initLoanBal-marginLoanBal) : 0;
+
+      const nY = annRetCount;
+      let sumR = 0;
+      for (let i = 0; i < nY; i++) sumR += annRets[i];
+      const meanR = nY > 0 ? sumR / nY : 0;
+      let varR = 0;
+      for (let i = 0; i < nY; i++) { const d2 = annRets[i]-meanR; varR += d2*d2; }
+      const vol    = nY > 1 ? Math.sqrt(varR / (nY-1)) : 0;
+      const sharpe = vol > 0 ? (meanR - rfMeanAnn) / vol : 0;
+
+      finalV[s]     = finalTv;
+      mddArr[s]     = maxDD;
+      recArr[s]     = maxRec;
+      betaArr[s]      = betaCount > 0 ? betaSum/betaCount : 0;
+      betaGrossArr[s] = betaCount > 0 ? betaGrossSum/betaCount : 0;
+      volArr[s]     = vol;
+      sharpArr[s]   = sharpe;
+      meanRetArr[s] = meanR;
+      surv[s]       = alive ? 1 : 0;
+
+      if (s < TRACKS) {
+        const ftvN = Math.max(finalTv, 0);
+        const gross = v0+v1+v2+v3;
+        fanData[s*T + T-1]        = ftvN;
+        wdFanData[s*T + T-1]      = cumWd;
+        loanFanData[s*T + T-1]    = initLoanBal + marginLoanBal;
+        betaNetFanData[s*T + T-1] = ftvN > 0 ? (v0*1+v1*2+v2*3) / ftvN : NaN;
+        betaGrsFanData[s*T + T-1] = (v0*1+v1*2+v2*3) / Math.max(gross, 1e-9);
+      }
+      totalWdArr[s]   = cumWd;
+      totalLoanArr[s] = initLoanBal + marginLoanBal;
+    }
+
+    return { finalV, mddArr, recArr, betaArr, betaGrossArr, volArr, sharpArr, meanRetArr, surv,
+             fanData, wdFanData, loanFanData, betaNetFanData, betaGrsFanData, totalWdArr, totalLoanArr, T, K, days, years, p,
+             survRate: surv.reduce((a,b)=>a+b,0)/numSims };
+  })(p, D);
 }
 
 // ╔══════════════════════════════════════════════════════════════╗
@@ -1744,22 +2430,82 @@ async function doRun() {
   document.getElementById('res-empty').classList.add('hidden');
   document.getElementById('res-content').classList.remove('hidden');
 
-  await tick();
-  // Run in one shot (JS is single-threaded; for large sims this may block briefly)
-  const res = simulate(p);
-  lastResult = res;
+  // Terminate any previous worker
+  if (_activeWorker) { _activeWorker.terminate(); _activeWorker = null; }
 
-  document.getElementById('prog-fill').style.width = '100%';
-  await tick();
+  const worker = new Worker(_WORKER_URL);
+  _activeWorker = worker;
 
-  renderResults(res);
+  // Serialise D's typed arrays as transferable ArrayBuffers
+  const ndxRCopy   = D.ndxR.slice();
+  const rfDCopy    = D.rfD.slice();
+  const ndx2lRCopy = D.ndx2lR.slice();
+  const ndx3lRCopy = D.ndx3lR.slice();
 
-  btn.disabled = false; btn.textContent = '▶ 執行模擬';
-  document.getElementById('prog-wrap').classList.add('hidden');
+  worker.onmessage = function(e) {
+    const { type } = e.data;
+    if (type === 'progress') {
+      document.getElementById('prog-fill').style.width = (e.data.pct * 100).toFixed(1) + '%';
+    } else if (type === 'done') {
+      _activeWorker = null;
 
-  // Switch to results tab
-  const resTab = document.querySelector('.tab[onclick*="switchTab(\'res\'"]');
-  if (resTab) switchTab('res', resTab);
+      const res = e.data.result;
+      // Reconstruct typed arrays from transferred buffers
+      res.finalV         = new Float64Array(res.finalV.buffer ?? res.finalV);
+      res.mddArr         = new Float64Array(res.mddArr.buffer ?? res.mddArr);
+      res.recArr         = new Float32Array(res.recArr.buffer ?? res.recArr);
+      res.betaArr        = new Float64Array(res.betaArr.buffer ?? res.betaArr);
+      res.betaGrossArr   = new Float64Array(res.betaGrossArr.buffer ?? res.betaGrossArr);
+      res.volArr         = new Float64Array(res.volArr.buffer ?? res.volArr);
+      res.sharpArr       = new Float64Array(res.sharpArr.buffer ?? res.sharpArr);
+      res.meanRetArr     = new Float64Array(res.meanRetArr.buffer ?? res.meanRetArr);
+      res.surv           = new Uint8Array(res.surv.buffer ?? res.surv);
+      res.fanData        = new Float64Array(res.fanData.buffer ?? res.fanData);
+      res.wdFanData      = new Float64Array(res.wdFanData.buffer ?? res.wdFanData);
+      res.loanFanData    = new Float64Array(res.loanFanData.buffer ?? res.loanFanData);
+      res.betaNetFanData = new Float64Array(res.betaNetFanData.buffer ?? res.betaNetFanData);
+      res.betaGrsFanData = new Float64Array(res.betaGrsFanData.buffer ?? res.betaGrsFanData);
+      res.totalWdArr     = new Float64Array(res.totalWdArr.buffer ?? res.totalWdArr);
+      res.totalLoanArr   = new Float64Array(res.totalLoanArr.buffer ?? res.totalLoanArr);
+
+      lastResult = res;
+      worker.terminate();
+
+      document.getElementById('prog-fill').style.width = '100%';
+      renderResults(res);
+      btn.disabled = false; btn.textContent = '▶ 執行模擬';
+      document.getElementById('prog-wrap').classList.add('hidden');
+
+      // Switch to results tab
+      const resTab = document.querySelector('.tab[onclick*="switchTab(\'res\'"]');
+      if (resTab) switchTab('res', resTab);
+    }
+  };
+
+  worker.onerror = function(err) {
+    console.error('Worker error:', err);
+    _activeWorker = null;
+    worker.terminate();
+    btn.disabled = false; btn.textContent = '▶ 執行模擬';
+    document.getElementById('prog-wrap').classList.add('hidden');
+    alert('模擬時發生錯誤，請查看主控台。');
+  };
+
+  worker.postMessage(
+    {
+      type: 'run',
+      params: p,
+      dataset: {
+        N: D.N,
+        ndxR:   ndxRCopy.buffer,
+        rfD:    rfDCopy.buffer,
+        ndx2lR: ndx2lRCopy.buffer,
+        ndx3lR: ndx3lRCopy.buffer,
+        blocks: D.blocks,
+      },
+    },
+    [ndxRCopy.buffer, rfDCopy.buffer, ndx2lRCopy.buffer, ndx3lRCopy.buffer]
+  );
 }
 
 function tick() { return new Promise(r => setTimeout(r, 0)); }
