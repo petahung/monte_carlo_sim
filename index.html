@@ -2951,12 +2951,12 @@ function drawHist(finalV, init, cagrArr, mwrrArr) {
       },
       scales:{
         x:{
-          title:{display:true,text:'最終金額',color:'#6b7280',font:{size:10}},
+          title:{display:true,text:'最終金額',color:'#6b7280',font:{size:11}},
           ticks:{color:'#4b5563',maxTicksLimit:8,font:{size:10}},grid:{display:false}
         },
         y:{
           type: useLog ? 'logarithmic' : 'linear',
-          title:{display:true,text:'模擬次數',color:'#6b7280',font:{size:10}},
+          title:{display:true,text:'模擬次數',color:'#6b7280',font:{size:11}},
           ticks:{color:'#4b5563',font:{size:10}},
           grid:{color:'#1f2937'}
         }
@@ -3010,11 +3010,11 @@ function drawDD(mddArr) {
       },
       scales:{
         x:{
-          title:{display:true,text:'最深跌幅',color:'#6b7280',font:{size:10}},
+          title:{display:true,text:'最深跌幅',color:'#6b7280',font:{size:11}},
           ticks:{color:'#4b5563',maxTicksLimit:8},grid:{display:false}
         },
         y:{
-          title:{display:true,text:'模擬次數',color:'#6b7280',font:{size:10}},
+          title:{display:true,text:'模擬次數',color:'#6b7280',font:{size:11}},
           ticks:{color:'#4b5563'},grid:{color:'#1f2937'}
         }
       }
@@ -3896,7 +3896,7 @@ function kellyAnimDraw(idx) {
   }
 
   // ── 軸名稱 ──
-  ctx.fillStyle = '#6b7280'; ctx.font = '10px sans-serif'; ctx.textAlign = 'center';
+  ctx.fillStyle = '#6b7280'; ctx.font = '11px sans-serif'; ctx.textAlign = 'center';
   ctx.fillText('β 槓桿倍數', PAD.l + cw / 2, H - 2);
   ctx.save(); ctx.translate(12, PAD.t + ch / 2); ctx.rotate(-Math.PI / 2);
   ctx.fillText('年化期望報酬', 0, 0); ctx.restore();
