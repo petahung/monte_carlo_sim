@@ -3795,7 +3795,7 @@ function kellyAnimDraw(idx) {
   const curve = b => f.mu * b - 0.5 * f.sig2 * b * b;
 
   // x 軸範圍 β: 0 → 5
-  const BMAX = 5;
+  const BMAX = 8;
   const xOf  = b  => PAD.l + (b / BMAX) * cw;
   // y 軸：0% 置中，範圍對稱於 0，掃描曲線找最大絕對值加 12% padding
   let absMax = 0.05; // 最小範圍
