@@ -880,6 +880,24 @@ tr:hover td{background:var(--bg-hover)}
           </div>
           <div class="gls-def" style="margin-top:6px;color:var(--text-dim)"><strong>前提假設：</strong>股市長期向上、投資人可承受短期巨幅虧損、槓桿成本低於預期超額報酬。此法在市場長期牛市下回測效果顯著，但槓桿爆倉風險不可忽視。</div>
         </div>
+        <div class="gls-card">
+          <div class="gls-term">市場中性策略（Beta = 0）</div>
+          <div class="gls-en">Market-Neutral Strategy / Long-Short Equity</div>
+          <div class="gls-def">透過<strong>同時持有多頭與空頭部位</strong>，使投資組合對整體市場的淨曝險趨近於零（Beta ≈ 0）。報酬來源不再是市場漲跌（Beta 收益），而是個別資產的相對表現（Alpha）。</div>
+          <div class="gls-def" style="margin-top:6px;display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:0.88em">
+            <div style="padding:6px 8px;border:1px solid var(--border);border-radius:6px">
+              <div style="font-weight:600;margin-bottom:4px">📈 多頭（Long）</div>
+              買入預期相對跑贏市場的資產（如高品質成長股），若市場上漲則獲益
+            </div>
+            <div style="padding:6px 8px;border:1px solid var(--border);border-radius:6px">
+              <div style="font-weight:600;margin-bottom:4px">📉 空頭（Short）</div>
+              賣空預期相對跑輸市場的資產（如弱勢股），若市場下跌則獲益
+            </div>
+          </div>
+          <div class="gls-def" style="margin-top:6px">多空部位的市值相等時，市場整體漲跌對組合影響抵消，<strong>淨 Beta ≈ 0</strong>。理想情況下，無論牛熊皆可獲取正報酬。</div>
+          <div class="gls-def" style="margin-top:6px;color:var(--text-dim);font-size:0.85em"><strong>現實挑戰：</strong>做空成本（借券費）、軋空風險（Short Squeeze）、Alpha 來源難以持續。Renaissance Technologies 的大獎章基金是此類策略的極致代表，但其演算法屬高度機密。</div>
+          <div class="gls-formula">淨 Beta = Σ(多頭權重 × Beta) + Σ(空頭權重 × Beta) ≈ 0</div>
+        </div>
       </div>
     </div>
 
@@ -1265,6 +1283,25 @@ f*：最優下注比例　b：賠率　p：勝率　q = 1−p</div>
           </div>
           <div class="gls-person-bio" style="margin-top:8px;color:var(--text-dim)">
             主要著作：《隨機騙局》（2001）、《黑天鵝》（2007）、《反脆弱》（2012）、《非對稱風險》（2018）
+          </div>
+        </div>
+        <div class="gls-card">
+          <div class="gls-person">
+            <div class="gls-avatar">🧮</div>
+            <div class="gls-person-body">
+              <div class="gls-person-name">Jim Simons</div>
+              <div class="gls-person-meta">1938 – 2024　美國數學家、量化投資先驅</div>
+              <span class="gls-tag">量化投資</span><span class="gls-tag">大獎章基金</span><span class="gls-tag">演算法交易</span><span class="gls-tag">數學建模</span>
+            </div>
+          </div>
+          <div class="gls-person-bio" style="margin-top:10px">
+            冷戰時期曾任密碼破譯員，後成為頂尖幾何學家，1978 年創立 Renaissance Technologies。他首次將數學家、物理學家與統計學家大規模引入金融業，以純粹的統計與演算法取代人類直覺做交易決策。
+          </div>
+          <div class="gls-person-bio" style="margin-top:8px">
+            旗艦基金<strong>大獎章基金（Medallion Fund）</strong>自 1988 至 2018 年，扣除高達 5% 管理費與 44% 績效費後，年化報酬仍達約 <strong>66%</strong>（費前約 ~100%），被廣泛視為人類史上最成功的投資基金。其核心策略從未公開，但已知大量運用統計套利、市場中性與高頻訊號。
+          </div>
+          <div class="gls-person-bio" style="margin-top:8px;color:var(--text-dim)">
+            同時代的量化對沖基金巨頭還有 Ken Griffin 的 <strong>Citadel</strong>（多策略）與 D.E. Shaw——共同開創了以數學模型主導金融市場的時代。Simons 晚年投身慈善與數學教育，2024 年辭世，享年 86 歲。
           </div>
         </div>
 
