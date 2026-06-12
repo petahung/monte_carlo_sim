@@ -3814,9 +3814,19 @@ function kellyAnimDraw(idx) {
   ctx.fillStyle = '#151e2d';
   ctx.fillRect(0, 0, W, H);
 
-  // 背景色：kOpt 與 β=2 的關係
-  if (f.kOpt !== null) {
-    const bg = f.kOpt >= 2 ? 'rgba(74,222,128,0.07)' : f.kOpt >= 1 ? 'rgba(251,191,36,0.07)' : 'rgba(239,68,68,0.07)';
+  // 背景色：以 β=2（NDX2L）相對於最佳 Kelly 的位置決定
+  {
+    const ret2 = f.mu * 2 - 0.5 * f.sig2 * 4; // f(β=2)
+    let bg;
+    if (ret2 < 0) {
+      bg = 'rgba(239,68,68,0.12)';           // 紅：NDX2L 期望虧損
+    } else if (f.kOpt !== null && 2 > f.kOpt) {
+      bg = 'rgba(251,146,60,0.12)';          // 橘：超過最佳 Kelly
+    } else if (f.kOpt !== null && 2 >= f.kOpt / 2) {
+      bg = 'rgba(74,222,128,0.10)';          // 綠：半Kelly ~ 全Kelly 區間
+    } else {
+      bg = 'rgba(251,191,36,0.10)';          // 黃：低於半Kelly（保守）
+    }
     ctx.fillStyle = bg;
     ctx.fillRect(PAD.l, PAD.t, cw, ch);
   }
