@@ -3666,7 +3666,7 @@ function renderDataTab() {
 
   if (CHARTS.ann) CHARTS.ann.destroy();
   CHARTS.ann = new Chart(document.getElementById('ann-chart'), {
-    type: 'bar',
+    type: 'line',
     data: { datasets: [
       {
         type: 'bar', label: '年報酬率 %', yAxisID: 'yR',
@@ -3730,7 +3730,7 @@ function renderDataTab() {
 
   if (CHARTS.m2) CHARTS.m2.destroy();
   CHARTS.m2 = new Chart(document.getElementById('m2-chart'), {
-    type: 'bar',
+    type: 'line',
     data: { datasets: [
       {
         type: 'bar', label: 'M2 年增率 %', yAxisID: 'yG',
