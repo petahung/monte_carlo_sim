@@ -2172,71 +2172,39 @@ function drawHist(finalV, init) {
 }
 
 function drawDD(mddArr) {
-  // mddArr 為負小數，例如 -0.57 代表 -57%
-  const vals = Array.from(mddArr, v => v * 100).filter(isFinite).sort((a,b)=>a-b);
+  const vals = Array.from(mddArr, v=>-v*100).sort((a,b)=>a-b); // 轉為正值，升序
   const n = vals.length;
   if (!n) return;
-  const pct = q => vals[Math.min(Math.floor(q*n), n-1)];
-  const p10=pct(.10), p50=pct(.50), p90=pct(.90);
-
-  // 範圍：最嚴重(最負)到接近0
-  const minV = Math.floor(vals[0] / 5) * 5;         // 例：-80
-  const maxV = Math.min(-1, Math.ceil(vals[n-1] / 5) * 5); // 例：-5（排除0避免空bin）
-  const BINS = 30;
-  const bw = (maxV - minV) / BINS;                  // 正值 bin 寬
+  const minDD = Math.floor(vals[0]/5)*5 || -100;
+  const BINS = 20, bw = -minDD/BINS;
   const counts = new Array(BINS).fill(0);
   for (const v of vals) {
-    const idx = Math.max(0, Math.min(Math.floor((v - minV) / bw), BINS-1));
-    counts[idx]++;
+    const idx = Math.min(Math.floor((v - minDD)/bw), BINS-1);
+    if (idx >= 0) counts[idx]++;
   }
-  // X 軸標籤：負值百分比，由左（最嚴重）到右（最輕微）
-  const labels = Array.from({length:BINS}, (_,i) => (minV + (i+0.5)*bw).toFixed(0)+'%');
-
-  // 顏色：依嚴重程度
-  const midpts = Array.from({length:BINS}, (_,i) => minV + (i+0.5)*bw);
+  const labels = Array.from({length:BINS}, (_,i)=>f2(minDD+(i+0.5)*bw,0)+'%');
+  const midpts = Array.from({length:BINS}, (_,i)=>minDD+(i+0.5)*bw);
   const colors = midpts.map(v =>
-    v < -70 ? '#7f1d1dcc' : v < -50 ? '#ef4444cc' : v < -30 ? '#f97316cc' : '#fbbf24cc'
+    v > 70 ? '#7f1d1dcc' : v > 50 ? '#ef4444cc' : v > 30 ? '#f97316cc' : '#fbbf24cc'
   );
-
-  const pLine = (val) => Math.min(Math.max(Math.floor((val - minV) / bw), 0), BINS-1);
-
   if (CHARTS.dd) CHARTS.dd.destroy();
   CHARTS.dd = new Chart(document.getElementById('dd-chart'), {
     type:'bar',
-    data:{labels, datasets:[{data:counts, backgroundColor:colors, borderWidth:0, barPercentage:1, categoryPercentage:1}]},
+    data:{labels, datasets:[{data:counts, backgroundColor:colors, borderWidth:0}]},
     options:{
       animation:false, responsive:true,
       plugins:{
         legend:{display:false},
-        tooltip:{callbacks:{
-          title: (items) => {
-            const i = items[0].dataIndex;
-            return `${(minV+i*bw).toFixed(0)}% ~ ${(minV+(i+1)*bw).toFixed(0)}%`;
-          },
-          label: c => `${c.raw} 次 (${(c.raw/n*100).toFixed(1)}%)`
-        }},
-        annotation:{
-          annotations:{
-            lp10:{type:'line',xMin:pLine(p10)-0.5,xMax:pLine(p10)-0.5,
-              borderColor:'#a78bfa',borderWidth:1.5,borderDash:[4,3],
-              label:{content:'P10',display:true,position:'end',color:'#a78bfa',font:{size:9},backgroundColor:'transparent'}},
-            lp50:{type:'line',xMin:pLine(p50)-0.5,xMax:pLine(p50)-0.5,
-              borderColor:'#4ade80',borderWidth:2,
-              label:{content:'P50',display:true,position:'end',color:'#4ade80',font:{size:9},backgroundColor:'transparent'}},
-            lp90:{type:'line',xMin:pLine(p90)-0.5,xMax:pLine(p90)-0.5,
-              borderColor:'#fbbf24',borderWidth:1.5,borderDash:[4,3],
-              label:{content:'P90',display:true,position:'end',color:'#fbbf24',font:{size:9},backgroundColor:'transparent'}}
-          }
-        }
+        tooltip:{callbacks:{label:c=>`${c.raw} 次 (${(c.raw/n*100).toFixed(1)}%)`}}
       },
       scales:{
         x:{
           title:{display:true,text:'最深跌幅',color:'#6b7280',font:{size:10}},
-          ticks:{color:'#4b5563',maxTicksLimit:10,font:{size:10}},grid:{display:false}
+          ticks:{color:'#4b5563',maxTicksLimit:8},grid:{display:false}
         },
         y:{
           title:{display:true,text:'模擬次數',color:'#6b7280',font:{size:10}},
-          ticks:{color:'#4b5563',font:{size:10}},grid:{color:'#1f2937'}
+          ticks:{color:'#4b5563'},grid:{color:'#1f2937'}
         }
       }
     }
