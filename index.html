@@ -807,6 +807,78 @@ tr:hover td{background:var(--bg-hover)}
     </div>
 
     <div class="gls-section">
+      <div class="gls-section-title">關鍵人物</div>
+      <style>
+        .gls-person{display:flex;gap:14px;align-items:flex-start}
+        .gls-avatar{width:52px;height:52px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:1.5rem;background:var(--bg-hover)}
+        .gls-person-body{flex:1;min-width:0}
+        .gls-person-name{font-size:0.88rem;font-weight:700;color:var(--text-bright)}
+        .gls-person-meta{font-size:0.72rem;color:var(--text-dim);margin-bottom:6px}
+        .gls-person-bio{font-size:0.78rem;color:var(--text);line-height:1.6}
+        .gls-tag{display:inline-block;font-size:0.68rem;padding:1px 7px;border-radius:10px;border:1px solid var(--border-mid);color:var(--text-dim);margin-right:4px;margin-bottom:4px}
+      </style>
+      <div class="gls-grid">
+
+        <div class="gls-card">
+          <div class="gls-person">
+            <div class="gls-avatar">📡</div>
+            <div class="gls-person-body">
+              <div class="gls-person-name">Claude Elwood Shannon</div>
+              <div class="gls-person-meta">1916 – 2001　美國數學家、電機工程師</div>
+              <span class="gls-tag">資訊理論</span><span class="gls-tag">密碼學</span><span class="gls-tag">投資組合</span>
+            </div>
+          </div>
+          <div class="gls-person-bio" style="margin-top:10px">
+            被譽為「資訊理論之父」，1948 年發表《通訊的數學理論》，奠定了現代數位通訊、資料壓縮與密碼學的基礎。Shannon 以「熵（Entropy）」量化資訊的不確定性，與 Kelly 準則共享深刻的數學根源——兩者均以對數期望最大化為核心目標。
+          </div>
+          <div class="gls-person-bio" style="margin-top:8px">
+            在投資領域，Shannon 提出其著名的思想實驗（Shannon's Demon）：即使資產本身期望報酬為零，透過持續再平衡仍可從波動性中提取正報酬。他在 MIT 的辦公室中實際操作過一台自製的機械式輪盤預測機，展現了他將理論轉化為實踐的天賦。
+          </div>
+        </div>
+
+        <div class="gls-card">
+          <div class="gls-person">
+            <div class="gls-avatar">🎰</div>
+            <div class="gls-person-body">
+              <div class="gls-person-name">John Larry Kelly Jr.</div>
+              <div class="gls-person-meta">1923 – 1965　美國物理學家、貝爾實驗室研究員</div>
+              <span class="gls-tag">資訊理論</span><span class="gls-tag">最優下注</span><span class="gls-tag">財富成長</span>
+            </div>
+          </div>
+          <div class="gls-person-bio" style="margin-top:10px">
+            1956 年在貝爾實驗室發表論文《資訊率的新詮釋》，提出以 Shannon 熵為基礎的最優下注公式——Kelly 準則。他的出發點是：如何利用「內線資訊」（額外資訊優勢）最大化長期財富的對數成長率，這與賭博和投資有著天然的對應關係。
+          </div>
+          <div class="gls-person-bio" style="margin-top:8px">
+            Kelly 準則在發表後很快被 MIT 的數學家 Ed Thorp 應用於二十一點算牌與股票市場，成為量化金融史上最具影響力的公式之一。Kelly 本人英年早逝（41歲），未能親眼目睹其理論在金融界的廣泛應用。
+          </div>
+          <div class="gls-formula" style="margin-top:8px">f* = (bp − q) / b
+f*：最優下注比例　b：賠率　p：勝率　q = 1−p</div>
+        </div>
+
+        <div class="gls-card">
+          <div class="gls-person">
+            <div class="gls-avatar">🦢</div>
+            <div class="gls-person-body">
+              <div class="gls-person-name">Nassim Nicholas Taleb</div>
+              <div class="gls-person-meta">1960 –　黎巴嫩裔美國作家、前衍生品交易員</div>
+              <span class="gls-tag">黑天鵝</span><span class="gls-tag">肥尾風險</span><span class="gls-tag">反脆弱</span>
+            </div>
+          </div>
+          <div class="gls-person-bio" style="margin-top:10px">
+            前衍生品交易員，後轉為作家與風險研究者。代表作《黑天鵝》（2007）深刻揭示了金融模型過度依賴常態分布的致命盲點——真實市場存在遠超理論預期的極端事件（黑天鵝），且這些事件對財富的影響遠大於日常波動的累積。
+          </div>
+          <div class="gls-person-bio" style="margin-top:8px">
+            Taleb 提出「反脆弱（Antifragile）」的概念：優秀的系統不僅能承受衝擊，更能從混亂中受益。在投資實踐中，他倡導「槓鈴策略」——將大部分資金置於極度保守的資產，少部分置於具有正向不對稱性（無限上行、有限下行）的標的，以此在保護本金的同時保留暴露於黑天鵝的機會。
+          </div>
+          <div class="gls-person-bio" style="margin-top:8px;color:var(--text-dim)">
+            主要著作：《隨機騙局》（2001）、《黑天鵝》（2007）、《反脆弱》（2012）、《非對稱風險》（2018）
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="gls-section">
       <div class="gls-section-title">如何閱讀箱形圖（Box-Whisker Plot）</div>
 
       <!-- SVG diagram -->
