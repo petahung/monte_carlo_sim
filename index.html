@@ -817,28 +817,23 @@ tr:hover td{background:var(--bg-hover)}
           <div class="gls-term">期權（Options）</div>
           <div class="gls-en">Options Contract</div>
           <div class="gls-def">期權合約由買方與賣方組成，兩者的權利與義務完全不對稱：</div>
-          <div class="gls-def" style="margin-top:6px">
-            <table style="width:100%;border-collapse:collapse;font-size:0.88em">
-              <thead>
-                <tr>
-                  <th style="text-align:left;padding:4px 8px;border-bottom:1px solid var(--border)"></th>
-                  <th style="text-align:left;padding:4px 8px;border-bottom:1px solid var(--border)">Call（看漲）</th>
-                  <th style="text-align:left;padding:4px 8px;border-bottom:1px solid var(--border)">Put（看跌）</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="padding:4px 8px;border-bottom:1px solid var(--border);white-space:nowrap"><strong>買方</strong></td>
-                  <td style="padding:4px 8px;border-bottom:1px solid var(--border)">付權利金，有<strong>權利</strong>以履約價<strong>買入</strong>標的；最大虧損 = 權利金</td>
-                  <td style="padding:4px 8px;border-bottom:1px solid var(--border)">付權利金，有<strong>權利</strong>以履約價<strong>賣出</strong>標的；最大虧損 = 權利金</td>
-                </tr>
-                <tr>
-                  <td style="padding:4px 8px;white-space:nowrap"><strong>賣方</strong></td>
-                  <td style="padding:4px 8px">收權利金，有<strong>義務</strong>以履約價<strong>賣出</strong>標的；潛在虧損無上限</td>
-                  <td style="padding:4px 8px">收權利金，有<strong>義務</strong>以履約價<strong>買入</strong>標的；潛在虧損極大</td>
-                </tr>
-              </tbody>
-            </table>
+          <div class="gls-def" style="margin-top:6px;display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:0.88em">
+            <div style="padding:6px 8px;border:1px solid var(--border);border-radius:6px">
+              <div style="font-weight:600;margin-bottom:4px">📈 Call 買方</div>
+              付權利金，有<strong>權利</strong>以履約價<strong>買入</strong>標的<br>最大虧損 = 權利金
+            </div>
+            <div style="padding:6px 8px;border:1px solid var(--border);border-radius:6px">
+              <div style="font-weight:600;margin-bottom:4px">📉 Put 買方</div>
+              付權利金，有<strong>權利</strong>以履約價<strong>賣出</strong>標的<br>最大虧損 = 權利金
+            </div>
+            <div style="padding:6px 8px;border:1px solid var(--border);border-radius:6px">
+              <div style="font-weight:600;margin-bottom:4px">📈 Call 賣方</div>
+              收權利金，有<strong>義務</strong>以履約價<strong>賣出</strong>標的<br>潛在虧損無上限
+            </div>
+            <div style="padding:6px 8px;border:1px solid var(--border);border-radius:6px">
+              <div style="font-weight:600;margin-bottom:4px">📉 Put 賣方</div>
+              收權利金，有<strong>義務</strong>以履約價<strong>買入</strong>標的<br>潛在虧損極大
+            </div>
           </div>
           <div class="gls-def" style="margin-top:6px"><strong>槓桿用途：</strong>買入深度實值 Call 可以小博大；賣出 Put 收取期權金同時承擔下行風險。<strong>關鍵風險：</strong>時間價值損耗（Theta Decay）——即使方向正確，若價格未及時移動仍會虧損；波動率（IV）壓縮也會侵蝕期權金。</div>
           <div class="gls-formula">期權杠桿（Delta 杠桿）= Delta × 標的價格 / 期權金</div>
