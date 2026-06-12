@@ -1080,69 +1080,42 @@ tr:hover td{background:var(--bg-hover)}
           <div class="gls-term">主要資產類別總覽</div>
           <div class="gls-en">Major Asset Classes</div>
           <div class="gls-def">不同資產類別在報酬、波動性與市場相關性上差異顯著，理解其特性是配置決策的基礎：</div>
-          <div class="gls-def" style="margin-top:8px;font-size:0.85em;overflow-x:auto">
-            <table style="width:100%;border-collapse:collapse;min-width:420px">
-              <thead>
-                <tr style="border-bottom:1px solid var(--border)">
-                  <th style="text-align:left;padding:5px 8px;color:var(--text-dim);font-weight:600">資產類別</th>
-                  <th style="text-align:center;padding:5px 8px;color:var(--text-dim);font-weight:600">預期報酬</th>
-                  <th style="text-align:center;padding:5px 8px;color:var(--text-dim);font-weight:600">波動性</th>
-                  <th style="text-align:center;padding:5px 8px;color:var(--text-dim);font-weight:600">與股市相關</th>
-                  <th style="text-align:left;padding:5px 8px;color:var(--text-dim);font-weight:600">主要用途</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr style="border-bottom:1px solid var(--border)">
-                  <td style="padding:5px 8px"><strong>📈 股票（NDX）</strong></td>
-                  <td style="text-align:center;padding:5px 8px">高</td>
-                  <td style="text-align:center;padding:5px 8px">高</td>
-                  <td style="text-align:center;padding:5px 8px">1.0</td>
-                  <td style="padding:5px 8px">長期增值核心；本工具主角</td>
-                </tr>
-                <tr style="border-bottom:1px solid var(--border)">
-                  <td style="padding:5px 8px"><strong>🏦 債券</strong></td>
-                  <td style="text-align:center;padding:5px 8px">低–中</td>
-                  <td style="text-align:center;padding:5px 8px">低</td>
-                  <td style="text-align:center;padding:5px 8px">負相關</td>
-                  <td style="padding:5px 8px">避險、平衡波動；股災時上漲</td>
-                </tr>
-                <tr style="border-bottom:1px solid var(--border)">
-                  <td style="padding:5px 8px"><strong>🏠 房地產（REITs）</strong></td>
-                  <td style="text-align:center;padding:5px 8px">中</td>
-                  <td style="text-align:center;padding:5px 8px">中</td>
-                  <td style="text-align:center;padding:5px 8px">中</td>
-                  <td style="padding:5px 8px">租金現金流、通膨對沖</td>
-                </tr>
-                <tr style="border-bottom:1px solid var(--border)">
-                  <td style="padding:5px 8px"><strong>🥇 黃金</strong></td>
-                  <td style="text-align:center;padding:5px 8px">中</td>
-                  <td style="text-align:center;padding:5px 8px">中</td>
-                  <td style="text-align:center;padding:5px 8px">低</td>
-                  <td style="padding:5px 8px">避險、法幣貶值對沖</td>
-                </tr>
-                <tr style="border-bottom:1px solid var(--border)">
-                  <td style="padding:5px 8px"><strong>🛢️ 大宗商品</strong></td>
-                  <td style="text-align:center;padding:5px 8px">低–中</td>
-                  <td style="text-align:center;padding:5px 8px">高</td>
-                  <td style="text-align:center;padding:5px 8px">低</td>
-                  <td style="padding:5px 8px">通膨對沖、週期性配置</td>
-                </tr>
-                <tr style="border-bottom:1px solid var(--border)">
-                  <td style="padding:5px 8px"><strong>💵 現金／貨幣市場</strong></td>
-                  <td style="text-align:center;padding:5px 8px">低</td>
-                  <td style="text-align:center;padding:5px 8px">極低</td>
-                  <td style="text-align:center;padding:5px 8px">0</td>
-                  <td style="padding:5px 8px">無風險利率基準；流動性儲備</td>
-                </tr>
-                <tr>
-                  <td style="padding:5px 8px"><strong>₿ 比特幣</strong></td>
-                  <td style="text-align:center;padding:5px 8px">極高／極低</td>
-                  <td style="text-align:center;padding:5px 8px">極高</td>
-                  <td style="text-align:center;padding:5px 8px">中高</td>
-                  <td style="padding:5px 8px">數位黃金；供應量上限 2,100 萬枚</td>
-                </tr>
-              </tbody>
-            </table>
+          <div class="gls-def" style="margin-top:8px;display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:0.83em">
+            <div style="padding:6px 8px;border:1px solid var(--border);border-radius:6px">
+              <div style="font-weight:600;margin-bottom:4px">📈 股票（NDX）</div>
+              報酬：高　波動：高　相關：1.0<br>
+              <span style="color:var(--text-dim)">長期增值核心；本工具主角</span>
+            </div>
+            <div style="padding:6px 8px;border:1px solid var(--border);border-radius:6px">
+              <div style="font-weight:600;margin-bottom:4px">🏦 債券</div>
+              報酬：低–中　波動：低　相關：負<br>
+              <span style="color:var(--text-dim)">避險、平衡波動；股災時上漲</span>
+            </div>
+            <div style="padding:6px 8px;border:1px solid var(--border);border-radius:6px">
+              <div style="font-weight:600;margin-bottom:4px">🏠 房地產（REITs）</div>
+              報酬：中　波動：中　相關：中<br>
+              <span style="color:var(--text-dim)">租金現金流、通膨對沖</span>
+            </div>
+            <div style="padding:6px 8px;border:1px solid var(--border);border-radius:6px">
+              <div style="font-weight:600;margin-bottom:4px">🥇 黃金</div>
+              報酬：中　波動：中　相關：低<br>
+              <span style="color:var(--text-dim)">避險、法幣貶值對沖</span>
+            </div>
+            <div style="padding:6px 8px;border:1px solid var(--border);border-radius:6px">
+              <div style="font-weight:600;margin-bottom:4px">🛢️ 大宗商品</div>
+              報酬：低–中　波動：高　相關：低<br>
+              <span style="color:var(--text-dim)">通膨對沖、週期性配置</span>
+            </div>
+            <div style="padding:6px 8px;border:1px solid var(--border);border-radius:6px">
+              <div style="font-weight:600;margin-bottom:4px">💵 現金／貨幣市場</div>
+              報酬：低　波動：極低　相關：0<br>
+              <span style="color:var(--text-dim)">無風險利率基準；流動性儲備</span>
+            </div>
+            <div style="padding:6px 8px;border:1px solid var(--border);border-radius:6px;grid-column:1/-1">
+              <div style="font-weight:600;margin-bottom:4px">₿ 比特幣</div>
+              報酬：極高／極低　波動：極高　相關：中高<br>
+              <span style="color:var(--text-dim)">數位黃金；供應量上限 2,100 萬枚</span>
+            </div>
           </div>
           <div class="gls-def" style="margin-top:6px;color:var(--text-dim);font-size:0.85em">相關性會隨市場環境改變——2022 年股債同跌打破傳統「負相關」假設。本工具聚焦 NDX 股票模擬，其他資產類別可作為組合配置的參考框架。</div>
         </div>
