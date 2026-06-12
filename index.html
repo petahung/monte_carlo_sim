@@ -3782,7 +3782,9 @@ function kellyAnimDraw(idx) {
   // 解析度適配（最低 2×，避免初始縮圖模糊）
   const dpr = Math.max(window.devicePixelRatio || 1, 2);
   const W = canvas.offsetWidth || 600;
-  const H = canvas.offsetHeight || 160;
+  const H = parseInt(canvas.getAttribute('height')) || 240; // 從 HTML attribute 取高度
+  canvas.style.width  = W + 'px';
+  canvas.style.height = H + 'px';
   canvas.width  = W * dpr;
   canvas.height = H * dpr;
   ctx.scale(dpr, dpr);
