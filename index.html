@@ -2923,10 +2923,11 @@ function drawFan(res) {
           callbacks:{label:c=>{
             const fmt = v => '$'+Math.round(v).toLocaleString();
             const lbl = c.dataset.label;
-            if (lbl==='總投入')     return `總投入: ${fmt(c.raw)}`;
-            if (lbl==='累積取款 P50') return `累積取款 P50: ${fmt(c.raw)}`;
-            if (lbl==='累積債務 P50') return `累積債務 P50: ${fmt(c.raw)}`;
-            return `${lbl}: ${fmt(typeof c.raw==='object'?c.raw.y:c.raw)}`;
+            const rawVal = v => typeof v==='object' ? v?.y : v;
+            if (lbl==='總投入') return `總投入: ${fmt(rawVal(c.raw))}`;
+            if (lbl==='累積取款 P50') { const v=rawVal(c.raw); return (v==null||!isFinite(v)||v===0) ? null : `累積取款 P50: ${fmt(v)}`; }
+            if (lbl==='累積債務 P50') { const v=rawVal(c.raw); return (v==null||!isFinite(v)||v===0) ? null : `累積債務 P50: ${fmt(v)}`; }
+            return `${lbl}: ${fmt(rawVal(c.raw))}`;
           }}}
       }
     }
