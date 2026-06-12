@@ -427,6 +427,7 @@ tr:hover td{background:var(--bg-hover)}
     <div class="tab act" onclick="switchTab('res',this)">模擬結果</div>
     <div class="tab" onclick="switchTab('cmp',this)">比較分析</div>
     <div class="tab" onclick="switchTab('dat',this)">歷史資料</div>
+    <div class="tab" onclick="switchTab('gls',this)">名詞解釋</div>
   </div>
 
   <!-- ── RESULTS ── -->
@@ -598,6 +599,203 @@ tr:hover td{background:var(--bg-hover)}
         </div>
       </div>
     </div>
+  </div>
+
+  <!-- ── GLOSSARY ── -->
+  <div class="tab-body" id="tab-gls">
+  <style>
+    .gls-section{margin-bottom:28px}
+    .gls-section-title{font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--accent-title);border-bottom:1px solid var(--border-mid);padding-bottom:6px;margin-bottom:12px}
+    .gls-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:10px}
+    .gls-card{background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:12px 14px}
+    .gls-term{font-size:0.82rem;font-weight:700;color:var(--text-bright);margin-bottom:4px}
+    .gls-en{font-size:0.72rem;color:var(--text-dim);margin-bottom:6px;font-style:italic}
+    .gls-def{font-size:0.78rem;color:var(--text);line-height:1.55}
+    .gls-formula{font-size:0.74rem;background:var(--bg-input);border:1px solid var(--border);border-radius:4px;padding:5px 8px;margin-top:6px;color:var(--accent-text);font-family:monospace;white-space:pre-wrap}
+  </style>
+  <div style="padding:4px 0 20px">
+
+    <div class="gls-section">
+      <div class="gls-section-title">模擬方法</div>
+      <div class="gls-grid">
+        <div class="gls-card">
+          <div class="gls-term">蒙地卡羅模擬</div>
+          <div class="gls-en">Monte Carlo Simulation</div>
+          <div class="gls-def">透過重複隨機抽樣，模擬資產在未來各種可能情境下的價值路徑，從而估計收益分布與風險。本工具從歷史日報酬率中直接Bootstrap抽樣，保留其統計特性。</div>
+        </div>
+        <div class="gls-card">
+          <div class="gls-term">Bootstrap 抽樣</div>
+          <div class="gls-en">Bootstrap Resampling</div>
+          <div class="gls-def">從歷史資料中有放回地隨機抽取日報酬率，拼接成模擬路徑。不假設報酬率服從常態分布，自然保留了肥尾、偏態與聚集波動等特性。</div>
+        </div>
+        <div class="gls-card">
+          <div class="gls-term">逐日 Bootstrap</div>
+          <div class="gls-en">Daily Bootstrap</div>
+          <div class="gls-def">每個交易日獨立隨機抽取，各日之間無相關性。適合長期模擬，但無法捕捉短期動量或均值回歸。</div>
+        </div>
+        <div class="gls-card">
+          <div class="gls-term">區塊 Bootstrap</div>
+          <div class="gls-en">Block Bootstrap</div>
+          <div class="gls-def">以連續數日（區塊）為單位抽樣，保留短期序列相關性，較能重現真實市場的連續漲跌結構。</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="gls-section">
+      <div class="gls-section-title">報酬率指標</div>
+      <div class="gls-grid">
+        <div class="gls-card">
+          <div class="gls-term">年化複合成長率</div>
+          <div class="gls-en">CAGR — Compound Annual Growth Rate</div>
+          <div class="gls-def">將期末資產與期初資產的比值，折算為每年複利成長的等效利率。反映長期財富累積速度，不受中途現金流影響。</div>
+          <div class="gls-formula">CAGR = (期末 / 期初)^(1/年數) − 1</div>
+        </div>
+        <div class="gls-card">
+          <div class="gls-term">時間加權報酬率</div>
+          <div class="gls-en">TWR — Time-Weighted Return</div>
+          <div class="gls-def">消除現金流時機影響，反映投資策略本身的績效。將每次現金流之間的子期間報酬連乘，適合評估基金經理人表現。</div>
+        </div>
+        <div class="gls-card">
+          <div class="gls-term">金錢加權報酬率</div>
+          <div class="gls-en">MWRR / IRR — Money-Weighted Rate of Return</div>
+          <div class="gls-def">考慮現金流的時機與金額，反映投資人實際獲得的報酬。當大筆資金在高點投入時，MWRR 會低於 TWR。</div>
+        </div>
+        <div class="gls-card">
+          <div class="gls-term">算術平均報酬</div>
+          <div class="gls-en">Arithmetic Mean Return</div>
+          <div class="gls-def">各期報酬率的簡單平均值。因波動性而高估長期財富增長，與 CAGR 的差距約為 σ²/2（變異數折扣）。</div>
+          <div class="gls-formula">算術平均 ≈ CAGR + σ²/2</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="gls-section">
+      <div class="gls-section-title">風險指標</div>
+      <div class="gls-grid">
+        <div class="gls-card">
+          <div class="gls-term">最大回撤</div>
+          <div class="gls-en">MDD — Maximum Drawdown</div>
+          <div class="gls-def">從歷史高點到最低谷的最大跌幅百分比，衡量持有期間可能承受的最大虧損。槓桿倍數愈高，MDD 通常愈大。</div>
+          <div class="gls-formula">MDD = (谷底 − 前高) / 前高</div>
+        </div>
+        <div class="gls-card">
+          <div class="gls-term">恢復期</div>
+          <div class="gls-en">Recovery Period / Drawdown Duration</div>
+          <div class="gls-def">從回撤的最低谷重新回升至前高所需的時間（月數）。反映投資人需要忍受虧損的時間長度。</div>
+        </div>
+        <div class="gls-card">
+          <div class="gls-term">夏普比率</div>
+          <div class="gls-en">Sharpe Ratio</div>
+          <div class="gls-def">每承擔一單位總風險（標準差）所獲得的超額報酬，衡量風險調整後績效。值越高代表每單位波動獲得更多回報。</div>
+          <div class="gls-formula">Sharpe = (年化報酬 − 無風險利率) / 年化標準差</div>
+        </div>
+        <div class="gls-card">
+          <div class="gls-term">波動率</div>
+          <div class="gls-en">Volatility (σ)</div>
+          <div class="gls-def">日報酬率標準差的年化值（乘以 √252），反映資產價格的震盪幅度。槓桿 N 倍時，波動率約為原始資產的 N 倍。</div>
+          <div class="gls-formula">年化波動率 = 日報酬標準差 × √252</div>
+        </div>
+        <div class="gls-card">
+          <div class="gls-term">存活率</div>
+          <div class="gls-en">Survival Rate</div>
+          <div class="gls-def">模擬路徑中，期末淨資產仍大於零（未歸零）的比例。在啟用定期取款或高槓桿時，存活率為關鍵風險指標。</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="gls-section">
+      <div class="gls-section-title">槓桿與配置</div>
+      <div class="gls-grid">
+        <div class="gls-card">
+          <div class="gls-term">Beta（槓桿倍數）</div>
+          <div class="gls-en">Beta / Effective Leverage</div>
+          <div class="gls-def">投資組合對基礎指數的實效曝險倍數。1× = 無槓桿，2× = 每日重置 2 倍槓桿 ETF。Beta 隨槓桿配置比例而變動。</div>
+          <div class="gls-formula">Beta = 1×權重×1 + 2×權重×2 + 3×權重×3</div>
+        </div>
+        <div class="gls-card">
+          <div class="gls-term">每日重置槓桿</div>
+          <div class="gls-en">Daily-Reset Leverage (LETF)</div>
+          <div class="gls-def">槓桿 ETF 每日將曝險重置為 N 倍，因此長期持有時實際報酬受「波動損耗」影響，在震盪行情中顯著落後於 N 倍靜態槓桿。</div>
+        </div>
+        <div class="gls-card">
+          <div class="gls-term">波動損耗</div>
+          <div class="gls-en">Volatility Decay / Beta Slippage</div>
+          <div class="gls-def">因每日複利效應，槓桿 ETF 在震盪市場的長期表現低於「N × 指數報酬」的理論值。波動率越高，損耗越大。</div>
+          <div class="gls-formula">損耗 ≈ (N²−N)/2 × σ²（每期）</div>
+        </div>
+        <div class="gls-card">
+          <div class="gls-term">再平衡</div>
+          <div class="gls-en">Rebalancing</div>
+          <div class="gls-def">定期將各資產的實際配置比例調整回目標比例。在趨勢市場中有損績效，但在震盪市場中可獲得「再平衡紅利」。</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="gls-section">
+      <div class="gls-section-title">Kelly 準則</div>
+      <div class="gls-grid">
+        <div class="gls-card">
+          <div class="gls-term">Kelly Fraction</div>
+          <div class="gls-en">Kelly Criterion / Optimal Leverage</div>
+          <div class="gls-def">使長期財富期望對數成長率最大化的最優槓桿倍數。超過 Kelly 值會使長期財富期望值下降，即使短期期望報酬更高。</div>
+          <div class="gls-formula">Kelly = μ / σ²（連續時間版本）</div>
+        </div>
+        <div class="gls-card">
+          <div class="gls-term">半 Kelly</div>
+          <div class="gls-en">Half Kelly</div>
+          <div class="gls-def">使用 Kelly 值的一半作為槓桿，犧牲約 25% 的長期成長率換取顯著降低的波動與回撤。實務上廣泛採用。</div>
+        </div>
+        <div class="gls-card">
+          <div class="gls-term">超越 Kelly 的風險</div>
+          <div class="gls-en">Over-Betting / Ruin Risk</div>
+          <div class="gls-def">槓桿超過 Kelly 值後，隨著時間增加，財富的幾何平均成長率反而下降，長期面臨破產風險（即使期望報酬為正）。</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="gls-section">
+      <div class="gls-section-title">現金流</div>
+      <div class="gls-grid">
+        <div class="gls-card">
+          <div class="gls-term">定期定額（DCA）</div>
+          <div class="gls-en">Dollar-Cost Averaging</div>
+          <div class="gls-def">以固定時間間隔投入固定金額，無論市場高低。長期下來可降低平均成本，避免擇時失誤，適合工薪族持續投資。</div>
+        </div>
+        <div class="gls-card">
+          <div class="gls-term">定期取款（SWR）</div>
+          <div class="gls-en">Systematic Withdrawal Rate</div>
+          <div class="gls-def">退休或提款階段按固定頻率領取固定金額。4% 法則指初始提款金額不超過本金的 4%，歷史上30年存活率較高。</div>
+        </div>
+        <div class="gls-card">
+          <div class="gls-term">保證金貸款（Margin Loan）</div>
+          <div class="gls-en">Margin Loan / Leveraged Borrowing</div>
+          <div class="gls-def">向券商借款投資，以現有部位作為抵押。利率通常為無風險利率加上利差，放大報酬的同時也放大虧損風險。本工具利率 = 當日無風險利率 + 2%。</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="gls-section">
+      <div class="gls-section-title">總體指標</div>
+      <div class="gls-grid">
+        <div class="gls-card">
+          <div class="gls-term">無風險利率</div>
+          <div class="gls-en">Risk-Free Rate (RF)</div>
+          <div class="gls-def">理論上無信用風險的投資回報，通常以短期美國國庫券（T-Bill）收益率代替。用於計算超額報酬與 Sharpe Ratio 的基準。</div>
+        </div>
+        <div class="gls-card">
+          <div class="gls-term">M2 貨幣供應量</div>
+          <div class="gls-en">M2 Money Supply</div>
+          <div class="gls-def">廣義貨幣供應量，包含現金、活期存款、定期存款等。M2 快速增長通常與資產價格上漲相關，2020–2021年的量化寬鬆使 M2 大幅膨脹。</div>
+        </div>
+        <div class="gls-card">
+          <div class="gls-term">分位數（P10 / P50 / P90）</div>
+          <div class="gls-en">Percentile</div>
+          <div class="gls-def">P50（中位數）代表有一半路徑低於此值；P10 代表最差的 10% 情境；P90 代表最好的 10% 情境。分位帶展示了結果的不確定性範圍。</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
   </div>
 
   <div class="footer">
