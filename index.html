@@ -870,7 +870,8 @@ tr:hover td{background:var(--bg-hover)}
           <div class="gls-term">Kelly Fraction</div>
           <div class="gls-en">Kelly Criterion / Optimal Leverage</div>
           <div class="gls-def">使長期財富期望對數成長率最大化的最優槓桿倍數。超過 Kelly 值會使長期財富期望值下降，即使短期期望報酬更高。</div>
-          <div class="gls-formula">Kelly = μ / σ²（連續時間版本）</div>
+          <div class="gls-formula">Kelly = (μ − r) / σ²（連續時間版本）</div>
+          <div class="gls-def" style="margin-top:6px">μ = 資產預期年化報酬率；r = 無風險利率（如短期公債殖利率）；σ² = 報酬率年化變異數。分子為<strong>超額報酬</strong>——扣除無風險利率後，才是承擔風險所獲得的真實補償。若忽略 r，在高利率環境下會高估最優槓桿。</div>
         </div>
         <div class="gls-card">
           <div class="gls-term">半 Kelly</div>
