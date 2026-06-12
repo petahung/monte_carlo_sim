@@ -2917,19 +2917,17 @@ function drawFan(res) {
       plugins:{
         legend:{labels:{color:_lc,boxWidth:10,font:{size:11},
           filter: item => !item.text.startsWith('hist-')}},
-        tooltip:{callbacks:{label:c=>{
-          const fmt = v => '¥'+Math.round(v).toLocaleString();
-          const lbl = c.dataset.label;
-          if (lbl==='總投入')     return `總投入: ${fmt(c.raw)}`;
-          if (lbl==='累積取款 P50') return `累積取款 P50: ${fmt(c.raw)}`;
-          if (lbl==='累積債務 P50') return `累積債務 P50: ${fmt(c.raw)}`;
-          if (lbl.startsWith('hist-')) {
-            const val = typeof c.raw==='object' ? c.raw.y : c.raw;
-            const s = c.dataset.histStartDate, e = c.dataset.histEndDate;
-            return `歷史路徑 ${s}～${e}: ${fmt(val)}`;
-          }
-          return `${lbl}: ${fmt(typeof c.raw==='object'?c.raw.y:c.raw)}`;
-        }}}
+        tooltip:{
+          mode: 'index', intersect: false,
+          filter: item => !item.dataset.label.startsWith('hist-'),
+          callbacks:{label:c=>{
+            const fmt = v => '$'+Math.round(v).toLocaleString();
+            const lbl = c.dataset.label;
+            if (lbl==='總投入')     return `總投入: ${fmt(c.raw)}`;
+            if (lbl==='累積取款 P50') return `累積取款 P50: ${fmt(c.raw)}`;
+            if (lbl==='累積債務 P50') return `累積債務 P50: ${fmt(c.raw)}`;
+            return `${lbl}: ${fmt(typeof c.raw==='object'?c.raw.y:c.raw)}`;
+          }}}
       }
     }
   });
@@ -3722,9 +3720,9 @@ function renderDataTab() {
     data: { datasets: [
       {
         type: 'bar', label: 'M2 年增率 %', yAxisID: 'yG',
-        data: yrList.map((y,i) => M2[+y] ? { x: yrEndDate[y], y: m2Yoy[i] } : null).filter(Boolean),
-        backgroundColor: m2Yoy.filter(v=>v!=null).map(v => v>=0 ? 'rgba(244,114,182,0.45)' : 'rgba(251,191,36,0.45)'),
-        borderColor:     m2Yoy.filter(v=>v!=null).map(v => v>=0 ? '#f472b6' : '#fbbf24'),
+        data: yrList.map((y,i) => ({ x: yrEndDate[y], y: (M2[+y] && m2Yoy[i] != null) ? m2Yoy[i] : null })),
+        backgroundColor: m2Yoy.map(v => v==null ? 'transparent' : v>=0 ? 'rgba(244,114,182,0.45)' : 'rgba(251,191,36,0.45)'),
+        borderColor:     m2Yoy.map(v => v==null ? 'transparent' : v>=0 ? '#f472b6' : '#fbbf24'),
         borderWidth: 1, order: 2, barPercentage: 1.0, categoryPercentage: 0.85,
       },
       {
