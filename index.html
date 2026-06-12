@@ -990,6 +990,62 @@ tr:hover td{background:var(--bg-hover)}
       <div class="gls-section-title">總體指標</div>
       <div class="gls-grid">
         <div class="gls-card">
+          <div class="gls-term">Nasdaq 100（NDX）</div>
+          <div class="gls-en">Nasdaq 100 Index</div>
+          <div class="gls-def">由那斯達克交易所（Nasdaq）依市值排名選出的<strong>前 100 大非金融類上市公司</strong>所組成的股票指數，1985 年推出。以科技與成長型企業為主，涵蓋 Apple、Microsoft、Nvidia、Amazon、Meta 等全球最大科技巨頭，為本工具的模擬標的。</div>
+          <div class="gls-def" style="margin-top:6px;display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:0.88em">
+            <div style="padding:6px 8px;border:1px solid var(--border);border-radius:6px">
+              <div style="font-weight:600;margin-bottom:4px">📋 指數特性</div>
+              市值加權；每季審核成分股；排除金融股（銀行、保險）；科技股權重超過 50%
+            </div>
+            <div style="padding:6px 8px;border:1px solid var(--border);border-radius:6px">
+              <div style="font-weight:600;margin-bottom:4px">📈 常見追蹤工具</div>
+              <strong>QQQ</strong>：1× ETF（最流動）<br>
+              <strong>QLD</strong>：2× 每日重置槓桿 ETF<br>
+              <strong>TQQQ</strong>：3× 每日重置槓桿 ETF<br>
+              <strong>NQ 期貨</strong>：芝商所（CME）
+            </div>
+          </div>
+          <div class="gls-def" style="margin-top:6px;color:var(--text-dim);font-size:0.85em">歷史年化報酬約 14–16%（1985 年至今），但波動極大——2000 年科技泡沫破裂後跌幅達 <strong>−83%</strong>，2022 年跌幅 <strong>−33%</strong>。高報酬伴隨高集中度與高波動，是本工具著重風險模擬的核心原因。</div>
+        </div>
+        <div class="gls-card">
+          <div class="gls-term">牛市 ＆ 熊市</div>
+          <div class="gls-en">Bull Market &amp; Bear Market</div>
+          <div class="gls-def" style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:0.88em;margin-top:6px">
+            <div style="padding:6px 8px;border:1px solid var(--border);border-radius:6px">
+              <div style="font-weight:600;margin-bottom:4px">🐂 牛市（Bull Market）</div>
+              主要指數從近期低點上漲 <strong>20% 以上</strong>，持續數月至數年。通常伴隨經濟擴張、企業獲利增長、投資人情緒樂觀。<br><br>
+              <span style="color:var(--text-dim)">NDX 最長牛市：2009–2021（約 12 年）</span>
+            </div>
+            <div style="padding:6px 8px;border:1px solid var(--border);border-radius:6px">
+              <div style="font-weight:600;margin-bottom:4px">🐻 熊市（Bear Market）</div>
+              主要指數從近期高點下跌 <strong>20% 以上</strong>。通常伴隨經濟衰退、企業獲利下滑、信用緊縮與恐慌情緒。<br><br>
+              <span style="color:var(--text-dim)">NDX 最深熊市：2000–2002（跌幅 −83%）</span>
+            </div>
+          </div>
+          <div class="gls-def" style="margin-top:6px;color:var(--text-dim);font-size:0.85em">介於牛熊之間的短暫下跌（10–20%）稱為<strong>修正（Correction）</strong>。槓桿投資者需特別留意：熊市中 2× 槓桿理論跌幅達 −40% 至 −60%，3× 槓桿可超過 −90%，足以觸發爆倉。</div>
+        </div>
+        <div class="gls-card">
+          <div class="gls-term">通貨膨脹</div>
+          <div class="gls-en">Inflation</div>
+          <div class="gls-def">貨幣購買力隨時間下降的現象——同樣金額的錢，能買到的商品與服務越來越少。通常以<strong>消費者物價指數（CPI）</strong>年增率衡量，Fed 的長期目標為 2%。</div>
+          <div class="gls-def" style="margin-top:6px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;font-size:0.88em">
+            <div style="padding:6px 8px;border:1px solid var(--border);border-radius:6px">
+              <div style="font-weight:600;margin-bottom:4px">😐 溫和通膨（1–3%）</div>
+              經濟健康運行的正常伴隨現象；股票與房地產通常跑贏通膨
+            </div>
+            <div style="padding:6px 8px;border:1px solid var(--border);border-radius:6px">
+              <div style="font-weight:600;margin-bottom:4px">😰 高通膨（＞4%）</div>
+              侵蝕實質報酬；Fed 升息對抗，導致股票估值承壓（2022 年典型案例）
+            </div>
+            <div style="padding:6px 8px;border:1px solid var(--border);border-radius:6px">
+              <div style="font-weight:600;margin-bottom:4px">😱 惡性通膨（＞50%／月）</div>
+              貨幣體系崩潰；委內瑞拉、辛巴威為近代案例；實物資產成唯一避風港
+            </div>
+          </div>
+          <div class="gls-def" style="margin-top:6px;color:var(--text-dim);font-size:0.85em"><strong>與本工具的關聯：</strong>本工具模擬的是<em>名目報酬</em>（未扣除通膨）。若長期通膨率為 3%，P50 的名目終值需再折現才是真實購買力。持有 NDX 等成長資產是歷史上對抗通膨最有效的手段之一。</div>
+        </div>
+        <div class="gls-card">
           <div class="gls-term">無風險利率</div>
           <div class="gls-en">Risk-Free Rate (RF)</div>
           <div class="gls-def">理論上無信用風險的投資回報，通常以短期美國國庫券（T-Bill）收益率代替。用於計算超額報酬與 Sharpe Ratio 的基準。</div>
