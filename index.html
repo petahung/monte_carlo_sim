@@ -3659,16 +3659,20 @@ function renderDataTab() {
   ].map(st=>`<div class="stat"><div class="stat-l">${st.l}</div><div class="stat-v">${st.v}</div><div class="stat-s">${st.s||''}</div></div>`).join('');
 
   // ── Annual NDX returns + index level (dual axis) ──────────────
+  // Only complete years (last trading day in Dec) for bar width consistency
+  const yrBarList = yrList.filter(y => yrEndDate[y]?.slice(5,7) === '12');
+  const yrBarIdx  = yrBarList.map(y => yrList.indexOf(y));
+
   if (CHARTS.ann) CHARTS.ann.destroy();
   CHARTS.ann = new Chart(document.getElementById('ann-chart'), {
     type: 'bar',
     data: { datasets: [
       {
         type: 'bar', label: '年報酬率 %', yAxisID: 'yR',
-        data: yrList.map((y,i) => ({ x: yrEndDate[y], y: yrNDX[i] })),
-        backgroundColor: yrNDX.map(v => v>=0 ? '#4ade8055' : '#ef444455'),
-        borderColor:     yrNDX.map(v => v>=0 ? '#4ade80'   : '#ef4444'),
-        borderWidth: 1, order: 2, barPercentage: 1.0, categoryPercentage: 0.85,
+        data: yrBarList.map((y,j) => ({ x: yrEndDate[y], y: yrNDX[yrBarIdx[j]] })),
+        backgroundColor: yrBarIdx.map(i => yrNDX[i]>=0 ? '#4ade8055' : '#ef444455'),
+        borderColor:     yrBarIdx.map(i => yrNDX[i]>=0 ? '#4ade80'   : '#ef4444'),
+        borderWidth: 1, order: 2, barPercentage: 1.0, categoryPercentage: 0.95,
       },
       {
         type: 'line', label: `${ASSET_META.base} 點位`, yAxisID: 'yP',
@@ -3729,10 +3733,10 @@ function renderDataTab() {
     data: { datasets: [
       {
         type: 'bar', label: 'M2 年增率 %', yAxisID: 'yG',
-        data: yrList.map((y,i) => ({ x: yrEndDate[y], y: (M2[+y] && m2Yoy[i] != null) ? m2Yoy[i] : null })),
-        backgroundColor: m2Yoy.map(v => v==null ? 'transparent' : v>=0 ? 'rgba(244,114,182,0.45)' : 'rgba(251,191,36,0.45)'),
-        borderColor:     m2Yoy.map(v => v==null ? 'transparent' : v>=0 ? '#f472b6' : '#fbbf24'),
-        borderWidth: 1, order: 2, barPercentage: 1.0, categoryPercentage: 0.85,
+        data: yrBarList.map((y,j) => ({ x: yrEndDate[y], y: (M2[+y] && m2Yoy[yrBarIdx[j]] != null) ? m2Yoy[yrBarIdx[j]] : null })),
+        backgroundColor: yrBarIdx.map(i => m2Yoy[i]==null ? 'transparent' : m2Yoy[i]>=0 ? 'rgba(244,114,182,0.45)' : 'rgba(251,191,36,0.45)'),
+        borderColor:     yrBarIdx.map(i => m2Yoy[i]==null ? 'transparent' : m2Yoy[i]>=0 ? '#f472b6' : '#fbbf24'),
+        borderWidth: 1, order: 2, barPercentage: 1.0, categoryPercentage: 0.95,
       },
       {
         type: 'line', label: 'M2 供應量（兆 USD）', yAxisID: 'yM',
