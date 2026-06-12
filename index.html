@@ -3886,11 +3886,11 @@ function kellyAnimDraw(idx) {
 
   // ── 固定 β 垂直線：β=1, 2, 3 ──
   const FIXED = [
-    { b: 1, label: 'NDX\n1×',  color: '#94a3b8' },
-    { b: 2, label: 'NDX2L\n2×', color: '#fb923c' },
-    { b: 3, label: 'NDX3L\n3×', color: '#f87171' },
+    { b: 1, name: 'NDX',   sub: '1×', color: '#94a3b8' },
+    { b: 2, name: 'NDX2L', sub: '2×', color: '#fb923c' },
+    { b: 3, name: 'NDX3L', sub: '3×', color: '#f87171' },
   ];
-  for (const { b, label, color } of FIXED) {
+  for (const { b, name, sub, color } of FIXED) {
     const x = xOf(b);
     const v = curve(b);
     // 垂直虛線
@@ -3902,9 +3902,11 @@ function kellyAnimDraw(idx) {
     // 曲線上的點
     ctx.beginPath(); ctx.arc(x, yOf(v), 4, 0, Math.PI * 2);
     ctx.fillStyle = color; ctx.fill();
-    // 標籤（多行）
-    ctx.fillStyle = color; ctx.font = '10px sans-serif'; ctx.textAlign = 'center';
-    label.split('\n').forEach((ln, li) => ctx.fillText(ln, x, PAD.t + ch + 14 + li * 11));
+    // 標籤：畫在垂直線頂端圖內，避免與 x 軸 ticker 重疊
+    ctx.fillStyle = color; ctx.font = 'bold 10px sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText(name, x, PAD.t + 14);
+    ctx.font = '10px sans-serif';
+    ctx.fillText(sub, x, PAD.t + 26);
   }
 
   // ── 軸標籤 ──
