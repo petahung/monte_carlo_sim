@@ -3876,12 +3876,12 @@ function kellyAnimDraw(idx) {
     ctx.beginPath(); ctx.arc(x, yOf(v), 4, 0, Math.PI * 2);
     ctx.fillStyle = color; ctx.fill();
     // 標籤（多行）
-    ctx.fillStyle = color; ctx.font = '9px sans-serif'; ctx.textAlign = 'center';
+    ctx.fillStyle = color; ctx.font = '10px sans-serif'; ctx.textAlign = 'center';
     label.split('\n').forEach((ln, li) => ctx.fillText(ln, x, PAD.t + ch + 14 + li * 11));
   }
 
   // ── 軸標籤 ──
-  ctx.fillStyle = '#4b5563'; ctx.font = '9px sans-serif'; ctx.textAlign = 'right';
+  ctx.fillStyle = '#4b5563'; ctx.font = '10px sans-serif'; ctx.textAlign = 'right';
   // 動態 y 軸刻度：約 5 條，對齊到整數 %
   const yStep = Math.ceil((YMAX - YMIN) / 5 * 100) / 100;
   const yStart = Math.ceil(YMIN / yStep) * yStep;
@@ -3893,7 +3893,7 @@ function kellyAnimDraw(idx) {
   }
   ctx.textAlign = 'center';
   for (let b = 0; b <= BMAX; b++) {
-    ctx.fillStyle = '#4b5563'; ctx.font = '9px sans-serif';
+    ctx.fillStyle = '#4b5563'; ctx.font = '10px sans-serif';
     ctx.fillText(b + '×', xOf(b), PAD.t + ch + 12);
   }
 
