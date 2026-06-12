@@ -3813,20 +3813,27 @@ function kellyAnimDraw(idx) {
   ctx.fillStyle = '#151e2d';
   ctx.fillRect(0, 0, W, H);
 
-  // 背景色：以 β=2（NDX2L）相對於最佳 Kelly 的位置決定
-  {
-    const ret2 = f.mu * 2 - 0.5 * f.sig2 * 4; // f(β=2)
-    let bg;
-    if (ret2 < 0) {
-      bg = 'rgba(239,68,68,0.12)';           // 紅：NDX2L 期望虧損
-    } else if (f.kOpt !== null && 2 > f.kOpt) {
-      bg = 'rgba(251,146,60,0.12)';          // 橘：超過最佳 Kelly
-    } else if (f.kOpt !== null && 2 >= f.kOpt / 2) {
-      bg = 'rgba(74,222,128,0.10)';          // 綠：半Kelly ~ 全Kelly 區間
-    } else {
-      bg = 'rgba(251,191,36,0.10)';          // 黃：低於半Kelly（保守）
+  // 背景色帶：以 kOpt 為基準畫垂直分區
+  if (f.kOpt !== null && f.kOpt > 0) {
+    const halfK  = f.kOpt / 2;          // 半 Kelly
+    const fullK  = f.kOpt;              // 全 Kelly（最佳）
+    const zeroK  = f.kOpt * 2;         // 曲線過零點 = 2μ/σ²
+    const zones = [
+      { lo: 0,      hi: halfK, color: 'rgba(251,191,36,0.15)'  }, // 黃：保守
+      { lo: halfK,  hi: fullK, color: 'rgba(74,222,128,0.15)'  }, // 綠：最佳
+      { lo: fullK,  hi: zeroK, color: 'rgba(251,146,60,0.15)'  }, // 橘：超標仍正
+      { lo: zeroK,  hi: BMAX,  color: 'rgba(239,68,68,0.18)'   }, // 紅：期望虧損
+    ];
+    for (const { lo, hi, color } of zones) {
+      const x0 = xOf(Math.max(lo, 0));
+      const x1 = xOf(Math.min(hi, BMAX));
+      if (x1 <= x0) continue;
+      ctx.fillStyle = color;
+      ctx.fillRect(x0, PAD.t, x1 - x0, ch);
     }
-    ctx.fillStyle = bg;
+  } else {
+    // kOpt ≤ 0：全域虧損
+    ctx.fillStyle = 'rgba(239,68,68,0.18)';
     ctx.fillRect(PAD.l, PAD.t, cw, ch);
   }
 
