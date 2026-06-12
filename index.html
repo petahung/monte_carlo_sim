@@ -15,7 +15,7 @@
 :root{
   --bg-base:#0a0d14;--bg-surface:#111827;--bg-card:#151e2d;--bg-input:#0f172a;
   --bg-hover:#1a2540;--bg-btn:#1f2937;--bg-btn-hover:#273549;
-  --border:#1f2937;--border-mid:#374151;--chart-grid:#1f2937;
+  --border:#1f2937;--border-mid:#374151;--grid:#1f2937;--chart-grid:#1f2937;
   --text:#cbd5e1;--text-bright:#e2e8f0;--text-dim:#94a3b8;--text-muted:#4b5563;--text-faint:#374151;
   --accent:#3b82f6;--accent-hover:#2563eb;--accent-dark:#1d4ed8;
   --accent-text:#93c5fd;--accent-title:#60a5fa;
@@ -28,7 +28,7 @@
 [data-theme="light"]{
   --bg-base:#f0f4f8;--bg-surface:#ffffff;--bg-card:#f8fafc;--bg-input:#ffffff;
   --bg-hover:#e2e8f0;--bg-btn:#e2e8f0;--bg-btn-hover:#cbd5e1;
-  --border:#e2e8f0;--border-mid:#cbd5e1;--chart-grid:rgba(0,0,0,0.045);
+  --border:#e2e8f0;--border-mid:#cbd5e1;--grid:rgba(0,0,0,0.07);--chart-grid:rgba(0,0,0,0.045);
   --text:#334155;--text-bright:#1e293b;--text-dim:#475569;--text-muted:#64748b;--text-faint:#94a3b8;
   --accent:#2563eb;--accent-hover:#1d4ed8;--accent-dark:#1e40af;
   --accent-text:#1d4ed8;--accent-title:#1d4ed8;
@@ -627,7 +627,7 @@ function applyTheme(t){
   if(typeof Chart !== 'undefined'){
     const isLight = t === 'light';
     Chart.defaults.color      = isLight ? '#475569' : '#9ca3af';
-    Chart.defaults.borderColor= isLight ? '#e2e8f0' : '#1f2937';
+    Chart.defaults.borderColor= isLight ? 'rgba(0,0,0,0.06)' : '#1f2937';
     // Re-render all live charts
     Object.values(window.CHARTS || {}).forEach(c => { if(c && c.update) c.update(); });
     // Re-draw Kelly animation canvas if active
@@ -3506,8 +3506,8 @@ function drawCompBoxPlots(all) {
   const boxOpts = (titleText, unit, yMin) => ({
     animation: false, responsive: true,
     scales: {
-      x: { ticks: { color: '#9ca3af', font: { size: 10 }, maxRotation: 30 }, grid: { color: '#1f2937' } },
-      y: { min: yMin, ticks: { color: '#4b5563', callback: v => f2(v, 1) + unit }, grid: { color: '#1f2937' } }
+      x: { ticks: { color: _lc, font: { size: 10 }, maxRotation: 30 }, grid: { color: _gc } },
+      y: { min: yMin, ticks: { color: _tc, callback: v => f2(v, 1) + unit }, grid: { color: _gc } }
     },
     plugins: {
       legend: { display: false },
