@@ -1820,7 +1820,7 @@ function renderResults(res) {
   ).join('');
 
   drawFan(res);
-  drawHist(finalV, init);
+  drawHist(finalV, init, cagrArr, mwrrArr);
   drawDD(mddArr);
   drawBetaChart(res);
 }
@@ -2095,10 +2095,10 @@ function drawFan(res) {
 }
 
 let histCache = null;
-function redrawHistScale() { if (histCache) drawHist(histCache.finalV, histCache.init); }
+function redrawHistScale() { if (histCache) drawHist(histCache.finalV, histCache.init, histCache.cagrArr, histCache.mwrrArr); }
 
-function drawHist(finalV, init) {
-  histCache = {finalV, init};
+function drawHist(finalV, init, cagrArr, mwrrArr) {
+  histCache = {finalV, init, cagrArr, mwrrArr};
   const sorted = Array.from(finalV).filter(isFinite).sort((a,b)=>a-b);
   const n = sorted.length;
   const pct = q => sorted[Math.min(Math.floor(q*n), n-1)];
@@ -2116,12 +2116,23 @@ function drawHist(finalV, init) {
   }
   const BINS = 40, bw = (maxV - minV) / BINS;
   const counts = new Array(BINS).fill(0);
-  for (const v of sorted) {
-    if (clipLo && v < minV) { counts[0]++; continue; }
-    const b = Math.floor((v - minV) / bw);
-    if (b < 0) continue;
-    counts[Math.min(b, BINS-1)]++;
+  // 每個 bin 收集 CAGR / MWRR，用於 tooltip 顯示中位數
+  const binCagr = Array.from({length:BINS}, ()=>[]);
+  const binMwrr = Array.from({length:BINS}, ()=>[]);
+  // finalV 與 cagrArr/mwrrArr 依 simulation index 對應，需同步排序
+  const indices = Array.from({length:finalV.length}, (_,i)=>i);
+  for (const i of indices) {
+    const v = finalV[i];
+    if (!isFinite(v)) continue;
+    let b;
+    if (clipLo && v < minV) { b = 0; }
+    else { b = Math.floor((v - minV) / bw); if (b < 0) continue; b = Math.min(b, BINS-1); }
+    counts[b]++;
+    if (cagrArr) binCagr[b].push(cagrArr[i]);
+    if (mwrrArr) binMwrr[b].push(mwrrArr[i]);
   }
+  // 各 bin 中位數
+  const med = arr => { if (!arr.length) return null; const s=[...arr].sort((a,b)=>a-b); return s[Math.floor(s.length/2)]; };
   const midpoints = Array.from({length:BINS}, (_,i) => minV + (i+0.5)*bw);
   const fmtK = v => v>=1e9 ? (v/1e9).toFixed(1)+'B' : v>=1e6 ? (v/1e6).toFixed(1)+'M' : v>=1e3 ? (v/1e3).toFixed(0)+'K' : v.toFixed(0);
   const labels = midpoints.map((v,i) => {
@@ -2158,7 +2169,14 @@ function drawHist(finalV, init) {
             const i = items[0].dataIndex;
             return `${fmtK(minV + i*bw)} – ${fmtK(minV + (i+1)*bw)}`;
           },
-          label: c => `${c.raw} 次 (${(c.raw/n*100).toFixed(1)}%)`
+          label: c => {
+            const i = c.dataIndex;
+            const lines = [`模擬次數：${c.raw} (${(c.raw/n*100).toFixed(1)}%)`];
+            const mc = med(binCagr[i]), mm = med(binMwrr[i]);
+            if (mc != null) lines.push(`CAGR 中位：${mc.toFixed(1)}%`);
+            if (mm != null) lines.push(`MWRR 中位：${mm.toFixed(1)}%`);
+            return lines;
+          }
         }},
         annotation:{
           annotations:{
