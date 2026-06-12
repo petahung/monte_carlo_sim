@@ -3658,9 +3658,11 @@ function renderDataTab() {
       animation: false, responsive: true,
       scales: {
         x:  { ticks:{ color:_tc, maxTicksLimit:15 }, grid:{ display:false } },
-        yP: { position:'left',  title:{ display:true, text:'指數點位', color:'#fbbf24', font:{size:10} },
+        yP: { position:'left',  afterFit(s){s.width=56},
+              title:{ display:true, text:'指數點位', color:'#fbbf24', font:{size:10} },
               ticks:{ color:'#fbbf24', callback: v=>v>=1000?f2(v/1000,1)+'K':v }, grid:{ color:_gc } },
-        yR: { position:'right', title:{ display:true, text:'年報酬率 %', color:_tc, font:{size:10} },
+        yR: { position:'right', afterFit(s){s.width=46},
+              title:{ display:true, text:'年報酬率 %', color:_tc, font:{size:10} },
               ticks:{ color:_tc, callback: v=>v+'%' }, grid:{ drawOnChartArea:false } },
       },
       plugins: {
@@ -3684,7 +3686,8 @@ function renderDataTab() {
     options: { animation:false, responsive:true,
       plugins:{ legend:{display:false} },
       scales:{ x:{ ticks:{color:_tc,maxTicksLimit:12}, grid:{display:false} },
-               y:{ ticks:{color:_tc,callback:v=>v.toFixed(1)+'%'}, grid:{color:_gc} } } }
+               y:{ afterFit(s){s.width=56}, ticks:{color:_tc,callback:v=>v.toFixed(1)+'%'}, grid:{color:_gc} } },
+      layout:{ padding:{ right:46 } } }
   });
 
   // ── M2 supply + YoY growth (dual axis) — aligned to yrList ──
@@ -3716,9 +3719,11 @@ function renderDataTab() {
       animation: false, responsive: true,
       scales: {
         x:  { ticks:{ color:_tc, maxTicksLimit:15 }, grid:{ display:false } },
-        yM: { position:'left',  title:{ display:true, text:'兆 USD', color:'#8b5cf6', font:{size:10} },
+        yM: { position:'left',  afterFit(s){s.width=56},
+              title:{ display:true, text:'兆 USD', color:'#8b5cf6', font:{size:10} },
               ticks:{ color:'#8b5cf6', callback: v=>v.toFixed(0)+'T' }, grid:{ color:_gc } },
-        yG: { position:'right', title:{ display:true, text:'年增率 %', color:'#f472b6', font:{size:10} },
+        yG: { position:'right', afterFit(s){s.width=46},
+              title:{ display:true, text:'年增率 %', color:'#f472b6', font:{size:10} },
               ticks:{ color:'#f472b6', callback: v=>v+'%' }, grid:{ drawOnChartArea:false } },
       },
       plugins: {
@@ -3814,12 +3819,13 @@ function drawKellyChart(yrListArg) {
       interaction: { mode: 'index', intersect: false },
       scales: {
         x:  { ticks: { color: _tc, maxTicksLimit: 16 }, grid: { display: false } },
-        yK: { position: 'left',
+        yK: { position: 'left', afterFit(s){s.width=56},
                title: { display: true, text: useRF ? 'Kelly Fraction（扣除 RF）' : 'Kelly Fraction（最優槓桿倍數）',
                          color: _lc, font: { size: 10 } },
                ticks: { color: _lc, callback: v => v.toFixed(1) + '×' },
                grid: { color: _gc } },
       },
+      layout: { padding: { right: 46 } },
       plugins: {
         legend: { labels: { color: _lc, boxWidth: 10, font: { size: 11 } } },
         tooltip: { callbacks: { label: c => c.raw != null ? `${c.dataset.label}: ${c.raw.toFixed(2)}×` : '—' } },
