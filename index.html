@@ -7,6 +7,7 @@
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@sgratzl/chartjs-chart-boxplot@4.4.0/build/index.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -3621,6 +3622,20 @@ function renderDataTab() {
   const yrRF    = yrList.map(y => annRFDays[y] > 0 ? annRF[y] / annRFDays[y] * 252 : 0);
   const yrClose = yrList.map(y => annClose[y]);
 
+  // Shared time-axis bounds for all 4 data-tab charts
+  const xMin = dates[0];
+  const xMax = dates[N-1];
+  // year-end date (last trading day of each year)
+  const yrEndDate = {};
+  for (let i = 0; i < N; i++) yrEndDate[dates[i].slice(0,4)] = dates[i];
+  const _xAxis = (maxTicks=15) => ({
+    type: 'time',
+    time: { unit: 'year', displayFormats: { year: 'yyyy' } },
+    min: xMin, max: xMax,
+    ticks: { color: _tc, maxTicksLimit: maxTicks, source: 'auto' },
+    grid: { display: false },
+  });
+
   // Stat cards
   const meanNDX = Array.from(ndxR).reduce((a,v)=>a+v,0)/N*252*100;
   const cagr = (Math.pow(Array.from(ndxR).reduce((a,v)=>a*(1+v),1), 1/nYrs)-1)*100;
@@ -3640,15 +3655,17 @@ function renderDataTab() {
   if (CHARTS.ann) CHARTS.ann.destroy();
   CHARTS.ann = new Chart(document.getElementById('ann-chart'), {
     type: 'bar',
-    data: { labels: yrList, datasets: [
+    data: { datasets: [
       {
-        type: 'bar', label: '年報酬率 %', data: yrNDX, yAxisID: 'yR',
+        type: 'bar', label: '年報酬率 %', yAxisID: 'yR',
+        data: yrList.map((y,i) => ({ x: yrEndDate[y], y: yrNDX[i] })),
         backgroundColor: yrNDX.map(v => v>=0 ? '#4ade8055' : '#ef444455'),
         borderColor:     yrNDX.map(v => v>=0 ? '#4ade80'   : '#ef4444'),
         borderWidth: 1, order: 2,
       },
       {
-        type: 'line', label: `${ASSET_META.base} 點位`, data: yrClose, yAxisID: 'yP',
+        type: 'line', label: `${ASSET_META.base} 點位`, yAxisID: 'yP',
+        data: yrList.map((y,i) => ({ x: yrEndDate[y], y: yrClose[i] })),
         borderColor: '#fbbf24', borderWidth: 2,
         pointRadius: 2, pointBackgroundColor: '#fbbf24',
         tension: 0.3, fill: false, order: 1,
@@ -3657,7 +3674,7 @@ function renderDataTab() {
     options: {
       animation: false, responsive: true,
       scales: {
-        x:  { ticks:{ color:_tc, maxTicksLimit:15 }, grid:{ display:false } },
+        x:  { ..._xAxis(15) },
         yP: { position:'left',  afterFit(s){s.width=56},
               title:{ display:true, text:'指數點位', color:'#fbbf24', font:{size:10} },
               ticks:{ color:'#fbbf24', callback: v=>v>=1000?f2(v/1000,1)+'K':v }, grid:{ color:_gc } },
@@ -3668,8 +3685,8 @@ function renderDataTab() {
       plugins: {
         legend: { labels:{ color:_lc, boxWidth:10, font:{size:11} } },
         tooltip: { callbacks: { label: c => c.dataset.yAxisID==='yR'
-          ? `${c.dataset.label}: ${c.raw.toFixed(1)}%`
-          : `${c.dataset.label}: ${Math.round(c.raw).toLocaleString()}` } },
+          ? `${c.dataset.label}: ${c.raw.y.toFixed(1)}%`
+          : `${c.dataset.label}: ${Math.round(c.raw.y).toLocaleString()}` } },
       },
     }
   });
@@ -3678,37 +3695,39 @@ function renderDataTab() {
   if (CHARTS.rf) CHARTS.rf.destroy();
   CHARTS.rf = new Chart(document.getElementById('rf-chart'), {
     type: 'line',
-    data: { labels: yrList, datasets: [{
-      label: '無風險年利率 %', data: yrRF,
+    data: { datasets: [{
+      label: '無風險年利率 %',
+      data: yrList.map((y,i) => ({ x: yrEndDate[y], y: yrRF[i] })),
       borderColor:'#7dd3fc', borderWidth:1.5, pointRadius:2,
       fill:true, backgroundColor:'rgba(125,211,252,0.08)', tension:0.4
     }]},
     options: { animation:false, responsive:true,
       plugins:{ legend:{display:false} },
-      scales:{ x:{ ticks:{color:_tc,maxTicksLimit:12}, grid:{display:false} },
-               y:{ afterFit(s){s.width=56}, ticks:{color:_tc,callback:v=>v.toFixed(1)+'%'}, grid:{color:_gc} } },
+      scales:{
+        x:{ ..._xAxis(15) },
+        y:{ afterFit(s){s.width=56}, ticks:{color:_tc,callback:v=>v.toFixed(1)+'%'}, grid:{color:_gc} },
+      },
       layout:{ padding:{ right:46 } } }
   });
 
-  // ── M2 supply + YoY growth (dual axis) — aligned to yrList ──
-  const m2Vals = yrList.map(y => M2[+y] ? M2[+y] / 1000 : null);
-  const m2Yoy  = yrList.map(y => {
-    if (!M2[+y] || !M2[+y-1]) return null;
-    return (M2[+y] - M2[+y-1]) / M2[+y-1] * 100;
-  });
+  // ── M2 supply + YoY growth (dual axis) ───────────────────────
+  const m2Yoy  = yrList.map(y => (!M2[+y]||!M2[+y-1]) ? null
+    : (M2[+y]-M2[+y-1])/M2[+y-1]*100);
 
   if (CHARTS.m2) CHARTS.m2.destroy();
   CHARTS.m2 = new Chart(document.getElementById('m2-chart'), {
     type: 'bar',
-    data: { labels: yrList, datasets: [
+    data: { datasets: [
       {
-        type: 'bar', label: 'M2 年增率 %', data: m2Yoy, yAxisID: 'yG',
-        backgroundColor: m2Yoy.map(v => v==null ? 'transparent' : v>=0 ? 'rgba(244,114,182,0.45)' : 'rgba(251,191,36,0.45)'),
-        borderColor:     m2Yoy.map(v => v==null ? 'transparent' : v>=0 ? '#f472b6' : '#fbbf24'),
+        type: 'bar', label: 'M2 年增率 %', yAxisID: 'yG',
+        data: yrList.map((y,i) => M2[+y] ? { x: yrEndDate[y], y: m2Yoy[i] } : null).filter(Boolean),
+        backgroundColor: m2Yoy.filter(v=>v!=null).map(v => v>=0 ? 'rgba(244,114,182,0.45)' : 'rgba(251,191,36,0.45)'),
+        borderColor:     m2Yoy.filter(v=>v!=null).map(v => v>=0 ? '#f472b6' : '#fbbf24'),
         borderWidth: 1, order: 2,
       },
       {
-        type: 'line', label: 'M2 供應量（兆 USD）', data: m2Vals, yAxisID: 'yM',
+        type: 'line', label: 'M2 供應量（兆 USD）', yAxisID: 'yM',
+        data: yrList.filter(y=>M2[+y]).map(y => ({ x: yrEndDate[y], y: M2[+y]/1000 })),
         borderColor: '#a78bfa', borderWidth: 2,
         pointRadius: 2, pointBackgroundColor: '#a78bfa',
         fill: true, backgroundColor: 'rgba(139,92,246,0.1)',
@@ -3718,7 +3737,7 @@ function renderDataTab() {
     options: {
       animation: false, responsive: true,
       scales: {
-        x:  { ticks:{ color:_tc, maxTicksLimit:15 }, grid:{ display:false } },
+        x:  { ..._xAxis(15) },
         yM: { position:'left',  afterFit(s){s.width=56},
               title:{ display:true, text:'兆 USD', color:'#8b5cf6', font:{size:10} },
               ticks:{ color:'#8b5cf6', callback: v=>v.toFixed(0)+'T' }, grid:{ color:_gc } },
@@ -3729,30 +3748,26 @@ function renderDataTab() {
       plugins: {
         legend: { labels:{ color:_lc, boxWidth:10, font:{size:11} } },
         tooltip: { callbacks: { label: c => c.dataset.yAxisID==='yM'
-          ? `M2: ${c.raw.toFixed(2)}T USD`
-          : `年增率: ${c.raw!=null?c.raw.toFixed(1)+'%':'—'}` } },
+          ? `M2: ${c.raw.y.toFixed(2)}T USD`
+          : `年增率: ${c.raw?.y!=null?c.raw.y.toFixed(1)+'%':'—'}` } },
       },
     }
   });
 
-  drawKellyChart(yrList);
+  drawKellyChart(xMin, xMax);
   initKellyAnim();
 }
 
-function drawKellyChart(yrListArg) {
+function drawKellyChart(xMinArg, xMaxArg) {
   if (!D) return;
   const { N, dates, ndxR, rfD } = D;
   const useRF = document.getElementById('kelly-rf').checked;
-  // If no yrList passed, derive from D (e.g. called from kelly-rf checkbox handler)
-  const yrList = yrListArg || (() => {
-    const ann = {};
-    for (let i = 0; i < N; i++) ann[dates[i].slice(0,4)] = true;
-    return Object.keys(ann).sort();
-  })();
+  const xMin = xMinArg || dates[0];
+  const xMax = xMaxArg || dates[N-1];
 
   const KW     = [5, 10, 15, 20];
   const KWD    = KW.map(y => y * 252);
-  const STEP   = 21;
+  const STEP   = 63; // quarterly ≈ 21 × 3
 
   // Prefix sums for O(1) window queries
   const prefS   = new Float64Array(N + 1);
@@ -3764,15 +3779,13 @@ function drawKellyChart(yrListArg) {
     prefRF[i+1] = prefRF[i] + rfD[i];   // rfD is daily decimal
   }
 
-  // Build month-resolution arrays first, then aggregate to annual
-  const kellyLabelsM = [];
-  const kellySeriesM = KW.map(() => []);
+  // Build quarterly series as {x: date, y: value} for time scale
+  const kellySeries = KW.map(() => []);
 
   for (let t = KWD[0]; t < N; t += STEP) {
-    kellyLabelsM.push(dates[t].slice(0, 7));
     for (let wi = 0; wi < KW.length; wi++) {
       const W = KWD[wi];
-      if (t < W) { kellySeriesM[wi].push(null); continue; }
+      if (t < W) continue;
       const a = t - W, b = t;
       const meanR  = (prefS[b]  - prefS[a])  / W;
       const meanRF = (prefRF[b] - prefRF[a]) / W;
@@ -3780,20 +3793,10 @@ function drawKellyChart(yrListArg) {
       const varS   = varP * W / (W - 1);
       const mu     = useRF ? meanR - meanRF : meanR;
       const k      = varS > 1e-12 ? mu / varS : null;
-      kellySeriesM[wi].push(k != null ? Math.max(-2, Math.min(8, k)) : null);
+      if (k != null)
+        kellySeries[wi].push({ x: dates[t], y: Math.max(-2, Math.min(8, k)) });
     }
   }
-
-  // Aggregate monthly → annual (last non-null value per year), aligned to yrList
-  const kellySeries = KW.map((_, wi) =>
-    yrList.map(yr => {
-      let last = null;
-      kellyLabelsM.forEach((lbl, i) => {
-        if (lbl.startsWith(yr) && kellySeriesM[wi][i] != null) last = kellySeriesM[wi][i];
-      });
-      return last;
-    })
-  );
 
   const KW_COLORS = ['#f87171', '#fb923c', '#facc15', '#4ade80'];
 
@@ -3801,9 +3804,9 @@ function drawKellyChart(yrListArg) {
   CHARTS.kelly = new Chart(document.getElementById('kelly-chart'), {
     type: 'line',
     data: {
-      labels: yrList,
       datasets: [
-        { label: '1× 基準', data: yrList.map(() => 1), yAxisID: 'yK',
+        { label: '1× 基準',
+          data: [{ x: xMin, y: 1 }, { x: xMax, y: 1 }], yAxisID: 'yK',
           borderColor: '#374151', borderWidth: 1, borderDash: [4, 3],
           pointRadius: 0, fill: false, order: 10 },
         ...KW.map((y, wi) => ({
@@ -3818,7 +3821,11 @@ function drawKellyChart(yrListArg) {
       animation: false, responsive: true,
       interaction: { mode: 'index', intersect: false },
       scales: {
-        x:  { ticks: { color: _tc, maxTicksLimit: 16 }, grid: { display: false } },
+        x:  { type: 'time',
+              time: { unit: 'year', displayFormats: { year: 'yyyy' } },
+              min: xMin, max: xMax,
+              ticks: { color: _tc, maxTicksLimit: 15, source: 'auto' },
+              grid: { display: false } },
         yK: { position: 'left', afterFit(s){s.width=56},
                title: { display: true, text: useRF ? 'Kelly Fraction（扣除 RF）' : 'Kelly Fraction（最優槓桿倍數）',
                          color: _lc, font: { size: 10 } },
@@ -3828,7 +3835,7 @@ function drawKellyChart(yrListArg) {
       layout: { padding: { right: 46 } },
       plugins: {
         legend: { labels: { color: _lc, boxWidth: 10, font: { size: 11 } } },
-        tooltip: { callbacks: { label: c => c.raw != null ? `${c.dataset.label}: ${c.raw.toFixed(2)}×` : '—' } },
+        tooltip: { callbacks: { label: c => c.raw?.y != null ? `${c.dataset.label}: ${c.raw.y.toFixed(2)}×` : '—' } },
       },
     },
   });
