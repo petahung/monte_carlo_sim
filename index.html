@@ -3715,11 +3715,11 @@ function renderDataTab() {
       fill:true, backgroundColor:'rgba(125,211,252,0.08)', tension:0.4
     }]},
     options: { animation:false, responsive:true,
+      layout:{ padding:{ right:46 } },
       plugins:{ legend:{display:false}, tooltip:{ callbacks:{ title: items => items[0]?.raw?.x?.slice(0,4) ?? '' } } },
       scales:{
         x:{ ..._xAxis(15) },
         y:{ afterFit(s){s.width=56}, ticks:{color:_tc,callback:v=>v.toFixed(1)+'%'}, grid:{color:_gc} },
-        _r:{ display:true, position:'right', afterFit(s){s.width=46}, ticks:{display:false}, grid:{drawOnChartArea:false}, border:{display:false} },
       } }
   });
 
@@ -3834,13 +3834,13 @@ function drawKellyChart(xMinArg, xMaxArg) {
     options: {
       animation: false, responsive: true,
       interaction: { mode: 'index', intersect: false },
+      layout:{ padding:{ right:46 } },
       scales: {
         x:  { type: 'time',
               time: { unit: 'year', displayFormats: { year: 'yyyy' } },
               min: xMin, max: xMax, offset: false,
               ticks: { color: _tc, maxTicksLimit: 15, source: 'auto' },
               grid: { display: false } },
-        _r:{ display:true, position:'right', afterFit(s){s.width=46}, ticks:{display:false}, grid:{drawOnChartArea:false}, border:{display:false} },
         yK: { position: 'left', afterFit(s){s.width=56},
                title: { display: true, text: useRF ? 'Kelly Fraction（扣除 RF）' : 'Kelly Fraction（最優槓桿倍數）',
                          color: _lc, font: { size: 10 } },
