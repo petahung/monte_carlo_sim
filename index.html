@@ -898,6 +898,24 @@ tr:hover td{background:var(--bg-hover)}
           <div class="gls-def" style="margin-top:6px;color:var(--text-dim);font-size:0.85em"><strong>現實挑戰：</strong>做空成本（借券費）、軋空風險（Short Squeeze）、Alpha 來源難以持續。Renaissance Technologies 的大獎章基金是此類策略的極致代表，但其演算法屬高度機密。</div>
           <div class="gls-formula">淨 Beta = Σ(多頭權重 × Beta) + Σ(空頭權重 × Beta) ≈ 0</div>
         </div>
+        <div class="gls-card">
+          <div class="gls-term">現代投資組合理論（MPT）</div>
+          <div class="gls-en">Modern Portfolio Theory — Harry Markowitz (1952)</div>
+          <div class="gls-def">Markowitz 於 1952 年提出：投資決策不應只看單一資產的報酬，而應考慮<strong>整個組合的風險與報酬關係</strong>。核心洞見是——只要資產之間的相關性小於 1，將它們組合在一起就能在相同預期報酬下<strong>降低整體波動</strong>（分散效果）。</div>
+          <div class="gls-def" style="margin-top:6px;display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:0.88em">
+            <div style="padding:6px 8px;border:1px solid var(--border);border-radius:6px">
+              <div style="font-weight:600;margin-bottom:4px">📐 效率前緣（Efficient Frontier）</div>
+              在給定風險水準下，預期報酬最高的組合集合。位於效率前緣上的組合稱為「效率投資組合」；低於前緣的組合則存在改善空間
+            </div>
+            <div style="padding:6px 8px;border:1px solid var(--border);border-radius:6px">
+              <div style="font-weight:600;margin-bottom:4px">🎯 最優投資組合</div>
+              效率前緣與投資人風險偏好曲線的切點。加入無風險資產後，切線組合（Tangency Portfolio）的 Sharpe Ratio 最高
+            </div>
+          </div>
+          <div class="gls-def" style="margin-top:6px">MPT 將分散投資從直覺提升為數學：<strong>非系統性風險</strong>（個別資產風險）可透過組合分散消除；<strong>系統性風險</strong>（市場整體風險，即 Beta）無法分散，是投資人要求風險溢酬的來源。</div>
+          <div class="gls-formula">組合波動率 σₚ = √(w₁²σ₁² + w₂²σ₂² + 2w₁w₂σ₁σ₂ρ₁₂)</div>
+          <div class="gls-def" style="margin-top:6px;color:var(--text-dim);font-size:0.85em"><strong>與本工具的關聯：</strong>本工具模擬單一資產（NDX）加槓桿，屬於 MPT 框架中的<em>集中配置</em>。MPT 的角度提醒：高集中度換取高報酬的同時，非系統性風險完全無法分散，必須依靠 Kelly 準則控制槓桿倍數來管理下行風險。</div>
+        </div>
       </div>
     </div>
 
@@ -1414,6 +1432,25 @@ f*：最優下注比例　b：賠率　p：勝率　q = 1−p</div>
           </div>
           <div class="gls-person-bio" style="margin-top:8px;color:var(--text-dim)">
             同時代的量化對沖基金巨頭還有 Ken Griffin 的 <strong>Citadel</strong>（多策略）與 D.E. Shaw——共同開創了以數學模型主導金融市場的時代。Simons 晚年投身慈善與數學教育，2024 年辭世，享年 86 歲。
+          </div>
+        </div>
+        <div class="gls-card">
+          <div class="gls-person">
+            <div class="gls-avatar">📐</div>
+            <div class="gls-person-body">
+              <div class="gls-person-name">Harry Markowitz</div>
+              <div class="gls-person-meta">1927 – 2023　美國經濟學家、諾貝爾經濟學獎得主（1990）</div>
+              <span class="gls-tag">現代投資組合理論</span><span class="gls-tag">效率前緣</span><span class="gls-tag">均值變異數最佳化</span><span class="gls-tag">分散投資</span>
+            </div>
+          </div>
+          <div class="gls-person-bio" style="margin-top:10px">
+            1952 年，年僅 25 歲的 Markowitz 在《Journal of Finance》發表論文〈Portfolio Selection〉，僅 14 頁，卻徹底改變了金融學的面貌。他首次用數學語言證明：<strong>分散投資不只是常識，而是可量化的最優策略</strong>——透過均值變異數最佳化，可以在給定風險下最大化預期報酬。
+          </div>
+          <div class="gls-person-bio" style="margin-top:8px">
+            其理論催生了效率前緣、資本市場線（CML）與後來的資本資產定價模型（CAPM）。儘管 MPT 因假設報酬率常態分布、相關性固定等限制而受到批評（Taleb 尤為直言），其架構仍是現代資產管理的理論基礎。
+          </div>
+          <div class="gls-person-bio" style="margin-top:8px;color:var(--text-dim)">
+            1990 年與 William Sharpe、Merton Miller 同獲諾貝爾經濟學獎。據聞 Markowitz 本人管理自己退休金時，並未使用均值變異數最佳化，而是直接將資金平均分配（1/N 法則）——這成為行為財務學的經典趣聞。
           </div>
         </div>
 
