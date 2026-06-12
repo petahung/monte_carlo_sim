@@ -2112,7 +2112,7 @@ function drawHist(finalV, init) {
   } else if (xrange === 'p50p90') {
     minV = p50 * 0.92; maxV = p90 * 1.08; clipLo = true; clipHi = true;
   } else {
-    minV = Math.max(0, sorted[0] * 0.98); maxV = p90 * 1.15; clipHi = true;
+    minV = Math.max(0, sorted[0] * 0.98); maxV = p90 * 1.03; clipHi = true;
   }
   const BINS = 40, bw = (maxV - minV) / BINS;
   const counts = new Array(BINS).fill(0);
