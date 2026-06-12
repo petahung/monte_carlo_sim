@@ -723,6 +723,26 @@ tr:hover td{background:var(--bg-hover)}
           <div class="gls-en">Block Bootstrap</div>
           <div class="gls-def">以連續數日（區塊）為單位抽樣，保留短期序列相關性，較能重現真實市場的連續漲跌結構。</div>
         </div>
+        <div class="gls-card">
+          <div class="gls-term">均值回歸</div>
+          <div class="gls-en">Mean Reversion</div>
+          <div class="gls-def">資產價格或報酬率在偏離長期均值後，<strong>傾向回到均值附近</strong>的現象。與賭徒謬誤不同——均值回歸是有統計基礎的結構性現象（如本益比、波動率），而非對獨立隨機事件的錯誤預期。</div>
+          <div class="gls-def" style="margin-top:6px;display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:0.88em">
+            <div style="padding:6px 8px;border:1px solid var(--border);border-radius:6px">
+              <div style="font-weight:600;margin-bottom:4px">✅ 均值回歸確實存在</div>
+              波動率（高波動後趨於平靜）<br>
+              本益比（極高後趨於回落）<br>
+              利率（長期圍繞均衡水準波動）
+            </div>
+            <div style="padding:6px 8px;border:1px solid var(--border);border-radius:6px">
+              <div style="font-weight:600;margin-bottom:4px">❌ 均值回歸不適用</div>
+              單日報酬率（接近隨機漫步）<br>
+              短期價格走勢（動能效應主導）<br>
+              → 逐日 Bootstrap 的合理前提
+            </div>
+          </div>
+          <div class="gls-def" style="margin-top:6px;color:var(--text-dim);font-size:0.85em"><strong>與本工具的關聯：</strong>逐日 Bootstrap 假設各日報酬率獨立，隱含不存在短期均值回歸。若真實市場存在明顯均值回歸，區塊 Bootstrap 會更準確；若動能效應更強，逐日版本反而更保守。</div>
+        </div>
       </div>
     </div>
 
@@ -750,6 +770,41 @@ tr:hover td{background:var(--bg-hover)}
           <div class="gls-en">Arithmetic Mean Return</div>
           <div class="gls-def">各期報酬率的簡單平均值。因波動性而高估長期財富增長，與 CAGR 的差距約為 σ²/2（變異數折扣）。</div>
           <div class="gls-formula">算術平均 ≈ CAGR + σ²/2</div>
+        </div>
+        <div class="gls-card">
+          <div class="gls-term">Sharpe Ratio ＆ Sortino Ratio</div>
+          <div class="gls-en">Risk-Adjusted Return Metrics</div>
+          <div class="gls-def">衡量每承擔一單位風險所獲得的超額報酬，用於比較不同策略的<strong>風險調整後效益</strong>。</div>
+          <div class="gls-def" style="margin-top:6px;display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:0.88em">
+            <div style="padding:6px 8px;border:1px solid var(--border);border-radius:6px">
+              <div style="font-weight:600;margin-bottom:4px">📊 Sharpe Ratio</div>
+              以<strong>總波動率</strong>（含上行與下行）為分母。上漲波動與下跌波動一視同仁——對上行潛力大的槓桿策略會低估其真實吸引力
+              <div style="margin-top:4px;font-family:monospace;font-size:0.9em">(μ − r) / σ</div>
+            </div>
+            <div style="padding:6px 8px;border:1px solid var(--border);border-radius:6px">
+              <div style="font-weight:600;margin-bottom:4px">📉 Sortino Ratio</div>
+              以<strong>下行波動率</strong>（僅計算低於目標報酬的虧損波動）為分母。對槓桿策略更公平——只懲罰「壞的」波動
+              <div style="margin-top:4px;font-family:monospace;font-size:0.9em">(μ − r) / σ<sub>下行</sub></div>
+            </div>
+          </div>
+          <div class="gls-def" style="margin-top:6px;color:var(--text-dim);font-size:0.85em">一般而言，Sharpe &gt; 1 視為良好，&gt; 2 視為優秀。槓桿策略因放大波動，Sharpe 往往低於 1×，但 Sortino 可能仍具吸引力。兩者均以超額報酬（μ − r）為分子，故無風險利率的高低會直接影響數值。</div>
+        </div>
+        <div class="gls-card">
+          <div class="gls-term">Alpha（超額報酬）</div>
+          <div class="gls-en">Alpha / Excess Return</div>
+          <div class="gls-def">投資組合相對於<strong>基準（Benchmark）</strong>的超額報酬。若大盤漲 10%、你的組合漲 13%，Alpha = +3%。Alpha 代表純粹由選股、擇時或策略能力所創造的價值，扣除市場整體漲跌（Beta 貢獻）之後的剩餘報酬。</div>
+          <div class="gls-formula">Alpha = 實際報酬 − [無風險利率 + Beta × (市場報酬 − 無風險利率)]</div>
+          <div class="gls-def" style="margin-top:6px;display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:0.88em">
+            <div style="padding:6px 8px;border:1px solid var(--border);border-radius:6px">
+              <div style="font-weight:600;margin-bottom:4px">正 Alpha（α ＞ 0）</div>
+              跑贏基準；代表策略能力或市場暫時性失效（Andrew Lo 的 AMH 視角）
+            </div>
+            <div style="padding:6px 8px;border:1px solid var(--border);border-radius:6px">
+              <div style="font-weight:600;margin-bottom:4px">負 Alpha（α ＜ 0）</div>
+              跑輸基準；主動基金扣除費用後，長期平均 Alpha 為負（支持 Fama 的 EMH）
+            </div>
+          </div>
+          <div class="gls-def" style="margin-top:6px;color:var(--text-dim);font-size:0.85em"><strong>與本工具的關聯：</strong>本工具模擬的是純 Beta 策略（持有 NDX 指數），Alpha = 0。Jim Simons 的大獎章基金是人類歷史上持續獲取正 Alpha 的最極端案例。</div>
         </div>
       </div>
     </div>
