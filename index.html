@@ -616,6 +616,83 @@ tr:hover td{background:var(--bg-hover)}
   <div style="padding:4px 0 20px">
 
     <div class="gls-section">
+      <div class="gls-section-title">如何閱讀箱形圖（Box-Whisker Plot）</div>
+
+      <!-- SVG diagram -->
+      <div style="display:flex;justify-content:center;margin-bottom:16px">
+        <svg viewBox="0 0 520 165" width="100%" style="max-width:560px;font-family:inherit">
+          <!-- left whisker: P5 cap → Q1 -->
+          <line x1="120" y1="80" x2="185" y2="80" stroke="var(--text-dim)" stroke-width="1.5"/>
+          <line x1="120" y1="67" x2="120" y2="93" stroke="var(--text-dim)" stroke-width="1.5"/>
+          <!-- right whisker: Q3 → P95 cap -->
+          <line x1="335" y1="80" x2="400" y2="80" stroke="var(--text-dim)" stroke-width="1.5"/>
+          <line x1="400" y1="67" x2="400" y2="93" stroke="var(--text-dim)" stroke-width="1.5"/>
+          <!-- outlier dots -->
+          <circle cx="104" cy="80" r="3.5" fill="var(--text-muted)" opacity="0.7"/>
+          <circle cx="418" cy="80" r="3.5" fill="var(--text-muted)" opacity="0.7"/>
+          <!-- box Q1(P25) → Q3(P75) -->
+          <rect x="185" y="50" width="150" height="60" rx="3"
+                fill="rgba(34,211,238,0.12)" stroke="var(--accent)" stroke-width="1.8"/>
+          <!-- median line at P50 (midpoint 185+75=260) -->
+          <line x1="260" y1="50" x2="260" y2="110" stroke="#4ade80" stroke-width="3"/>
+
+          <!-- top labels -->
+          <text x="104" y="44" text-anchor="middle" font-size="10" fill="var(--text-muted)">極端值</text>
+          <text x="185" y="43" text-anchor="middle" font-size="10" fill="var(--accent-text)">Q1</text>
+          <text x="260" y="38" text-anchor="middle" font-size="11" font-weight="700" fill="#4ade80">中位數</text>
+          <text x="335" y="43" text-anchor="middle" font-size="10" fill="var(--accent-text)">Q3</text>
+          <text x="418" y="44" text-anchor="middle" font-size="10" fill="var(--text-muted)">極端值</text>
+
+          <!-- bottom labels -->
+          <text x="120" y="112" text-anchor="middle" font-size="10" fill="var(--text-dim)">P5</text>
+          <text x="185" y="124" text-anchor="middle" font-size="10" fill="var(--text-dim)">P25</text>
+          <text x="260" y="124" text-anchor="middle" font-size="10" fill="var(--text-dim)">P50</text>
+          <text x="335" y="124" text-anchor="middle" font-size="10" fill="var(--text-dim)">P75</text>
+          <text x="400" y="112" text-anchor="middle" font-size="10" fill="var(--text-dim)">P95</text>
+
+          <!-- IQR brace Q1→Q3 -->
+          <line x1="185" y1="140" x2="335" y2="140" stroke="var(--accent)" stroke-width="1" stroke-dasharray="3,2"/>
+          <line x1="185" y1="136" x2="185" y2="144" stroke="var(--accent)" stroke-width="1"/>
+          <line x1="335" y1="136" x2="335" y2="144" stroke="var(--accent)" stroke-width="1"/>
+          <text x="260" y="155" text-anchor="middle" font-size="9" fill="var(--accent-text)">IQR（四分位距 = Q3 − Q1）</text>
+        </svg>
+      </div>
+
+      <div class="gls-grid">
+        <div class="gls-card">
+          <div class="gls-term">箱體（Box）</div>
+          <div class="gls-en">Interquartile Range, IQR = Q3 − Q1</div>
+          <div class="gls-def">箱體涵蓋中間 50% 的資料（Q1 至 Q3，即 P25 至 P75）。箱體越寬代表結果越分散、不確定性越高。</div>
+        </div>
+        <div class="gls-card">
+          <div class="gls-term">中位線（Median）</div>
+          <div class="gls-en">Median = P50</div>
+          <div class="gls-def">箱體內的垂直線代表中位數（P50），即恰好有一半路徑低於此值。相較平均數，中位數不受極端值影響，更能反映典型情境。</div>
+        </div>
+        <div class="gls-card">
+          <div class="gls-term">鬚（Whiskers）</div>
+          <div class="gls-en">Whiskers — P5 to P95</div>
+          <div class="gls-def">從箱體延伸出的線段，代表資料的主體範圍（本圖為 P5–P95）。落在鬚之外的點為離群值（極端情境）。</div>
+        </div>
+        <div class="gls-card">
+          <div class="gls-term">離群值（Outliers）</div>
+          <div class="gls-en">Outliers</div>
+          <div class="gls-def">落在鬚末端之外的個別資料點，代表極端的好或壞情境（最佳 5% 或最差 5%）。在槓桿模擬中，離群值可能遠離箱體，顯示肥尾風險。</div>
+        </div>
+        <div class="gls-card">
+          <div class="gls-term">偏態（Skewness）</div>
+          <div class="gls-en">Skewness</div>
+          <div class="gls-def">若中位線偏向箱體左側（右偏），代表少數極高報酬拉高了平均值；若偏向右側（左偏），代表尾部虧損風險較大。槓桿策略通常呈現右偏分布。</div>
+        </div>
+        <div class="gls-card">
+          <div class="gls-term">多組對比技巧</div>
+          <div class="gls-en">Comparing Multiple Box Plots</div>
+          <div class="gls-def">並排比較時：① 中位線高低反映典型績效；② 箱體寬窄反映不確定性；③ 右鬚長短反映上行潛力；④ 左鬚與離群值反映下行風險。</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="gls-section">
       <div class="gls-section-title">模擬方法</div>
       <div class="gls-grid">
         <div class="gls-card">
@@ -895,83 +972,6 @@ f*：最優下注比例　b：賠率　p：勝率　q = 1−p</div>
           </div>
         </div>
 
-      </div>
-    </div>
-
-    <div class="gls-section">
-      <div class="gls-section-title">如何閱讀箱形圖（Box-Whisker Plot）</div>
-
-      <!-- SVG diagram -->
-      <div style="display:flex;justify-content:center;margin-bottom:16px">
-        <svg viewBox="0 0 520 165" width="100%" style="max-width:560px;font-family:inherit">
-          <!-- left whisker: P5 cap → Q1 -->
-          <line x1="120" y1="80" x2="185" y2="80" stroke="var(--text-dim)" stroke-width="1.5"/>
-          <line x1="120" y1="67" x2="120" y2="93" stroke="var(--text-dim)" stroke-width="1.5"/>
-          <!-- right whisker: Q3 → P95 cap -->
-          <line x1="335" y1="80" x2="400" y2="80" stroke="var(--text-dim)" stroke-width="1.5"/>
-          <line x1="400" y1="67" x2="400" y2="93" stroke="var(--text-dim)" stroke-width="1.5"/>
-          <!-- outlier dots -->
-          <circle cx="104" cy="80" r="3.5" fill="var(--text-muted)" opacity="0.7"/>
-          <circle cx="418" cy="80" r="3.5" fill="var(--text-muted)" opacity="0.7"/>
-          <!-- box Q1(P25) → Q3(P75) -->
-          <rect x="185" y="50" width="150" height="60" rx="3"
-                fill="rgba(34,211,238,0.12)" stroke="var(--accent)" stroke-width="1.8"/>
-          <!-- median line at P50 (midpoint 185+75=260) -->
-          <line x1="260" y1="50" x2="260" y2="110" stroke="#4ade80" stroke-width="3"/>
-
-          <!-- top labels -->
-          <text x="104" y="44" text-anchor="middle" font-size="10" fill="var(--text-muted)">極端值</text>
-          <text x="185" y="43" text-anchor="middle" font-size="10" fill="var(--accent-text)">Q1</text>
-          <text x="260" y="38" text-anchor="middle" font-size="11" font-weight="700" fill="#4ade80">中位數</text>
-          <text x="335" y="43" text-anchor="middle" font-size="10" fill="var(--accent-text)">Q3</text>
-          <text x="418" y="44" text-anchor="middle" font-size="10" fill="var(--text-muted)">極端值</text>
-
-          <!-- bottom labels -->
-          <text x="120" y="112" text-anchor="middle" font-size="10" fill="var(--text-dim)">P5</text>
-          <text x="185" y="124" text-anchor="middle" font-size="10" fill="var(--text-dim)">P25</text>
-          <text x="260" y="124" text-anchor="middle" font-size="10" fill="var(--text-dim)">P50</text>
-          <text x="335" y="124" text-anchor="middle" font-size="10" fill="var(--text-dim)">P75</text>
-          <text x="400" y="112" text-anchor="middle" font-size="10" fill="var(--text-dim)">P95</text>
-
-          <!-- IQR brace Q1→Q3 -->
-          <line x1="185" y1="140" x2="335" y2="140" stroke="var(--accent)" stroke-width="1" stroke-dasharray="3,2"/>
-          <line x1="185" y1="136" x2="185" y2="144" stroke="var(--accent)" stroke-width="1"/>
-          <line x1="335" y1="136" x2="335" y2="144" stroke="var(--accent)" stroke-width="1"/>
-          <text x="260" y="155" text-anchor="middle" font-size="9" fill="var(--accent-text)">IQR（四分位距 = Q3 − Q1）</text>
-        </svg>
-      </div>
-
-      <div class="gls-grid">
-        <div class="gls-card">
-          <div class="gls-term">箱體（Box）</div>
-          <div class="gls-en">Interquartile Range, IQR = Q3 − Q1</div>
-          <div class="gls-def">箱體涵蓋中間 50% 的資料（Q1 至 Q3，即 P25 至 P75）。箱體越寬代表結果越分散、不確定性越高。</div>
-        </div>
-        <div class="gls-card">
-          <div class="gls-term">中位線（Median）</div>
-          <div class="gls-en">Median = P50</div>
-          <div class="gls-def">箱體內的垂直線代表中位數（P50），即恰好有一半路徑低於此值。相較平均數，中位數不受極端值影響，更能反映典型情境。</div>
-        </div>
-        <div class="gls-card">
-          <div class="gls-term">鬚（Whiskers）</div>
-          <div class="gls-en">Whiskers — P5 to P95</div>
-          <div class="gls-def">從箱體延伸出的線段，代表資料的主體範圍（本圖為 P5–P95）。落在鬚之外的點為離群值（極端情境）。</div>
-        </div>
-        <div class="gls-card">
-          <div class="gls-term">離群值（Outliers）</div>
-          <div class="gls-en">Outliers</div>
-          <div class="gls-def">落在鬚末端之外的個別資料點，代表極端的好或壞情境（最佳 5% 或最差 5%）。在槓桿模擬中，離群值可能遠離箱體，顯示肥尾風險。</div>
-        </div>
-        <div class="gls-card">
-          <div class="gls-term">偏態（Skewness）</div>
-          <div class="gls-en">Skewness</div>
-          <div class="gls-def">若中位線偏向箱體左側（右偏），代表少數極高報酬拉高了平均值；若偏向右側（左偏），代表尾部虧損風險較大。槓桿策略通常呈現右偏分布。</div>
-        </div>
-        <div class="gls-card">
-          <div class="gls-term">多組對比技巧</div>
-          <div class="gls-en">Comparing Multiple Box Plots</div>
-          <div class="gls-def">並排比較時：① 中位線高低反映典型績效；② 箱體寬窄反映不確定性；③ 右鬚長短反映上行潛力；④ 左鬚與離群值反映下行風險。</div>
-        </div>
       </div>
     </div>
 
