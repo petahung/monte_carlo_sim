@@ -652,9 +652,9 @@ const _lc = () => getComputedStyle(document.documentElement).getPropertyValue('-
 
 // Tooltip positioner: anchors to the P50 dataset's y position at the hovered x
 Chart.Tooltip.positioners.followP50 = function(items, eventPosition) {
-  const p50 = items.find(it => it.dataset.label === 'P50');
+  const p50 = items.find(it => this.chart.data.datasets[it.datasetIndex]?.label === 'P50');
   if (p50) return { x: eventPosition.x, y: p50.element.y };
-  return Chart.Tooltip.positioners.average(items, eventPosition);
+  return Chart.Tooltip.positioners.average.call(this, items, eventPosition);
 };
 
 // ╔══════════════════════════════════════════════════════════════╗
