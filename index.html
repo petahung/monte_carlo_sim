@@ -3687,18 +3687,17 @@ function renderDataTab() {
                y:{ ticks:{color:_tc,callback:v=>v.toFixed(1)+'%'}, grid:{color:_gc} } } }
   });
 
-  // ── M2 supply + YoY growth (dual axis) ───────────────────────
-  const m2Yrs = yrList.filter(y => M2[+y]);
-  const m2Vals = m2Yrs.map(y => M2[+y] / 1000);          // trillions
-  const m2Yoy  = m2Yrs.map((y,i) => {
-    if (i === 0 || !M2[+y-1]) return null;
+  // ── M2 supply + YoY growth (dual axis) — aligned to yrList ──
+  const m2Vals = yrList.map(y => M2[+y] ? M2[+y] / 1000 : null);
+  const m2Yoy  = yrList.map(y => {
+    if (!M2[+y] || !M2[+y-1]) return null;
     return (M2[+y] - M2[+y-1]) / M2[+y-1] * 100;
   });
 
   if (CHARTS.m2) CHARTS.m2.destroy();
   CHARTS.m2 = new Chart(document.getElementById('m2-chart'), {
     type: 'bar',
-    data: { labels: m2Yrs, datasets: [
+    data: { labels: yrList, datasets: [
       {
         type: 'bar', label: 'M2 年增率 %', data: m2Yoy, yAxisID: 'yG',
         backgroundColor: m2Yoy.map(v => v==null ? 'transparent' : v>=0 ? 'rgba(244,114,182,0.45)' : 'rgba(251,191,36,0.45)'),
@@ -3731,14 +3730,20 @@ function renderDataTab() {
     }
   });
 
-  drawKellyChart();
+  drawKellyChart(yrList);
   initKellyAnim();
 }
 
-function drawKellyChart() {
+function drawKellyChart(yrListArg) {
   if (!D) return;
   const { N, dates, ndxR, rfD } = D;
   const useRF = document.getElementById('kelly-rf').checked;
+  // If no yrList passed, derive from D (e.g. called from kelly-rf checkbox handler)
+  const yrList = yrListArg || (() => {
+    const ann = {};
+    for (let i = 0; i < N; i++) ann[dates[i].slice(0,4)] = true;
+    return Object.keys(ann).sort();
+  })();
 
   const KW     = [5, 10, 15, 20];
   const KWD    = KW.map(y => y * 252);
@@ -3754,24 +3759,36 @@ function drawKellyChart() {
     prefRF[i+1] = prefRF[i] + rfD[i];   // rfD is daily decimal
   }
 
-  const kellyLabels = [];
-  const kellySeries = KW.map(() => []);
+  // Build month-resolution arrays first, then aggregate to annual
+  const kellyLabelsM = [];
+  const kellySeriesM = KW.map(() => []);
 
   for (let t = KWD[0]; t < N; t += STEP) {
-    kellyLabels.push(dates[t].slice(0, 7));
+    kellyLabelsM.push(dates[t].slice(0, 7));
     for (let wi = 0; wi < KW.length; wi++) {
       const W = KWD[wi];
-      if (t < W) { kellySeries[wi].push(null); continue; }
+      if (t < W) { kellySeriesM[wi].push(null); continue; }
       const a = t - W, b = t;
       const meanR  = (prefS[b]  - prefS[a])  / W;
       const meanRF = (prefRF[b] - prefRF[a]) / W;
       const varP   = (prefS2[b] - prefS2[a]) / W - meanR * meanR;
-      const varS   = varP * W / (W - 1); // sample variance
+      const varS   = varP * W / (W - 1);
       const mu     = useRF ? meanR - meanRF : meanR;
       const k      = varS > 1e-12 ? mu / varS : null;
-      kellySeries[wi].push(k != null ? Math.max(-2, Math.min(8, k)) : null);
+      kellySeriesM[wi].push(k != null ? Math.max(-2, Math.min(8, k)) : null);
     }
   }
+
+  // Aggregate monthly → annual (last non-null value per year), aligned to yrList
+  const kellySeries = KW.map((_, wi) =>
+    yrList.map(yr => {
+      let last = null;
+      kellyLabelsM.forEach((lbl, i) => {
+        if (lbl.startsWith(yr) && kellySeriesM[wi][i] != null) last = kellySeriesM[wi][i];
+      });
+      return last;
+    })
+  );
 
   const KW_COLORS = ['#f87171', '#fb923c', '#facc15', '#4ade80'];
 
@@ -3779,9 +3796,9 @@ function drawKellyChart() {
   CHARTS.kelly = new Chart(document.getElementById('kelly-chart'), {
     type: 'line',
     data: {
-      labels: kellyLabels,
+      labels: yrList,
       datasets: [
-        { label: '1× 基準', data: kellyLabels.map(() => 1), yAxisID: 'yK',
+        { label: '1× 基準', data: yrList.map(() => 1), yAxisID: 'yK',
           borderColor: '#374151', borderWidth: 1, borderDash: [4, 3],
           pointRadius: 0, fill: false, order: 10 },
         ...KW.map((y, wi) => ({
