@@ -15,7 +15,7 @@
 :root{
   --bg-base:#0a0d14;--bg-surface:#111827;--bg-card:#151e2d;--bg-input:#0f172a;
   --bg-hover:#1a2540;--bg-btn:#1f2937;--bg-btn-hover:#273549;
-  --border:#1f2937;--border-mid:#374151;
+  --border:#1f2937;--border-mid:#374151;--chart-grid:#1f2937;
   --text:#cbd5e1;--text-bright:#e2e8f0;--text-dim:#94a3b8;--text-muted:#4b5563;--text-faint:#374151;
   --accent:#3b82f6;--accent-hover:#2563eb;--accent-dark:#1d4ed8;
   --accent-text:#93c5fd;--accent-title:#60a5fa;
@@ -28,7 +28,7 @@
 [data-theme="light"]{
   --bg-base:#f0f4f8;--bg-surface:#ffffff;--bg-card:#f8fafc;--bg-input:#ffffff;
   --bg-hover:#e2e8f0;--bg-btn:#e2e8f0;--bg-btn-hover:#cbd5e1;
-  --border:#e2e8f0;--border-mid:#cbd5e1;
+  --border:#e2e8f0;--border-mid:#cbd5e1;--chart-grid:rgba(0,0,0,0.07);
   --text:#334155;--text-bright:#1e293b;--text-dim:#475569;--text-muted:#64748b;--text-faint:#94a3b8;
   --accent:#2563eb;--accent-hover:#1d4ed8;--accent-dark:#1e40af;
   --accent-text:#1d4ed8;--accent-title:#1d4ed8;
@@ -644,7 +644,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
 // ── Chart.js theme helpers (scriptable, re-read on each draw) ──
 const _tc = () => getComputedStyle(document.documentElement).getPropertyValue('--text-muted').trim() || '#4b5563';
-const _gc = () => getComputedStyle(document.documentElement).getPropertyValue('--border').trim()     || '#1f2937';
+const _gc = () => getComputedStyle(document.documentElement).getPropertyValue('--chart-grid').trim() || '#1f2937';
 const _lc = () => getComputedStyle(document.documentElement).getPropertyValue('--text-dim').trim()   || '#9ca3af';
 
 // ╔══════════════════════════════════════════════════════════════╗
@@ -3898,8 +3898,8 @@ function kellyAnimDraw(idx) {
   const _cs = getComputedStyle(document.documentElement);
   const _T = {
     bg:      _cs.getPropertyValue('--bg-card').trim()      || '#151e2d',
-    grid:    _cs.getPropertyValue('--border').trim()       || '#1f2937',
-    grid2:   _cs.getPropertyValue('--border-mid').trim()   || '#374151',
+    grid:    _cs.getPropertyValue('--chart-grid').trim()   || '#1f2937',
+    grid2:   _cs.getPropertyValue('--chart-grid').trim()   || '#374151',
     axis:    _cs.getPropertyValue('--text-dim').trim()     || '#94a3b8',
     axisLbl: _cs.getPropertyValue('--text-muted').trim()   || '#6b7280',
     label:   _cs.getPropertyValue('--accent-title').trim() || '#60a5fa',
