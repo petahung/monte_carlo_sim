@@ -4109,13 +4109,9 @@ function kellyCanvasHover(e) {
   const yOf = v => g.PAD.t + (1 - (v - YMIN) / (YMAX - YMIN)) * g.ch;
   const cy = yOf(ret);
 
-  // 還原底圖（dpr 座標，putImageData 不受 scale 影響）
+  // 還原底圖。putImageData 不改變 transform，
+  // kellyAnimDraw 結束後 transform 仍是 scale(dpr)，直接沿用即可。
   ctx.putImageData(_kellySnapshot, 0, 0);
-
-  // 現在繪製疊加層：先 save/restore，已在 scale 狀態下畫 CSS px
-  // 但 putImageData 後 ctx.scale 已重置，需重新 scale
-  ctx.save();
-  ctx.scale(g.dpr, g.dpr);
 
   // 垂直 crosshair 線
   const cs = getComputedStyle(document.documentElement);
@@ -4175,7 +4171,8 @@ function kellyCanvasHover(e) {
   ctx.fillStyle = borderColor;
   ctx.fillText(txt2, tx + PAD_TIP, ty + 30);
 
-  ctx.restore();
+  // 清除 lineDash 避免殘留
+  ctx.setLineDash([]);
 }
 
 function kellyCanvasLeave(e) {
