@@ -550,6 +550,12 @@ tr:hover td{background:#1a2540}
           <input type="range" id="kelly-anim-scrub" min="0" value="0" style="flex:1;min-width:80px;accent-color:#3b82f6" oninput="kellyAnimScrub(this.value)">
         </div>
         <canvas id="kelly-anim-canvas" data-h="480" style="width:100%;display:block;height:480px"></canvas>
+        <div style="display:flex;flex-wrap:wrap;gap:12px;margin-top:8px;font-size:0.75rem;color:#9ca3af">
+          <span><span style="display:inline-block;width:12px;height:12px;background:rgba(251,191,36,0.5);border-radius:2px;vertical-align:middle;margin-right:4px"></span>0 → β*/2：低於半 Kelly，槓桿使用保守</span>
+          <span><span style="display:inline-block;width:12px;height:12px;background:rgba(74,222,128,0.5);border-radius:2px;vertical-align:middle;margin-right:4px"></span>β*/2 → β*：最佳操作區間</span>
+          <span><span style="display:inline-block;width:12px;height:12px;background:rgba(251,146,60,0.5);border-radius:2px;vertical-align:middle;margin-right:4px"></span>β* → 2β*：超過全 Kelly，期望報酬仍為正</span>
+          <span><span style="display:inline-block;width:12px;height:12px;background:rgba(239,68,68,0.5);border-radius:2px;vertical-align:middle;margin-right:4px"></span>2β* 以上：曲線過零，期望報酬為負</span>
+        </div>
       </div>
     </div>
   </div>
