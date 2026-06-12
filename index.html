@@ -2099,17 +2099,19 @@ function drawHist(finalV, init) {
   const pct = q => sorted[Math.min(Math.floor(q*n), n-1)];
   const p10=pct(.10), p25=pct(.25), p50=pct(.50), p75=pct(.75), p90=pct(.90);
 
-  const maxV = sorted[n-1] * 1.02;
+  // x 軸上限截在 P90 * 1.15，避免極端值把分佈壓扁；超出值歸入最後一個 bin
+  const maxV = p90 * 1.15;
   const minV = Math.max(0, sorted[0] * 0.98);
   const BINS = 40, bw = (maxV - minV) / BINS;
   const counts = new Array(BINS).fill(0);
   for (const v of sorted) {
     const b = Math.min(Math.floor((v - minV) / bw), BINS-1);
-    counts[b]++;
+    if (b >= 0) counts[b]++;
   }
   const midpoints = Array.from({length:BINS}, (_,i) => minV + (i+0.5)*bw);
-  const fmtK = v => v>=1e6 ? (v/1e6).toFixed(1)+'M' : v>=1e3 ? (v/1e3).toFixed(0)+'K' : v.toFixed(0);
-  const labels = midpoints.map(v => fmtK(v));
+  const fmtK = v => v>=1e9 ? (v/1e9).toFixed(1)+'B' : v>=1e6 ? (v/1e6).toFixed(1)+'M' : v>=1e3 ? (v/1e3).toFixed(0)+'K' : v.toFixed(0);
+  const lastLabel = `>${fmtK(maxV)}`;
+  const labels = midpoints.map((v,i) => i===BINS-1 ? lastLabel : fmtK(v));
   // 單一顏色（藍色），以初始資金為界分淺深
   const colors = midpoints.map(v => v < init ? '#f87171cc' : '#60a5facc');
 
