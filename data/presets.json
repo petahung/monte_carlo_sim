@@ -10,8 +10,8 @@
     "key": "sp500tr",
     "label": "S&P500 TR",
     "file": "sp500tr_leveraged.csv",
-    "lev2": "2x S&P500",
-    "lev3": "3x S&P500"
+    "lev2": "2x S&P500 TR",
+    "lev3": "3x S&P500 TR"
   },
   {
     "key": "gspc",
@@ -36,10 +36,10 @@
   },
   {
     "key": "ir0001_tw",
-    "label": "加權報酬指數",
+    "label": "TAIEX TR",
     "file": "ir0001_tw_leveraged.csv",
-    "lev2": "2x 加權報酬指數",
-    "lev3": "3x 加權報酬指數"
+    "lev2": "2x TAIEX TR",
+    "lev3": "3x TAIEX TR"
   },
   {
     "key": "btc-usd",
