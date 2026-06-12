@@ -3734,7 +3734,7 @@ let _kellyAnimIdx = 0;
 let _kellyAnimRaf = null;
 let _kellyAnimPlaying = false;
 let _kellyAnimLastT = 0;
-const KELLY_FPS = 6.4; // 每秒播放幾年
+const KELLY_FPS = 5.12; // 每秒播放幾年
 
 function buildKellyFrames() {
   if (!D) return;
@@ -3777,8 +3777,8 @@ function kellyAnimDraw(idx) {
   const f = _kellyFrames[idx];
   const ctx = canvas.getContext('2d');
 
-  // 解析度適配
-  const dpr = window.devicePixelRatio || 1;
+  // 解析度適配（最低 2×，避免初始縮圖模糊）
+  const dpr = Math.max(window.devicePixelRatio || 1, 2);
   const W = canvas.offsetWidth || 600;
   const H = canvas.offsetHeight || 160;
   canvas.width  = W * dpr;
@@ -3795,16 +3795,15 @@ function kellyAnimDraw(idx) {
   // x 軸範圍 β: 0 → 5
   const BMAX = 5;
   const xOf  = b  => PAD.l + (b / BMAX) * cw;
-  // y 軸動態範圍：掃描曲線在 β=0~BMAX 的實際值，加 10% padding 避免 clipping
-  let rawMin = Infinity, rawMax = -Infinity;
+  // y 軸：0% 置中，範圍對稱於 0，掃描曲線找最大絕對值加 12% padding
+  let absMax = 0.05; // 最小範圍
   for (let i = 0; i <= 200; i++) {
     const v = curve((i / 200) * BMAX);
-    if (v < rawMin) rawMin = v;
-    if (v > rawMax) rawMax = v;
+    if (Math.abs(v) > absMax) absMax = Math.abs(v);
   }
-  const pad = Math.max((rawMax - rawMin) * 0.12, 0.02);
-  const YMIN = rawMin - pad;
-  const YMAX = rawMax + pad;
+  absMax *= 1.12;
+  const YMIN = -absMax;
+  const YMAX =  absMax;
   const yOf  = v  => PAD.t + (1 - (v - YMIN) / (YMAX - YMIN)) * ch;
 
   // ── 背景 ──
