@@ -434,6 +434,11 @@ tr:hover td{background:#1a2540}
         <div class="chart-box">
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
             <span class="chart-title" style="margin:0">最終資產分佈 Histogram</span>
+            <select id="hist-xrange" style="font-size:0.75rem" onchange="redrawHistScale()">
+              <option value="full">全景</option>
+              <option value="p10p50">P10 ~ P50</option>
+              <option value="p50p90">P50 ~ P90</option>
+            </select>
             <select id="hist-yscale" style="font-size:0.75rem" onchange="redrawHistScale()">
               <option value="linear">線性軸</option>
               <option value="logarithmic">對數軸</option>
@@ -2099,19 +2104,31 @@ function drawHist(finalV, init) {
   const pct = q => sorted[Math.min(Math.floor(q*n), n-1)];
   const p10=pct(.10), p25=pct(.25), p50=pct(.50), p75=pct(.75), p90=pct(.90);
 
-  // x 軸上限截在 P90 * 1.15，避免極端值把分佈壓扁；超出值歸入最後一個 bin
-  const maxV = p90 * 1.15;
-  const minV = Math.max(0, sorted[0] * 0.98);
+  // x 軸範圍依選項決定
+  const xrange = document.getElementById('hist-xrange')?.value || 'full';
+  let minV, maxV, clipLo = false, clipHi = false;
+  if (xrange === 'p10p50') {
+    minV = p10 * 0.92; maxV = p50 * 1.08; clipLo = true; clipHi = true;
+  } else if (xrange === 'p50p90') {
+    minV = p50 * 0.92; maxV = p90 * 1.08; clipLo = true; clipHi = true;
+  } else {
+    minV = Math.max(0, sorted[0] * 0.98); maxV = p90 * 1.15; clipHi = true;
+  }
   const BINS = 40, bw = (maxV - minV) / BINS;
   const counts = new Array(BINS).fill(0);
   for (const v of sorted) {
-    const b = Math.min(Math.floor((v - minV) / bw), BINS-1);
-    if (b >= 0) counts[b]++;
+    if (clipLo && v < minV) { counts[0]++; continue; }
+    const b = Math.floor((v - minV) / bw);
+    if (b < 0) continue;
+    counts[Math.min(b, BINS-1)]++;
   }
   const midpoints = Array.from({length:BINS}, (_,i) => minV + (i+0.5)*bw);
   const fmtK = v => v>=1e9 ? (v/1e9).toFixed(1)+'B' : v>=1e6 ? (v/1e6).toFixed(1)+'M' : v>=1e3 ? (v/1e3).toFixed(0)+'K' : v.toFixed(0);
-  const lastLabel = `>${fmtK(maxV)}`;
-  const labels = midpoints.map((v,i) => i===BINS-1 ? lastLabel : fmtK(v));
+  const labels = midpoints.map((v,i) => {
+    if (i === BINS-1 && clipHi) return `>${fmtK(maxV)}`;
+    if (i === 0 && clipLo) return `<${fmtK(minV + bw)}`;
+    return fmtK(v);
+  });
   // 單一顏色（藍色），以初始資金為界分淺深
   const colors = midpoints.map(v => v < init ? '#f87171cc' : '#60a5facc');
 
