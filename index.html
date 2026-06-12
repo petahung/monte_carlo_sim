@@ -785,6 +785,51 @@ tr:hover td{background:var(--bg-hover)}
           <div class="gls-en">Survival Rate</div>
           <div class="gls-def">模擬路徑中，期末淨資產仍大於零（未歸零）的比例。在啟用定期取款或高槓桿時，存活率為關鍵風險指標。</div>
         </div>
+        <div class="gls-card">
+          <div class="gls-term">肥尾風險</div>
+          <div class="gls-en">Fat Tail Risk / Heavy Tail Risk</div>
+          <div class="gls-def">在統計學中，<strong>常態分布（鐘形曲線）的尾部極薄</strong>——極端事件發生的機率被視為近乎為零。然而真實金融市場的報酬分布呈現<strong>肥尾（Fat Tail）</strong>：極端漲跌發生的頻率遠超常態分布的預測，且幅度更大。</div>
+          <div class="gls-def" style="margin-top:8px;font-size:0.88em">
+            <svg viewBox="0 0 320 110" style="width:100%;height:auto;display:block">
+              <!-- axes -->
+              <line x1="20" y1="95" x2="300" y2="95" stroke="var(--text-dim)" stroke-width="1"/>
+              <line x1="160" y1="10" x2="160" y2="95" stroke="var(--text-dim)" stroke-width="0.5" stroke-dasharray="3,3"/>
+              <!-- normal distribution curve -->
+              <path d="M30,93 C60,92 90,80 120,45 C140,20 150,10 160,9 C170,10 180,20 200,45 C230,80 260,92 290,93"
+                    fill="none" stroke="#60a5fa" stroke-width="2"/>
+              <!-- fat tail curve -->
+              <path d="M30,88 C55,86 85,78 115,50 C138,27 150,12 160,10 C170,12 182,27 205,50 C235,78 265,86 290,88"
+                    fill="none" stroke="#f472b6" stroke-width="2" stroke-dasharray="5,3"/>
+              <!-- left fat tail highlight -->
+              <path d="M30,88 C40,87 50,87 65,86 L65,95 L30,95 Z" fill="#f472b655"/>
+              <path d="M30,93 C40,93 50,93 65,93 L65,95 L30,95 Z" fill="#60a5fa33"/>
+              <!-- right fat tail highlight -->
+              <path d="M255,86 C270,87 280,87 290,88 L290,95 L255,95 Z" fill="#f472b655"/>
+              <path d="M255,93 C270,93 280,93 290,93 L290,95 L255,95 Z" fill="#60a5fa33"/>
+              <!-- labels -->
+              <text x="160" y="7" font-size="8" fill="var(--text-dim)" text-anchor="middle">中心（均值）</text>
+              <text x="45" y="83" font-size="7.5" fill="#f472b6" text-anchor="middle">肥尾</text>
+              <text x="275" y="83" font-size="7.5" fill="#f472b6" text-anchor="middle">肥尾</text>
+              <text x="75" y="105" font-size="7.5" fill="#60a5fa" text-anchor="middle">── 常態分布</text>
+              <text x="220" y="105" font-size="7.5" fill="#f472b6" text-anchor="middle">╌ 肥尾分布</text>
+            </svg>
+          </div>
+          <div class="gls-def" style="margin-top:6px;display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:0.88em">
+            <div style="padding:6px 8px;border:1px solid var(--border);border-radius:6px">
+              <div style="font-weight:600;margin-bottom:4px">📐 常態分布假設</div>
+              3σ 事件機率 ≈ 0.3%<br>
+              6σ 事件幾乎不可能<br>
+              <span style="color:var(--text-dim)">→ VaR、CAPM 等模型的基礎假設</span>
+            </div>
+            <div style="padding:6px 8px;border:1px solid var(--border);border-radius:6px">
+              <div style="font-weight:600;margin-bottom:4px">💥 真實市場</div>
+              6σ 事件每數年就發生一次<br>
+              1987 年崩盤為 ~20σ 事件<br>
+              <span style="color:var(--text-dim)">→ Taleb 稱之為「黑天鵝」</span>
+            </div>
+          </div>
+          <div class="gls-def" style="margin-top:6px;color:var(--text-dim);font-size:0.85em"><strong>與本工具的關聯：</strong>Bootstrap 直接從歷史日報酬率抽樣，自然保留了肥尾特性與聚集波動，不假設常態分布。P5 情境即為模擬捕捉的左尾極端情境，是槓桿投資者最需關注的風險區域。</div>
+        </div>
       </div>
     </div>
 
