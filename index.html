@@ -2212,6 +2212,8 @@ function drawDD(mddArr) {
   const vals = Array.from(mddArr, v=>-v*100).sort((a,b)=>a-b); // 轉為正值，升序
   const n = vals.length;
   if (!n) return;
+  const ddPct = q => vals[Math.min(Math.floor(q*n), n-1)];
+  const p10=ddPct(.10), p50=ddPct(.50), p90=ddPct(.90);
   const minDD = Math.floor(vals[0]/5)*5 || -100;
   const BINS = 20, bw = -minDD/BINS;
   const counts = new Array(BINS).fill(0);
@@ -2224,6 +2226,7 @@ function drawDD(mddArr) {
   const colors = midpts.map(v =>
     v > 70 ? '#7f1d1dcc' : v > 50 ? '#ef4444cc' : v > 30 ? '#f97316cc' : '#fbbf24cc'
   );
+  const pLine = val => Math.min(Math.max(Math.floor((val - minDD)/bw), 0), BINS-1);
   if (CHARTS.dd) CHARTS.dd.destroy();
   CHARTS.dd = new Chart(document.getElementById('dd-chart'), {
     type:'bar',
@@ -2232,7 +2235,21 @@ function drawDD(mddArr) {
       animation:false, responsive:true,
       plugins:{
         legend:{display:false},
-        tooltip:{callbacks:{label:c=>`${c.raw} 次 (${(c.raw/n*100).toFixed(1)}%)`}}
+        tooltip:{callbacks:{
+          title: items => labels[items[0].dataIndex],
+          label: c => `${c.raw} 次 (${(c.raw/n*100).toFixed(1)}%)`
+        }},
+        annotation:{annotations:{
+          lp10:{type:'line',xMin:pLine(p10)-0.5,xMax:pLine(p10)-0.5,
+            borderColor:'#a78bfa',borderWidth:1.5,borderDash:[4,3],
+            label:{content:`P10 ${p10.toFixed(0)}%`,display:true,position:'end',color:'#a78bfa',font:{size:9},backgroundColor:'transparent'}},
+          lp50:{type:'line',xMin:pLine(p50)-0.5,xMax:pLine(p50)-0.5,
+            borderColor:'#4ade80',borderWidth:2,
+            label:{content:`P50 ${p50.toFixed(0)}%`,display:true,position:'end',color:'#4ade80',font:{size:9},backgroundColor:'transparent'}},
+          lp90:{type:'line',xMin:pLine(p90)-0.5,xMax:pLine(p90)-0.5,
+            borderColor:'#fbbf24',borderWidth:1.5,borderDash:[4,3],
+            label:{content:`P90 ${p90.toFixed(0)}%`,display:true,position:'end',color:'#fbbf24',font:{size:9},backgroundColor:'transparent'}}
+        }}
       },
       scales:{
         x:{
