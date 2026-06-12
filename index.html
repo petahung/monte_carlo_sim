@@ -544,7 +544,11 @@ tr:hover td{background:#1a2540}
       <!-- Kelly 曲線動畫 -->
       <div class="chart-box">
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap">
-          <span class="chart-title" style="margin:0">Kelly 曲線時變動畫（5年滾動）</span>
+          <span class="chart-title" style="margin:0">Kelly 曲線時變動畫</span>
+          <select id="kelly-win" style="font-size:0.75rem" onchange="initKellyAnim()">
+            <option value="5">5年滾動</option>
+            <option value="10">10年滾動</option>
+          </select>
           <button id="kelly-anim-btn" onclick="kellyAnimToggle()" style="font-size:0.75rem;padding:2px 10px;background:#1f2937;border:1px solid #374151;border-radius:4px;color:#cbd5e1;cursor:pointer">▶ 播放</button>
           <span id="kelly-anim-year" style="font-size:0.8rem;color:#60a5fa;font-weight:600;min-width:50px"></span>
           <input type="range" id="kelly-anim-scrub" min="0" value="0" style="flex:1;min-width:80px;accent-color:#3b82f6" oninput="kellyAnimScrub(this.value)">
@@ -3747,7 +3751,8 @@ const KELLY_FPS = 4.096; // 每秒播放幾年
 function buildKellyFrames() {
   if (!D) return;
   const { N, dates, ndxR, rfD } = D;
-  const WIN = 5 * 252; // 5年滾動窗口（交易日）
+  const years = parseInt(document.getElementById('kelly-win')?.value || 5);
+  const WIN = years * 252; // 滾動窗口（交易日）
 
   // prefix sums
   const prefS  = new Float64Array(N + 1);
@@ -3986,6 +3991,13 @@ function kellyAnimScrub(val) {
 }
 
 function initKellyAnim() {
+  // 停止現有播放
+  if (_kellyAnimPlaying) {
+    _kellyAnimPlaying = false;
+    cancelAnimationFrame(_kellyAnimRaf);
+    const btn = document.getElementById('kelly-anim-btn');
+    if (btn) btn.textContent = '▶ 播放';
+  }
   _kellyFrames = buildKellyFrames();
   if (!_kellyFrames || !_kellyFrames.length) return;
   const scrub = document.getElementById('kelly-anim-scrub');
