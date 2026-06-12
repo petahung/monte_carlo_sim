@@ -3661,7 +3661,7 @@ function renderDataTab() {
         data: yrList.map((y,i) => ({ x: yrEndDate[y], y: yrNDX[i] })),
         backgroundColor: yrNDX.map(v => v>=0 ? '#4ade8055' : '#ef444455'),
         borderColor:     yrNDX.map(v => v>=0 ? '#4ade80'   : '#ef4444'),
-        borderWidth: 1, order: 2,
+        borderWidth: 1, order: 2, barPercentage: 1.0, categoryPercentage: 0.85,
       },
       {
         type: 'line', label: `${ASSET_META.base} 點位`, yAxisID: 'yP',
@@ -3723,7 +3723,7 @@ function renderDataTab() {
         data: yrList.map((y,i) => M2[+y] ? { x: yrEndDate[y], y: m2Yoy[i] } : null).filter(Boolean),
         backgroundColor: m2Yoy.filter(v=>v!=null).map(v => v>=0 ? 'rgba(244,114,182,0.45)' : 'rgba(251,191,36,0.45)'),
         borderColor:     m2Yoy.filter(v=>v!=null).map(v => v>=0 ? '#f472b6' : '#fbbf24'),
-        borderWidth: 1, order: 2,
+        borderWidth: 1, order: 2, barPercentage: 1.0, categoryPercentage: 0.85,
       },
       {
         type: 'line', label: 'M2 供應量（兆 USD）', yAxisID: 'yM',
