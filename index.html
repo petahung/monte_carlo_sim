@@ -650,6 +650,13 @@ const _tc = () => getComputedStyle(document.documentElement).getPropertyValue('-
 const _gc = () => getComputedStyle(document.documentElement).getPropertyValue('--chart-grid').trim() || '#1f2937';
 const _lc = () => getComputedStyle(document.documentElement).getPropertyValue('--text-dim').trim()   || '#9ca3af';
 
+// Tooltip positioner: anchors to the P50 dataset's y position at the hovered x
+Chart.Tooltip.positioners.followP50 = function(items, eventPosition) {
+  const p50 = items.find(it => it.dataset.label === 'P50');
+  if (p50) return { x: eventPosition.x, y: p50.element.y };
+  return Chart.Tooltip.positioners.average(items, eventPosition);
+};
+
 // ╔══════════════════════════════════════════════════════════════╗
 //   DATA
 // ╚══════════════════════════════════════════════════════════════╝
@@ -2918,7 +2925,7 @@ function drawFan(res) {
         legend:{labels:{color:_lc,boxWidth:10,font:{size:11},
           filter: item => !item.text.startsWith('hist-')}},
         tooltip:{
-          mode: 'index', intersect: false,
+          mode: 'index', intersect: false, position: 'followP50',
           filter: item => !item.dataset.label.startsWith('hist-'),
           callbacks:{label:c=>{
             const fmt = v => '$'+Math.round(v).toLocaleString();
