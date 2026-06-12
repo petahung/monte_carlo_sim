@@ -3734,7 +3734,7 @@ let _kellyAnimIdx = 0;
 let _kellyAnimRaf = null;
 let _kellyAnimPlaying = false;
 let _kellyAnimLastT = 0;
-const KELLY_FPS = 8; // 每秒播放幾年
+const KELLY_FPS = 6.4; // 每秒播放幾年
 
 function buildKellyFrames() {
   if (!D) return;
@@ -3795,8 +3795,16 @@ function kellyAnimDraw(idx) {
   // x 軸範圍 β: 0 → 5
   const BMAX = 5;
   const xOf  = b  => PAD.l + (b / BMAX) * cw;
-  // y 軸範圍：-0.4 → +0.4 (年化報酬)
-  const YMIN = -0.4, YMAX = 0.4;
+  // y 軸動態範圍：掃描曲線在 β=0~BMAX 的實際值，加 10% padding 避免 clipping
+  let rawMin = Infinity, rawMax = -Infinity;
+  for (let i = 0; i <= 200; i++) {
+    const v = curve((i / 200) * BMAX);
+    if (v < rawMin) rawMin = v;
+    if (v > rawMax) rawMax = v;
+  }
+  const pad = Math.max((rawMax - rawMin) * 0.12, 0.02);
+  const YMIN = rawMin - pad;
+  const YMAX = rawMax + pad;
   const yOf  = v  => PAD.t + (1 - (v - YMIN) / (YMAX - YMIN)) * ch;
 
   // ── 背景 ──
@@ -3810,16 +3818,12 @@ function kellyAnimDraw(idx) {
     ctx.fillRect(PAD.l, PAD.t, cw, ch);
   }
 
-  // ── grid 線 ──
+  // ── 垂直 grid 線 ──
   ctx.strokeStyle = '#1f2937';
   ctx.lineWidth = 1;
   for (let b = 0; b <= BMAX; b++) {
     const x = xOf(b);
     ctx.beginPath(); ctx.moveTo(x, PAD.t); ctx.lineTo(x, PAD.t + ch); ctx.stroke();
-  }
-  for (const v of [-0.3, -0.2, -0.1, 0, 0.1, 0.2, 0.3]) {
-    const y = yOf(v);
-    ctx.beginPath(); ctx.moveTo(PAD.l, y); ctx.lineTo(PAD.l + cw, y); ctx.stroke();
   }
 
   // ── 零線 ──
@@ -3833,7 +3837,7 @@ function kellyAnimDraw(idx) {
   ctx.beginPath();
   for (let i = 0; i <= STEPS; i++) {
     const b = (i / STEPS) * BMAX;
-    const v = Math.max(YMIN, Math.min(YMAX, curve(b)));
+    const v = curve(b);
     const x = xOf(b), y = yOf(v);
     i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
   }
@@ -3860,7 +3864,7 @@ function kellyAnimDraw(idx) {
   ];
   for (const { b, label, color } of FIXED) {
     const x = xOf(b);
-    const v = Math.max(YMIN, Math.min(YMAX, curve(b)));
+    const v = curve(b);
     // 垂直虛線
     ctx.setLineDash([4, 3]);
     ctx.strokeStyle = color + '99';
@@ -3877,8 +3881,14 @@ function kellyAnimDraw(idx) {
 
   // ── 軸標籤 ──
   ctx.fillStyle = '#4b5563'; ctx.font = '9px sans-serif'; ctx.textAlign = 'right';
-  for (const v of [-0.3, -0.2, -0.1, 0, 0.1, 0.2, 0.3]) {
-    ctx.fillText((v * 100).toFixed(0) + '%', PAD.l - 4, yOf(v) + 3);
+  // 動態 y 軸刻度：約 5 條，對齊到整數 %
+  const yStep = Math.ceil((YMAX - YMIN) / 5 * 100) / 100;
+  const yStart = Math.ceil(YMIN / yStep) * yStep;
+  for (let v = yStart; v <= YMAX + 1e-9; v += yStep) {
+    const y = yOf(v);
+    ctx.fillText((v * 100).toFixed(0) + '%', PAD.l - 4, y + 3);
+    ctx.strokeStyle = '#1f2937'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(PAD.l, y); ctx.lineTo(PAD.l + cw, y); ctx.stroke();
   }
   ctx.textAlign = 'center';
   for (let b = 0; b <= BMAX; b++) {
