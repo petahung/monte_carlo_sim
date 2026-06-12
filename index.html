@@ -2915,6 +2915,7 @@ function drawFan(res) {
     data:{ labels, datasets },
     options:{
       animation:false, responsive:true, maintainAspectRatio:true,
+      interaction:{ mode:'index', intersect:false },
       scales:{
         x:{ ticks:{color:_tc,maxTicksLimit:10}, grid:{color:_gc} },
         y:{ type:isLog?'logarithmic':'linear',
@@ -2925,7 +2926,7 @@ function drawFan(res) {
         legend:{labels:{color:_lc,boxWidth:10,font:{size:11},
           filter: item => !item.text.startsWith('hist-')}},
         tooltip:{
-          mode: 'index', intersect: false, position: 'followP50',
+          position: 'followP50',
           filter: item => !item.dataset.label.startsWith('hist-'),
           callbacks:{label:c=>{
             const fmt = v => '$'+Math.round(v).toLocaleString();
