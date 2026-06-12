@@ -3751,24 +3751,27 @@ function buildKellyFrames() {
     prefS2[i+1] = prefS2[i] + ndxR[i] * ndxR[i];
   }
 
-  // 逐年（每年最後一個交易日）建立 frame
+  // 每季（約 63 個交易日）建立一個 frame
+  const QUARTER = Math.round(252 / 4); // ≈63
   const frames = [];
-  let prevYear = null;
+  let prevQ = null;
   for (let t = WIN; t < N; t++) {
-    const yr = parseInt(dates[t].slice(0, 4));
-    if (yr === prevYear) continue;
-    prevYear = yr;
+    const yr  = parseInt(dates[t].slice(0, 4));
+    const mo  = parseInt(dates[t].slice(5, 7));
+    const q   = yr * 4 + Math.floor((mo - 1) / 3); // 唯一季度 key
+    if (q === prevQ) continue;
+    prevQ = q;
 
     const a = t - WIN, b = t;
     const meanR = (prefS[b]  - prefS[a])  / WIN;
     const varP  = (prefS2[b] - prefS2[a]) / WIN - meanR * meanR;
     const varS  = varP * WIN / (WIN - 1);
-    // daily → annual: mu_ann ≈ meanR*252, sigma2_ann ≈ varS*252
-    const mu  = meanR * 252;
+    const mu   = meanR * 252;
     const sig2 = varS * 252;
     const kOpt = sig2 > 1e-8 ? mu / sig2 : null;
+    const qLabel = `${yr} Q${Math.floor((mo - 1) / 3) + 1}`;
 
-    frames.push({ year: yr, mu, sig2, kOpt });
+    frames.push({ year: yr, qLabel, mu, sig2, kOpt });
   }
   return frames;
 }
@@ -3923,7 +3926,7 @@ function kellyAnimDraw(idx) {
 
   // ── 年份 + 統計 ──
   ctx.fillStyle = '#60a5fa'; ctx.font = 'bold 14px sans-serif'; ctx.textAlign = 'left';
-  ctx.fillText(f.year + '年', PAD.l + 6, PAD.t + 16);
+  ctx.fillText(f.qLabel || f.year + '年', PAD.l + 6, PAD.t + 16);
   ctx.fillStyle = '#9ca3af'; ctx.font = '10px sans-serif';
   ctx.fillText(`μ=${(f.mu*100).toFixed(1)}%  σ=${(Math.sqrt(f.sig2)*100).toFixed(1)}%`, PAD.l + 6, PAD.t + 30);
 
@@ -3931,7 +3934,7 @@ function kellyAnimDraw(idx) {
   const scrub = document.getElementById('kelly-anim-scrub');
   const yearLbl = document.getElementById('kelly-anim-year');
   if (scrub) scrub.value = idx;
-  if (yearLbl) yearLbl.textContent = f.year + '年';
+  if (yearLbl) yearLbl.textContent = f.qLabel || f.year + '年';
 }
 
 function kellyAnimStep(ts) {
