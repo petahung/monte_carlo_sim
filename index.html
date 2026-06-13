@@ -2070,67 +2070,61 @@ f*：最優下注比例　b：賠率　p：勝率　q = 1−p</div>
             </div>
           </div>
           <div style="margin:10px 0 2px">
-            <!--
-              Gaussian bell: 4-segment cubic bezier, centered on diagonal (slope=-0.44).
-              Formula per half: M cx,cy-dy C cx,cy-0.7dy  cx+amp,cy-0.2dy  cx+amp,cy
-                                           C cx+amp,cy+0.2dy  cx,cy+0.7dy  cx,cy+dy  (then mirror left)
-              Diagonal through (90,144),(170,109),(255,72),(340,35).
-            -->
-            <svg viewBox="0 0 420 210" style="width:100%;height:auto;display:block">
+            <!-- Bell paths computed by JS below using true gaussian PDF exp(-(y-cy)²/2σ²)·amp -->
+            <!-- Diagonal slope ≈ -0.352, through (90,153)(170,125)(255,95)(340,65) -->
+            <svg id="hm-svg" viewBox="0 0 420 210" style="width:100%;height:auto;display:block">
               <defs>
-                <clipPath id="hm-clip"><rect x="0" y="6" width="420" height="204"/></clipPath>
+                <clipPath id="hm-clip"><rect x="40" y="6" width="376" height="176"/></clipPath>
               </defs>
+              <!-- axes (outside clip so labels stay fully visible) -->
+              <line x1="40" y1="182" x2="412" y2="182" stroke="var(--text-dim)" stroke-width="1.5"/>
+              <line x1="40" y1="8"   x2="40"  y2="182" stroke="var(--text-dim)" stroke-width="1.5"/>
+              <text x="410" y="196" font-size="11" fill="var(--text-dim)" text-anchor="end">風險</text>
+              <text x="20"  y="97"  font-size="11" fill="var(--text-dim)" text-anchor="middle" transform="rotate(-90,20,97)">報酬</text>
               <g clip-path="url(#hm-clip)">
-                <!-- axes -->
-                <line x1="40" y1="182" x2="412" y2="182" stroke="var(--text-dim)" stroke-width="1.5"/>
-                <line x1="40" y1="8"   x2="40"  y2="182" stroke="var(--text-dim)" stroke-width="1.5"/>
-                <text x="410" y="195" font-size="11" fill="var(--text-dim)" text-anchor="end">風險 →</text>
-                <text x="20"  y="97"  font-size="11" fill="var(--text-dim)" text-anchor="middle" transform="rotate(-90,20,97)">報酬 ↑</text>
-
-                <!-- Bell 1: cx=90  cy=144 dy=14 amp=10 -->
-                <path d="M 90,130 C 90,134 100,141 100,144 C 100,147 90,154 90,158
-                         C 90,154 80,147 80,144 C 80,141 90,134 90,130 Z"
-                      fill="var(--bg-input)" stroke="var(--text-dim)" stroke-width="1"/>
-                <!-- Bell 2: cx=170 cy=109 dy=22 amp=17 -->
-                <path d="M 170,87 C 170,94 187,105 187,109 C 187,113 170,124 170,131
-                         C 170,124 153,113 153,109 C 153,105 170,94 170,87 Z"
-                      fill="var(--bg-input)" stroke="var(--text-dim)" stroke-width="1"/>
-                <!-- Bell 3: cx=255 cy=72  dy=33 amp=26 -->
-                <path d="M 255,39 C 255,50 281,65 281,72 C 281,79 255,95 255,105
-                         C 255,95 229,79 229,72 C 229,65 255,50 255,39 Z"
-                      fill="var(--bg-input)" stroke="var(--text-dim)" stroke-width="1"/>
-                <!-- Bell 4: cx=340 cy=35  dy=44 amp=34 (top clips) -->
-                <path d="M 340,-9 C 340,4 374,26 374,35 C 374,44 340,66 340,79
-                         C 340,66 306,44 306,35 C 306,26 340,4 340,-9 Z"
-                      fill="var(--bg-input)" stroke="var(--text-dim)" stroke-width="1.2"/>
-
-                <!-- diagonal — thick solid, over bells -->
-                <line x1="40" y1="166" x2="390" y2="12" stroke="var(--text-bright)" stroke-width="3"/>
-
-                <!-- dots at bell centers on diagonal -->
-                <circle cx="90"  cy="144" r="3.5" fill="var(--text-bright)"/>
-                <circle cx="170" cy="109" r="3.5" fill="var(--text-bright)"/>
-                <circle cx="255" cy="72"  r="3.5" fill="var(--text-bright)"/>
-                <circle cx="340" cy="35"  r="3.5" fill="var(--text-bright)"/>
-
-                <!-- bell 4 range bracket + labels -->
-                <line x1="378" y1="9"  x2="378" y2="79" stroke="#fbbf24" stroke-width="1.2" stroke-dasharray="3,2"/>
-                <text x="383" y="22" font-size="9" fill="#4ade80">↑ 高報酬</text>
-                <text x="383" y="74" font-size="9" fill="#ef4444">↓ 虧損</text>
-                <text x="383" y="40" font-size="8.5" fill="#fbbf24">可能</text>
-                <text x="383" y="51" font-size="8.5" fill="#fbbf24">結果</text>
-                <text x="383" y="62" font-size="8.5" fill="#fbbf24">範圍</text>
-
-                <!-- diagonal label (rotated) -->
-                <text x="158" y="126" font-size="9" fill="var(--text-dim)" text-anchor="middle"
-                      transform="rotate(-24,158,126)">最常見結果</text>
-
+                <!-- bell paths — d attribute filled by inline script -->
+                <path id="hm-bell1" fill="var(--bg-input)" stroke="var(--text-dim)" stroke-width="1"/>
+                <path id="hm-bell2" fill="var(--bg-input)" stroke="var(--text-dim)" stroke-width="1"/>
+                <path id="hm-bell3" fill="var(--bg-input)" stroke="var(--text-dim)" stroke-width="1"/>
+                <path id="hm-bell4" fill="var(--bg-input)" stroke="var(--text-dim)" stroke-width="1.2"/>
+                <!-- diagonal — thick solid, over bells; (40,171)→(390,47), slope≈-0.352 -->
+                <line x1="40" y1="171" x2="390" y2="47" stroke="var(--text-bright)" stroke-width="3"/>
+                <!-- dots at bell centers -->
+                <circle cx="90"  cy="153" r="3.5" fill="var(--text-bright)"/>
+                <circle cx="170" cy="125" r="3.5" fill="var(--text-bright)"/>
+                <circle cx="255" cy="95"  r="3.5" fill="var(--text-bright)"/>
+                <circle cx="340" cy="65"  r="3.5" fill="var(--text-bright)"/>
+                <!-- bell 4 range: full ±3.5σ bracket -->
+                <line x1="378" y1="8"   x2="378" y2="180" stroke="#fbbf24" stroke-width="1" stroke-dasharray="3,2"/>
+                <text x="382" y="16"  font-size="9" fill="#4ade80">↑高報酬</text>
+                <text x="382" y="178" font-size="9" fill="#ef4444">↓虧損</text>
+                <text x="408" y="94"  font-size="9" fill="#fbbf24" text-anchor="middle" transform="rotate(90,408,94)">可能結果範圍</text>
+                <!-- diagonal label -->
+                <text x="212" y="118" font-size="9" fill="var(--text-dim)" text-anchor="middle" transform="rotate(-19,212,118)">最常見結果</text>
                 <!-- insight box -->
-                <rect x="48" y="20" width="148" height="38" rx="4" fill="var(--bg-input)" opacity="0.93"/>
-                <text x="122" y="34" font-size="9.5" fill="var(--text-bright)" text-anchor="middle" font-weight="600">高風險 ≠ 保證高報酬</text>
-                <text x="122" y="50" font-size="9"   fill="var(--text-dim)"    text-anchor="middle">高風險 = 結果離散度更大</text>
+                <rect x="46" y="22" width="148" height="38" rx="4" fill="var(--bg-input)" opacity="0.93"/>
+                <text x="120" y="36" font-size="9.5" fill="var(--text-bright)" text-anchor="middle" font-weight="600">高風險 ≠ 保證高報酬</text>
+                <text x="120" y="50" font-size="9"   fill="var(--text-dim)"    text-anchor="middle">高風險 = 結果離散度更大</text>
               </g>
             </svg>
+            <script>(function(){
+              function gPath(cx,cy,s,a){
+                var n=80,r=3.5*s,rpts=[],lpts=[];
+                for(var i=0;i<=n;i++){
+                  var y=cy-r+2*r*i/n;
+                  var w=a*Math.exp(-(y-cy)*(y-cy)/(2*s*s));
+                  rpts.push([(cx+w).toFixed(1),y.toFixed(1)]);
+                  lpts.unshift([(cx-w).toFixed(1),y.toFixed(1)]);
+                }
+                return 'M '+rpts.concat(lpts).map(function(p){return p[0]+','+p[1];}).join(' L ')+' Z';
+              }
+              [['hm-bell1',90,153,12,10],['hm-bell2',170,125,20,16],
+               ['hm-bell3',255,95,30,24],['hm-bell4',340,65,42,34]]
+              .forEach(function(b){
+                var el=document.getElementById(b[0]);
+                if(el) el.setAttribute('d',gPath(b[1],b[2],b[3],b[4]));
+              });
+            })();</script>
           </div>
           <div class="gls-person-bio" style="margin-top:8px">
             另一核心概念是<strong>第二層思維（Second-Level Thinking）</strong>：第一層思維說「這是好公司，買入」；第二層思維說「這是好公司，但所有人都知道，所以股價已反映，現在買划算嗎？」——與 Fama 的 EMH 形成有趣對話。
