@@ -2065,60 +2065,80 @@ f*：最優下注比例　b：賠率　p：勝率　q = 1−p</div>
             </div>
           </div>
           <div style="margin:10px 0 2px">
-            <!-- Bell paths computed by JS below using true gaussian PDF exp(-(y-cy)²/2σ²)·amp -->
-            <!-- Diagonal slope ≈ -0.352, through (90,153)(170,125)(255,95)(340,65) -->
-            <svg id="hm-svg" viewBox="0 0 420 210" style="width:100%;height:auto;display:block">
+            <!--
+              Investment Styles (Howard Marks) — Chinese version.
+              Diagonal: (55,265)→(465,95), slope≈-0.414.
+              Bell centers on diagonal: (135,232),(220,197),(315,157),(415,116).
+              Bell 4 asymmetric: sUp=100 (long upper tail), sDown=55.
+              JS computes true gaussian PDF paths at runtime.
+            -->
+            <svg id="hm-svg" viewBox="0 0 500 330" style="width:100%;height:auto;display:block">
               <defs>
-                <clipPath id="hm-clip"><rect x="40" y="6" width="376" height="176"/></clipPath>
+                <!-- clip to chart area only; title + labels outside -->
+                <clipPath id="hm-clip"><rect x="55" y="35" width="415" height="235"/></clipPath>
               </defs>
-              <!-- axes (outside clip so labels stay fully visible) -->
-              <line x1="40" y1="182" x2="412" y2="182" stroke="var(--text-dim)" stroke-width="1.5"/>
-              <line x1="40" y1="8"   x2="40"  y2="182" stroke="var(--text-dim)" stroke-width="1.5"/>
-              <text x="410" y="196" font-size="11" fill="var(--text-dim)" text-anchor="end">風險</text>
-              <text x="20"  y="97"  font-size="11" fill="var(--text-dim)" text-anchor="middle" transform="rotate(-90,20,97)">報酬</text>
+              <!-- Title with underline -->
+              <text x="248" y="24" font-size="15" fill="var(--text-bright)" text-anchor="middle" font-weight="600">投資風格</text>
+              <line x1="192" y1="28" x2="304" y2="28" stroke="var(--text-bright)" stroke-width="1.2"/>
+              <!-- Axes -->
+              <line x1="55" y1="270" x2="472" y2="270" stroke="var(--text-dim)" stroke-width="1.5"/>
+              <line x1="55" y1="35"  x2="55"  y2="270" stroke="var(--text-dim)" stroke-width="1.5"/>
+              <!-- Origin -->
+              <text x="48" y="275" font-size="11" fill="var(--text-dim)" text-anchor="end">0</text>
+              <!-- Axis labels -->
+              <text x="470" y="284" font-size="11" fill="var(--text-dim)" text-anchor="end">風險</text>
+              <text x="22"  y="155" font-size="11" fill="var(--text-dim)" text-anchor="middle" transform="rotate(-90,22,155)">報酬</text>
+              <!-- Chart content (clipped) -->
               <g clip-path="url(#hm-clip)">
-                <!-- bell paths — d attribute filled by inline script -->
-                <path id="hm-bell1" fill="var(--bg-input)" stroke="var(--text-dim)" stroke-width="1"/>
-                <path id="hm-bell2" fill="var(--bg-input)" stroke="var(--text-dim)" stroke-width="1"/>
-                <path id="hm-bell3" fill="var(--bg-input)" stroke="var(--text-dim)" stroke-width="1"/>
+                <!-- bell paths — filled by JS -->
+                <path id="hm-bell1" fill="var(--bg-input)" stroke="var(--text-dim)" stroke-width="1.2"/>
+                <path id="hm-bell2" fill="var(--bg-input)" stroke="var(--text-dim)" stroke-width="1.2"/>
+                <path id="hm-bell3" fill="var(--bg-input)" stroke="var(--text-dim)" stroke-width="1.2"/>
                 <path id="hm-bell4" fill="var(--bg-input)" stroke="var(--text-dim)" stroke-width="1.2"/>
-                <!-- diagonal — thick solid, over bells; (40,171)→(390,47), slope≈-0.352 -->
-                <line x1="40" y1="171" x2="390" y2="47" stroke="var(--text-bright)" stroke-width="3"/>
-                <!-- dots at bell centers -->
-                <circle cx="90"  cy="153" r="3.5" fill="var(--text-bright)"/>
-                <circle cx="170" cy="125" r="3.5" fill="var(--text-bright)"/>
-                <circle cx="255" cy="95"  r="3.5" fill="var(--text-bright)"/>
-                <circle cx="340" cy="65"  r="3.5" fill="var(--text-bright)"/>
-                <!-- bell 4 range: full ±3.5σ bracket -->
-                <line x1="378" y1="8"   x2="378" y2="180" stroke="#fbbf24" stroke-width="1" stroke-dasharray="3,2"/>
-                <text x="382" y="16"  font-size="9" fill="#4ade80">↑高報酬</text>
-                <text x="382" y="178" font-size="9" fill="#ef4444">↓虧損</text>
-                <text x="408" y="94"  font-size="9" fill="#fbbf24" text-anchor="middle" transform="rotate(90,408,94)">可能結果範圍</text>
-                <!-- diagonal label -->
-                <text x="212" y="118" font-size="9" fill="var(--text-dim)" text-anchor="middle" transform="rotate(-19,212,118)">最常見結果</text>
-                <!-- insight box -->
-                <rect x="46" y="22" width="148" height="38" rx="4" fill="var(--bg-input)" opacity="0.93"/>
-                <text x="120" y="36" font-size="9.5" fill="var(--text-bright)" text-anchor="middle" font-weight="600">高風險 ≠ 保證高報酬</text>
-                <text x="120" y="50" font-size="9"   fill="var(--text-dim)"    text-anchor="middle">高風險 = 結果離散度更大</text>
+                <!-- diagonal: market expected return line -->
+                <line x1="55" y1="265" x2="465" y2="95" stroke="var(--text-bright)" stroke-width="2.5"/>
+                <!-- dots at bell centers on diagonal -->
+                <circle cx="135" cy="232" r="3" fill="var(--text-bright)"/>
+                <circle cx="220" cy="197" r="3" fill="var(--text-bright)"/>
+                <circle cx="315" cy="157" r="3" fill="var(--text-bright)"/>
+                <circle cx="415" cy="116" r="3" fill="var(--text-bright)"/>
               </g>
+              <!-- Bottom labels -->
+              <text x="120" y="300" font-size="13" fill="var(--text-dim)" text-anchor="middle">避免輸家</text>
+              <text x="400" y="300" font-size="13" fill="var(--text-dim)" text-anchor="middle">追求贏家</text>
             </svg>
             <script>(function(){
-              function gPath(cx,cy,s,a){
-                var n=80,r=3.5*s,rpts=[],lpts=[];
+              /* symmetric gaussian bell */
+              function gSym(cx,cy,s,amp){
+                var n=100,r=3.5*s,rp=[],lp=[];
                 for(var i=0;i<=n;i++){
                   var y=cy-r+2*r*i/n;
-                  var w=a*Math.exp(-(y-cy)*(y-cy)/(2*s*s));
-                  rpts.push([(cx+w).toFixed(1),y.toFixed(1)]);
-                  lpts.unshift([(cx-w).toFixed(1),y.toFixed(1)]);
+                  var w=amp*Math.exp(-(y-cy)*(y-cy)/(2*s*s));
+                  rp.push((cx+w).toFixed(1)+','+y.toFixed(1));
+                  lp.unshift((cx-w).toFixed(1)+','+y.toFixed(1));
                 }
-                return 'M '+rpts.concat(lpts).map(function(p){return p[0]+','+p[1];}).join(' L ')+' Z';
+                return 'M '+rp.concat(lp).join(' L ')+' Z';
               }
-              [['hm-bell1',90,153,12,10],['hm-bell2',170,125,20,16],
-               ['hm-bell3',255,95,30,24],['hm-bell4',340,65,42,34]]
-              .forEach(function(b){
-                var el=document.getElementById(b[0]);
-                if(el) el.setAttribute('d',gPath(b[1],b[2],b[3],b[4]));
-              });
+              /* asymmetric bell: sU for upper tail (y<cy), sD for lower tail */
+              function gAsym(cx,cy,sU,sD,amp){
+                var n=120,rU=3.5*sU,rD=3.5*sD,rp=[],lp=[];
+                for(var i=0;i<=n;i++){
+                  var y=cy-rU+(rU+rD)*i/n;
+                  var s=y<cy?sU:sD;
+                  var w=amp*Math.exp(-(y-cy)*(y-cy)/(2*s*s));
+                  rp.push((cx+w).toFixed(1)+','+y.toFixed(1));
+                  lp.unshift((cx-w).toFixed(1)+','+y.toFixed(1));
+                }
+                return 'M '+rp.concat(lp).join(' L ')+' Z';
+              }
+              var e1=document.getElementById('hm-bell1');
+              var e2=document.getElementById('hm-bell2');
+              var e3=document.getElementById('hm-bell3');
+              var e4=document.getElementById('hm-bell4');
+              if(e1) e1.setAttribute('d',gSym(135,232,15,14));
+              if(e2) e2.setAttribute('d',gSym(220,197,25,22));
+              if(e3) e3.setAttribute('d',gSym(315,157,40,33));
+              if(e4) e4.setAttribute('d',gAsym(415,116,100,55,40));
             })();</script>
           </div>
           <div class="gls-person-bio" style="margin-top:8px">
