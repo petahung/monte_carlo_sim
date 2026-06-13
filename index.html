@@ -1404,11 +1404,10 @@ tr:hover td{background:var(--bg-hover)}
             </div>
             <div style="padding:6px 8px;border:1px solid var(--border);border-radius:6px">
               <div style="font-weight:600;margin-bottom:4px">📺 Archegos（2021）</div>
-              Bill Hwang 的家族辦公室，透過<strong>總報酬互換（TRS）</strong>繞過持倉揭露規定，實際槓桿達 <strong>5–8×</strong>，集中押注少數媒體股。2021 年 3 月維亞康姆股價下跌觸發追繳保證金，連鎖平倉造成各大投行合計虧損逾 <strong>100 億美元</strong>。<br><br>
-              <strong>外溢效應（交易對手風險）：</strong><br>
-              • <strong>瑞士信貸（Credit Suisse）</strong>未及時平倉 → 損失約 <strong>55 億美元</strong><br>
-              • <strong>野村證券</strong>損失約 <strong>29 億美元</strong><br>
-              TRS 持倉不透明使 Prime Broker 無法掌握整體曝險；Hwang 同時委託多家券商，各方均不知對方的集中部位規模。這是<strong>交易對手風險（Counterparty Risk）</strong>的經典案例：個人爆倉透過衍生品網絡造成系統性外溢，損害了對 Hwang 持倉毫無直接知情的機構。
+              Bill Hwang 透過 <strong>TRS</strong> 繞過揭露規定，槓桿 <strong>5–8×</strong> 集中押媒體股。ViacomCBS 下跌觸發追繳，連鎖平倉致各大投行虧損逾 <strong>100 億美元</strong>。<br><br>
+              <strong>交易對手風險：</strong><br>
+              • <strong>Credit Suisse</strong> 未及時平倉 → −<strong>55 億美元</strong><br>
+              • <strong>野村證券</strong> → −<strong>29 億美元</strong>
             </div>
           </div>
           <div class="gls-def" style="margin-top:6px;color:var(--text-dim);font-size:0.85em"><strong>共同教訓：</strong>① 模型優秀不等於槓桿安全；② 流動性危機時「正常」的相關性假設會同步崩潰（肥尾事件）；③ Kelly 的核心價值在於<em>限制</em>槓桿上限，而非追求最大報酬。</div>
@@ -2077,41 +2076,43 @@ f*：最優下注比例　b：賠率　p：勝率　q = 1−p</div>
             另一核心概念是<strong>第二層思維（Second-Level Thinking）</strong>：第一層思維說「這是好公司，買入」；第二層思維說「這是好公司，但所有人都知道，所以股價已反映，現在買划算嗎？」——與 Fama 的 EMH 形成有趣對話。
           </div>
           <div style="margin:10px 0 2px">
-            <svg viewBox="0 0 320 160" style="width:100%;height:auto;display:block">
-              <!-- axes -->
-              <line x1="30" y1="140" x2="305" y2="140" stroke="var(--text-dim)" stroke-width="1"/>
-              <line x1="30" y1="10"  x2="30"  y2="140" stroke="var(--text-dim)" stroke-width="1"/>
-              <text x="305" y="148" font-size="8" fill="var(--text-dim)" text-anchor="end">風險 →</text>
-              <text x="12"  y="75"  font-size="8" fill="var(--text-dim)" text-anchor="middle" transform="rotate(-90,12,75)">預期報酬 ↑</text>
-              <!-- traditional view: straight diagonal -->
-              <line x1="30" y1="130" x2="290" y2="28" stroke="var(--text-dim)" stroke-width="1.5" stroke-dasharray="5,3"/>
-              <text x="294" y="25" font-size="7.5" fill="var(--text-dim)" text-anchor="start">傳統觀點</text>
-              <!-- Marks fan: upper bound (possible upside) -->
-              <path d="M30,130 C80,108 140,82 200,60 C240,45 270,32 305,16"
-                    fill="none" stroke="#4ade80" stroke-width="1.5" opacity="0.8"/>
-              <!-- Marks fan: lower bound (possible downside) -->
-              <path d="M30,130 C80,128 140,122 200,112 C240,104 270,95 305,82"
-                    fill="none" stroke="#ef4444" stroke-width="1.5" opacity="0.8"/>
-              <!-- fan fill -->
-              <path d="M30,130 C80,108 140,82 200,60 C240,45 270,32 305,16 L305,82 C270,95 240,104 200,112 C140,122 80,128 30,130 Z"
-                    fill="url(#marks-grad)" opacity="0.25"/>
+            <svg viewBox="0 0 360 175" style="width:100%;height:auto;display:block">
               <defs>
-                <linearGradient id="marks-grad" x1="0" y1="0" x2="1" y2="0">
-                  <stop offset="0%" stop-color="#6b7280"/>
-                  <stop offset="100%" stop-color="#ef4444"/>
-                </linearGradient>
+                <clipPath id="hm-clip"><rect x="0" y="0" width="360" height="175"/></clipPath>
               </defs>
-              <!-- width annotation at high risk -->
-              <line x1="305" y1="16" x2="305" y2="82" stroke="#fbbf24" stroke-width="1.5" stroke-dasharray="3,2"/>
-              <text x="310" y="50" font-size="7" fill="#fbbf24" text-anchor="start">結果</text>
-              <text x="310" y="59" font-size="7" fill="#fbbf24" text-anchor="start">離散度</text>
-              <!-- labels -->
-              <text x="195" y="55" font-size="7" fill="#4ade80" text-anchor="end">可能獲利上界</text>
-              <text x="195" y="118" font-size="7" fill="#ef4444" text-anchor="end">可能虧損下界</text>
-              <!-- annotation box -->
-              <rect x="55" y="32" width="118" height="28" rx="4" fill="var(--bg-input)" opacity="0.9"/>
-              <text x="114" y="45" font-size="7" fill="var(--text)" text-anchor="middle">高風險 ≠ 保證高報酬</text>
-              <text x="114" y="56" font-size="7" fill="var(--text-dim)" text-anchor="middle">高風險 = 結果範圍更大</text>
+              <g clip-path="url(#hm-clip)">
+                <!-- axes -->
+                <line x1="35" y1="158" x2="338" y2="158" stroke="var(--text-dim)" stroke-width="1"/>
+                <line x1="35" y1="8"   x2="35"  y2="158" stroke="var(--text-dim)" stroke-width="1"/>
+                <text x="336" y="167" font-size="9" fill="var(--text-dim)" text-anchor="end">風險 →</text>
+                <text x="18"  y="83"  font-size="9" fill="var(--text-dim)" text-anchor="middle" transform="rotate(-90,18,83)">報酬 ↑</text>
+                <!-- diagonal: most common outcome increases with risk -->
+                <line x1="35" y1="153" x2="318" y2="20" stroke="var(--text-dim)" stroke-width="2" stroke-dasharray="5,3"/>
+                <text x="320" y="20" font-size="8" fill="var(--text-dim)" text-anchor="start">最常見</text>
+                <text x="320" y="30" font-size="8" fill="var(--text-dim)" text-anchor="start">結果</text>
+                <!-- Bell 1: low risk  x=90, cy≈127, dy=16, amp=12 -->
+                <!-- Bell shape: M x,cy-dy  C x+amp*1.5,cy-dy  x+amp*1.5,cy+dy  x,cy+dy  Z -->
+                <path d="M 90,111 C 108,111 108,143 90,143 Z"
+                      fill="var(--accent)" opacity="0.35" stroke="var(--accent)" stroke-width="1"/>
+                <circle cx="90" cy="127" r="2.5" fill="var(--text-dim)"/>
+                <!-- Bell 2: medium risk  x=195, cy≈80, dy=27, amp=22 -->
+                <path d="M 195,53 C 228,53 228,107 195,107 Z"
+                      fill="var(--accent)" opacity="0.35" stroke="var(--accent)" stroke-width="1"/>
+                <circle cx="195" cy="80" r="2.5" fill="var(--text-dim)"/>
+                <!-- Bell 3: high risk  x=300, cy≈30, dy=48, amp=40 -->
+                <path d="M 300,-18 C 360,-18 360,78 300,78 Z"
+                      fill="var(--accent)" opacity="0.35" stroke="var(--accent)" stroke-width="1.5"/>
+                <circle cx="300" cy="30" r="2.5" fill="var(--text-dim)"/>
+                <!-- high-risk upside/downside labels -->
+                <text x="258" y="13"  font-size="8.5" fill="#4ade80">↑ 可能暴漲</text>
+                <text x="258" y="84"  font-size="8.5" fill="#ef4444">↓ 可能歸零</text>
+                <!-- low risk label -->
+                <text x="106" y="127" font-size="8" fill="var(--text-dim)">結果集中</text>
+                <!-- insight box -->
+                <rect x="50" y="22" width="138" height="32" rx="4" fill="var(--bg-input)" opacity="0.92"/>
+                <text x="119" y="35" font-size="8.5" fill="var(--text-bright)" text-anchor="middle" font-weight="600">高風險 ≠ 保證高報酬</text>
+                <text x="119" y="47" font-size="8"   fill="var(--text-dim)"    text-anchor="middle">高風險 = 結果離散度更大</text>
+              </g>
             </svg>
           </div>
           <div class="gls-person-bio" style="margin-top:8px;color:var(--text-dim)">
@@ -5607,8 +5608,10 @@ function kellyAnimDraw(idx) {
   // 解析度適配（最低 2×，避免初始縮圖模糊）
   const dpr = Math.max(window.devicePixelRatio || 1, 2);
   const W = canvas.offsetWidth || 600;
-  const H = canvas.offsetHeight || Math.max(220, Math.min(480, W * 0.6));
   if (W < 10) return; // tab 隱藏時 offsetWidth=0，跳過避免 crash
+  // 每次繪製前同步 CSS 高度，確保縮圖比例正確
+  canvas.style.height = Math.max(220, Math.min(480, W * 0.6)) + 'px';
+  const H = canvas.offsetHeight || Math.max(220, Math.min(480, W * 0.6));
   canvas.width  = W * dpr;
   canvas.height = H * dpr;
   ctx.scale(dpr, dpr);
