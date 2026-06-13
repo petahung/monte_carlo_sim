@@ -1199,11 +1199,12 @@ tr:hover td{background:var(--bg-hover)}
           <div class="gls-term">幾何報酬與波動耗損</div>
           <div class="gls-en">Geometric Return &amp; Volatility Drag</div>
           <div class="gls-def">槓桿 β 下的長期幾何平均報酬（連續時間）：</div>
-          <div class="gls-formula">g(β) = r_f + β(μ − r_f) − β²σ²/2
+          <div class="gls-formula">g(β) = r + β(μ − r) − β²σ²/2
 
-  β(μ − r_f)  → 算術超額報酬，隨 β 線性增長
-  β²σ²/2      → 波動耗損（Volatility Drag），隨 β 平方增長
-  最優 β* = (μ − r_f) / σ²  ← 即 Kelly Criterion</div>
+  β(μ − r)  → 算術超額報酬，隨 β 線性增長
+  β²σ²/2    → 波動耗損（Volatility Drag），隨 β 平方增長
+  最優 β* = (μ − r) / σ²  ← 即 Kelly Criterion</div>
+          <div class="gls-def" style="font-size:0.85em;color:var(--text-dim)">r = 無風險利率（risk-free rate），如美國短期公債殖利率</div>
           <div class="gls-def" style="margin-top:8px">
             <strong>互動示例</strong>（μ=10%, r_f=4%, σ=20%）——拖曳滑桿觀察 CAGR 變化：
             <div style="display:flex;align-items:center;gap:8px;margin:6px 0">
