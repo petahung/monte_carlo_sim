@@ -2069,81 +2069,71 @@ f*：最優下注比例　b：賠率　p：勝率　q = 1−p</div>
               <span style="color:var(--text-dim)">重點：好資產暫時下跌 ≠ 風險；爛資產永久歸零才是風險</span>
             </div>
           </div>
-          <div class="gls-person-bio" style="margin-top:8px">
-            另一核心概念是<strong>第二層思維（Second-Level Thinking）</strong>：第一層思維說「這是好公司，買入」；第二層思維說「這是好公司，但所有人都知道，所以股價已反映，現在買划算嗎？」——與 Fama 的 EMH 形成有趣對話。
-          </div>
           <div style="margin:10px 0 2px">
             <!--
-              Bell shape: symmetric lens (almond) centered on diagonal.
-              Diagonal passes through (90,134), (195,84), (300,34) — slope=-0.476.
-              Each bell: M cx,cy-dy  (top)
-                right arc: C cx,cy-dy*0.448  cx+amp*0.448,cy  cx+amp,cy
-                           C cx+amp,cy+dy*0.552  cx+amp*0.448,cy+dy  cx,cy+dy
-                left arc:  C cx-amp*0.448,cy+dy  cx-amp,cy+dy*0.552  cx-amp,cy
-                           C cx-amp,cy-dy*0.552  cx-amp*0.448,cy-dy  cx,cy-dy  Z
+              Gaussian bell: 4-segment cubic bezier, centered on diagonal (slope=-0.44).
+              Formula per half: M cx,cy-dy C cx,cy-0.7dy  cx+amp,cy-0.2dy  cx+amp,cy
+                                           C cx+amp,cy+0.2dy  cx,cy+0.7dy  cx,cy+dy  (then mirror left)
+              Diagonal through (90,144),(170,109),(255,72),(340,35).
             -->
-            <svg viewBox="0 0 370 185" style="width:100%;height:auto;display:block">
+            <svg viewBox="0 0 420 210" style="width:100%;height:auto;display:block">
               <defs>
-                <clipPath id="hm-clip"><rect x="0" y="5" width="370" height="180"/></clipPath>
+                <clipPath id="hm-clip"><rect x="0" y="6" width="420" height="204"/></clipPath>
               </defs>
               <g clip-path="url(#hm-clip)">
                 <!-- axes -->
-                <line x1="35" y1="168" x2="355" y2="168" stroke="var(--text-dim)" stroke-width="1.5"/>
-                <line x1="35" y1="8"   x2="35"  y2="168" stroke="var(--text-dim)" stroke-width="1.5"/>
-                <text x="352" y="178" font-size="9.5" fill="var(--text-dim)" text-anchor="end">風險 →</text>
-                <text x="18"  y="90"  font-size="9.5" fill="var(--text-dim)" text-anchor="middle" transform="rotate(-90,18,90)">報酬 ↑</text>
+                <line x1="40" y1="182" x2="412" y2="182" stroke="var(--text-dim)" stroke-width="1.5"/>
+                <line x1="40" y1="8"   x2="40"  y2="182" stroke="var(--text-dim)" stroke-width="1.5"/>
+                <text x="410" y="195" font-size="11" fill="var(--text-dim)" text-anchor="end">風險 →</text>
+                <text x="20"  y="97"  font-size="11" fill="var(--text-dim)" text-anchor="middle" transform="rotate(-90,20,97)">報酬 ↑</text>
 
-                <!-- Bell 1: cx=90 cy=134 dy=18 amp=12 -->
-                <path d="M 90,116
-                         C 90,126   95,134  102,134
-                         C 102,144  95,152   90,152
-                         C 85,152   78,144   78,134
-                         C 78,126   85,116   90,116 Z"
+                <!-- Bell 1: cx=90  cy=144 dy=14 amp=10 -->
+                <path d="M 90,130 C 90,134 100,141 100,144 C 100,147 90,154 90,158
+                         C 90,154 80,147 80,144 C 80,141 90,134 90,130 Z"
                       fill="var(--bg-input)" stroke="var(--text-dim)" stroke-width="1"/>
-
-                <!-- Bell 2: cx=195 cy=84 dy=30 amp=22 -->
-                <path d="M 195,54
-                         C 195,71  205,84  217,84
-                         C 217,101 205,114 195,114
-                         C 185,114 173,101 173,84
-                         C 173,71  185,54  195,54 Z"
+                <!-- Bell 2: cx=170 cy=109 dy=22 amp=17 -->
+                <path d="M 170,87 C 170,94 187,105 187,109 C 187,113 170,124 170,131
+                         C 170,124 153,113 153,109 C 153,105 170,94 170,87 Z"
                       fill="var(--bg-input)" stroke="var(--text-dim)" stroke-width="1"/>
-
-                <!-- Bell 3: cx=300 cy=34 dy=48 amp=40 (top clips at y=5) -->
-                <path d="M 300,-14
-                         C 300,13  318,34  340,34
-                         C 340,61  318,82  300,82
-                         C 282,82  260,61  260,34
-                         C 260,13  282,-14 300,-14 Z"
+                <!-- Bell 3: cx=255 cy=72  dy=33 amp=26 -->
+                <path d="M 255,39 C 255,50 281,65 281,72 C 281,79 255,95 255,105
+                         C 255,95 229,79 229,72 C 229,65 255,50 255,39 Z"
+                      fill="var(--bg-input)" stroke="var(--text-dim)" stroke-width="1"/>
+                <!-- Bell 4: cx=340 cy=35  dy=44 amp=34 (top clips) -->
+                <path d="M 340,-9 C 340,4 374,26 374,35 C 374,44 340,66 340,79
+                         C 340,66 306,44 306,35 C 306,26 340,4 340,-9 Z"
                       fill="var(--bg-input)" stroke="var(--text-dim)" stroke-width="1.2"/>
 
-                <!-- diagonal line — thick solid, drawn over bells -->
-                <line x1="35" y1="160" x2="355" y2="8" stroke="var(--text-bright)" stroke-width="3"/>
+                <!-- diagonal — thick solid, over bells -->
+                <line x1="40" y1="166" x2="390" y2="12" stroke="var(--text-bright)" stroke-width="3"/>
 
-                <!-- dots where diagonal meets bell centers -->
-                <circle cx="90"  cy="134" r="3" fill="var(--text-bright)"/>
-                <circle cx="195" cy="84"  r="3" fill="var(--text-bright)"/>
-                <circle cx="300" cy="34"  r="3" fill="var(--text-bright)"/>
+                <!-- dots at bell centers on diagonal -->
+                <circle cx="90"  cy="144" r="3.5" fill="var(--text-bright)"/>
+                <circle cx="170" cy="109" r="3.5" fill="var(--text-bright)"/>
+                <circle cx="255" cy="72"  r="3.5" fill="var(--text-bright)"/>
+                <circle cx="340" cy="35"  r="3.5" fill="var(--text-bright)"/>
 
-                <!-- range annotation on bell 3 -->
-                <line x1="344" y1="7" x2="344" y2="82" stroke="#fbbf24" stroke-width="1" stroke-dasharray="3,2"/>
-                <text x="350" y="26" font-size="8.5" fill="#fbbf24">可能</text>
-                <text x="350" y="37" font-size="8.5" fill="#fbbf24">結果</text>
-                <text x="350" y="48" font-size="8.5" fill="#fbbf24">範圍</text>
-                <!-- upside/downside labels near bell 3 -->
-                <text x="256" y="14" font-size="9" fill="#4ade80">↑ 可能暴漲</text>
-                <text x="256" y="89" font-size="9" fill="#ef4444">↓ 可能歸零</text>
+                <!-- bell 4 range bracket + labels -->
+                <line x1="378" y1="9"  x2="378" y2="79" stroke="#fbbf24" stroke-width="1.2" stroke-dasharray="3,2"/>
+                <text x="383" y="22" font-size="9" fill="#4ade80">↑ 高報酬</text>
+                <text x="383" y="74" font-size="9" fill="#ef4444">↓ 虧損</text>
+                <text x="383" y="40" font-size="8.5" fill="#fbbf24">可能</text>
+                <text x="383" y="51" font-size="8.5" fill="#fbbf24">結果</text>
+                <text x="383" y="62" font-size="8.5" fill="#fbbf24">範圍</text>
 
-                <!-- most-common-outcome label near diagonal -->
-                <text x="148" y="112" font-size="8.5" fill="var(--text-dim)" text-anchor="middle"
-                      transform="rotate(-26,148,112)">最常見結果</text>
+                <!-- diagonal label (rotated) -->
+                <text x="158" y="126" font-size="9" fill="var(--text-dim)" text-anchor="middle"
+                      transform="rotate(-24,158,126)">最常見結果</text>
 
-                <!-- insight box top-left -->
-                <rect x="45" y="22" width="144" height="36" rx="4" fill="var(--bg-input)" opacity="0.93"/>
-                <text x="117" y="36" font-size="9" fill="var(--text-bright)" text-anchor="middle" font-weight="600">高風險 ≠ 保證高報酬</text>
-                <text x="117" y="50" font-size="8.5" fill="var(--text-dim)" text-anchor="middle">高風險 = 結果離散度更大</text>
+                <!-- insight box -->
+                <rect x="48" y="20" width="148" height="38" rx="4" fill="var(--bg-input)" opacity="0.93"/>
+                <text x="122" y="34" font-size="9.5" fill="var(--text-bright)" text-anchor="middle" font-weight="600">高風險 ≠ 保證高報酬</text>
+                <text x="122" y="50" font-size="9"   fill="var(--text-dim)"    text-anchor="middle">高風險 = 結果離散度更大</text>
               </g>
             </svg>
+          </div>
+          <div class="gls-person-bio" style="margin-top:8px">
+            另一核心概念是<strong>第二層思維（Second-Level Thinking）</strong>：第一層思維說「這是好公司，買入」；第二層思維說「這是好公司，但所有人都知道，所以股價已反映，現在買划算嗎？」——與 Fama 的 EMH 形成有趣對話。
           </div>
           <div class="gls-person-bio" style="margin-top:8px;color:var(--text-dim)">
             每季發布投資備忘錄（Memo），長期被 Warren Buffett 等人視為必讀。代表作：《投資最重要的事》（The Most Important Thing, 2011）、《掌握市場週期》（Mastering the Market Cycle, 2018）。
