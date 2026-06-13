@@ -1197,19 +1197,24 @@ tr:hover td{background:var(--bg-hover)}
         <div class="gls-card">
           <div class="gls-term">Beta（槓桿倍數）</div>
           <div class="gls-en">Beta / Effective Leverage</div>
-          <div class="gls-def">投資組合對基礎指數的實效曝險倍數。1× = 無槓桿，2× = 每日重置 2 倍槓桿 ETF。Beta 隨槓桿配置比例而變動。</div>
-          <div class="gls-formula">Beta = 1×權重×1 + 2×權重×2 + 3×權重×3</div>
-          <div class="gls-def" style="margin-top:8px"><strong>幾何報酬（CAGR）與 Volatility Drag：</strong></div>
-          <div class="gls-formula">g_L = r_f + L(μ − r_f) − L²σ²/2
+          <div class="gls-def">投資組合對基礎指數的實效曝險倍數。β = 1 為無槓桿；β = 2 為每日重置 2 倍槓桿 ETF。β 隨各部位的配置比例加權而變動。</div>
+          <div class="gls-formula">β = Σ（各部位權重 × 該部位槓桿倍數）
+例：50% 持有 2× ETF + 50% 現金 → β = 0.5×2 + 0.5×0 = 1.0</div>
+          <div class="gls-def" style="margin-top:6px;color:var(--text-dim);font-size:0.85em"><strong>Sharpe Ratio 不因 β 而改變：</strong>槓桿等比例放大超額報酬與波動，Sharpe = (μ−r_f)/σ = β(μ−r_f)/βσ → β 約分消失。這意味著槓桿本身不創造風險調整後的超額價值——Alpha 才是真正的優勢來源。→ 幾何報酬（CAGR）如何受 β 影響，詳見下方「幾何報酬與波動耗損」卡片。</div>
+        </div>
+        <div class="gls-card">
+          <div class="gls-term">幾何報酬與波動耗損</div>
+          <div class="gls-en">Geometric Return &amp; Volatility Drag</div>
+          <div class="gls-def">槓桿 β 下的長期幾何平均報酬（連續時間）：</div>
+          <div class="gls-formula">g(β) = r_f + β(μ − r_f) − β²σ²/2
 
-其中：
-  L(μ − r_f)  → 槓桿放大的算術超額報酬（線性）
-  L²σ²/2      → Volatility Drag，隨槓桿平方增長
-  最優槓桿 L* = (μ − r_f) / σ²  ← 即 Kelly Criterion</div>
+  β(μ − r_f)  → 算術超額報酬，隨 β 線性增長
+  β²σ²/2      → 波動耗損（Volatility Drag），隨 β 平方增長
+  最優 β* = (μ − r_f) / σ²  ← 即 Kelly Criterion</div>
           <div class="gls-def" style="margin-top:8px">
             <strong>互動示例</strong>（μ=10%, r_f=4%, σ=20%）——拖曳滑桿觀察 CAGR 變化：
             <div style="display:flex;align-items:center;gap:8px;margin:6px 0">
-              <span style="font-size:0.8em;color:var(--text-dim);white-space:nowrap">L =</span>
+              <span style="font-size:0.8em;color:var(--text-dim);white-space:nowrap">β =</span>
               <input type="range" id="beta-drag-l" min="0" max="40" value="10" style="flex:1;accent-color:#3b82f6" oninput="betaDragUpdate()">
               <span id="beta-drag-lval" style="font-size:0.85em;font-weight:700;color:#60a5fa;min-width:30px">1.0×</span>
             </div>
@@ -1219,30 +1224,31 @@ tr:hover td{background:var(--bg-hover)}
                 <div id="beta-drag-arith" style="font-weight:700;color:#60a5fa">6.0%</div>
               </div>
               <div style="padding:6px;border:1px solid var(--border);border-radius:6px">
-                <div style="color:var(--text-dim);margin-bottom:2px">Volatility Drag</div>
+                <div style="color:var(--text-dim);margin-bottom:2px">波動耗損</div>
                 <div id="beta-drag-drag" style="font-weight:700;color:#f472b6">−2.0%</div>
               </div>
               <div style="padding:6px;border:1px solid var(--border);border-radius:6px">
-                <div style="color:var(--text-dim);margin-bottom:2px">CAGR (g_L)</div>
+                <div style="color:var(--text-dim);margin-bottom:2px">CAGR g(β)</div>
                 <div id="beta-drag-cagr" style="font-weight:700;color:#4ade80">8.0%</div>
               </div>
             </div>
-            <div style="margin-top:6px;font-size:0.78em;color:var(--text-dim)" id="beta-drag-note">L* (Kelly) = 1.5× → 最大 CAGR ≈ 8.5%</div>
+            <div style="margin-top:6px;font-size:0.78em;color:var(--text-dim)" id="beta-drag-note">β* (Kelly) = 1.5× → 最大 CAGR ≈ 8.5%</div>
           </div>
-          <div class="gls-def" style="margin-top:6px;color:var(--text-dim);font-size:0.85em"><strong>Sharpe Ratio 不變：</strong>槓桿等比例放大超額報酬與波動，Sharpe = (μ−r)/σ = β(μ−r)/βσ 不隨 β 改變。槓桿本身不創造風險調整後的超額價值——但 Volatility Drag 使幾何報酬（CAGR）在超過 L* 後迅速下滑。→ 參見 <em>Kelly Fraction</em> 卡片。</div>
+          <div class="gls-def" style="margin-top:6px;color:var(--text-dim);font-size:0.85em">波動耗損以 β 的<strong>平方</strong>增長，超過 β* 後幾何報酬迅速下滑；β > 2β* 時 CAGR 甚至低於不槓桿。→ 參見 <em>Kelly Fraction</em> 卡片。</div>
           <script>
           function betaDragUpdate(){
-            const L=parseInt(document.getElementById('beta-drag-l').value)/10;
+            const beta=parseInt(document.getElementById('beta-drag-l').value)/10;
             const mu=0.10,rf=0.04,sig2=0.04;
-            const excess=L*(mu-rf), drag=L*L*sig2/2, gL=rf+excess-drag;
-            const Lstar=(mu-rf)/sig2;
-            document.getElementById('beta-drag-lval').textContent=L.toFixed(1)+'×';
+            const excess=beta*(mu-rf), drag=beta*beta*sig2/2, gB=rf+excess-drag;
+            const bstar=(mu-rf)/sig2;
+            const gMax=rf+bstar*(mu-rf)-bstar*bstar*sig2/2;
+            document.getElementById('beta-drag-lval').textContent=beta.toFixed(1)+'×';
             document.getElementById('beta-drag-arith').textContent=(excess*100).toFixed(1)+'%';
             document.getElementById('beta-drag-drag').textContent='−'+(drag*100).toFixed(1)+'%';
             const cagrEl=document.getElementById('beta-drag-cagr');
-            cagrEl.textContent=(gL*100).toFixed(1)+'%';
-            cagrEl.style.color=gL>=rf+Lstar*(mu-rf)-Lstar*Lstar*sig2/2-0.001?'#4ade80':gL>rf?'#fbbf24':'#ef4444';
-            document.getElementById('beta-drag-note').textContent=`L* (Kelly) = ${Lstar.toFixed(1)}× → 最大 CAGR ≈ ${((rf+(mu-rf)*(mu-rf)/sig2/2)*100).toFixed(1)}%；目前 L=${L.toFixed(1)}× ${L<Lstar?'低於 Kelly，可適度提高曝險':L===Lstar?'= Kelly 最優':L<=2*Lstar?'超過 Kelly，注意 Drag 加速':'> 2×Kelly，期望幾何報酬低於無槓桿'}`;
+            cagrEl.textContent=(gB*100).toFixed(1)+'%';
+            cagrEl.style.color=gB>=gMax-0.001?'#4ade80':gB>rf?'#fbbf24':'#ef4444';
+            document.getElementById('beta-drag-note').textContent=`β* (Kelly) = ${bstar.toFixed(1)}× → 最大 CAGR ≈ ${(gMax*100).toFixed(1)}%；目前 β=${beta.toFixed(1)}× ${beta<bstar?'低於 β*，可適度提高曝險':beta===bstar?'= β* 最優':beta<=2*bstar?'超過 β*，耗損加速':'> 2β*，幾何報酬低於不槓桿'}`;
           }
           betaDragUpdate();
           </script>
