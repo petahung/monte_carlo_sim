@@ -1059,12 +1059,9 @@ tr:hover td{background:var(--bg-hover)}
                 ctx.stroke(); ctx.setLineDash([]);
                 // labels
                 ctx.font=`${Math.max(12,W/28)}px sans-serif`; ctx.textAlign='center';
-                ctx.fillStyle='#60a5fa'; ctx.fillText('── 常態分布 N(0,1)',W*0.27,H-8);
-                ctx.fillStyle='#f472b6'; ctx.fillText('╌ 肥尾 t(df=3)',W*0.73,H-8);
                 ctx.fillStyle=textColor;
                 ctx.fillText('肥尾',toX(-3.2),pad.t+ch-8);
                 ctx.fillText('肥尾',toX(3.2),pad.t+ch-8);
-                ctx.fillText('μ',toX(0),pad.t+10);
               }
               if(cv.offsetWidth>0) draw();
               else requestAnimationFrame(draw);
