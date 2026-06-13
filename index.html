@@ -86,6 +86,7 @@ input[type=number],input[type=text]{background:var(--bg-input);border:1px solid 
 .btn-primary:disabled{background:var(--disabled-bg);color:var(--disabled-text);cursor:not-allowed}
 .btn-sm{padding:4px 10px;font-size:0.75rem;border-radius:4px;border:1px solid var(--border-mid);background:var(--bg-btn);color:var(--text-dim);cursor:pointer}
 .btn-sm:hover{background:var(--bg-btn-hover);color:var(--text)}
+.btn-sm.btn-active{background:var(--accent);color:#fff;border-color:var(--accent)}
 .preset-sel{padding:4px 6px;font-size:0.75rem;border-radius:4px;border:1px solid var(--border-mid);background:var(--bg-btn);color:var(--text-dim);cursor:pointer;max-width:160px}
 .preset-sel:hover{background:var(--bg-btn-hover);color:var(--text)}
 .preset-sel option{background:var(--bg-btn);color:var(--text)}
@@ -484,7 +485,13 @@ tr:hover td{background:var(--bg-hover)}
           <canvas id="hist-chart" height="200"></canvas>
         </div>
         <div class="chart-box">
-          <div class="chart-title" style="margin-bottom:6px">最大回撤分佈 Histogram</div>
+          <div class="chart-header">
+            <span class="chart-title" id="dd-chart-title">最大回撤分佈 Histogram</span>
+            <div style="display:flex;gap:4px">
+              <button id="dd-btn-mdd" class="btn-sm btn-active" onclick="setDDView('mdd')">MDD</button>
+              <button id="dd-btn-rec" class="btn-sm" onclick="setDDView('rec')">恢復期</button>
+            </div>
+          </div>
           <canvas id="dd-chart" height="200"></canvas>
         </div>
       </div>
@@ -590,7 +597,8 @@ tr:hover td{background:var(--bg-hover)}
           <span id="kelly-anim-year" style="font-size:0.8rem;color:#60a5fa;font-weight:600;min-width:50px"></span>
           <input type="range" id="kelly-anim-scrub" min="0" value="0" style="flex:1;min-width:80px;accent-color:#3b82f6" oninput="kellyAnimScrub(this.value)">
         </div>
-        <canvas id="kelly-anim-canvas" data-h="480" style="width:100%;display:block;height:480px"></canvas>
+        <canvas id="kelly-anim-canvas" style="width:100%;display:block"></canvas>
+        <script>(function(){const cv=document.getElementById('kelly-anim-canvas');function setH(){cv.style.height=Math.max(220,Math.min(480,cv.offsetWidth*0.6))+'px';}setH();new ResizeObserver(setH).observe(cv);})();</script>
         <div style="display:flex;flex-wrap:wrap;gap:12px;margin-top:8px;font-size:0.75rem;color:#9ca3af">
           <span><span style="display:inline-block;width:12px;height:12px;background:rgba(251,191,36,0.5);border-radius:2px;vertical-align:middle;margin-right:4px"></span>0 → β*/2：低於半 Kelly，槓桿使用保守</span>
           <span><span style="display:inline-block;width:12px;height:12px;background:rgba(74,222,128,0.5);border-radius:2px;vertical-align:middle;margin-right:4px"></span>β*/2 → β*：最佳操作區間</span>
@@ -607,15 +615,56 @@ tr:hover td{background:var(--bg-hover)}
     .gls-section{margin-bottom:28px}
     .gls-section-title{font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--accent-title);border-bottom:1px solid var(--border-mid);padding-bottom:6px;margin-bottom:12px}
     .gls-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:10px}
-    .gls-card{background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:12px 14px}
+    .gls-card{background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:12px 14px;transition:border-color .15s}
+    .gls-card.gls-hidden{display:none}
+    .gls-card-header{cursor:pointer;user-select:none;display:flex;justify-content:space-between;align-items:flex-start;gap:6px}
+    .gls-card-header:hover .gls-term{color:var(--accent-title)}
+    .gls-collapse-btn{font-size:0.65rem;color:var(--text-dim);flex-shrink:0;margin-top:3px;transition:transform .2s}
+    .gls-card.collapsed .gls-collapse-btn{transform:rotate(-90deg)}
+    .gls-card-body{overflow:hidden;transition:max-height .25s ease, opacity .2s ease;max-height:2000px;opacity:1}
+    .gls-card.collapsed .gls-card-body{max-height:0;opacity:0}
     .gls-term{font-size:0.82rem;font-weight:700;color:var(--text-bright);margin-bottom:4px}
     .gls-en{font-size:0.72rem;color:var(--text-dim);margin-bottom:6px;font-style:italic}
     .gls-def{font-size:0.78rem;color:var(--text);line-height:1.55}
     .gls-formula{font-size:0.74rem;background:var(--bg-input);border:1px solid var(--border);border-radius:4px;padding:5px 8px;margin-top:6px;color:var(--accent-text);font-family:monospace;white-space:pre-wrap}
+    /* search bar */
+    #gls-search-wrap{position:sticky;top:0;z-index:20;background:var(--bg-main);padding:8px 0 10px;margin-bottom:4px}
+    #gls-search{width:100%;box-sizing:border-box;background:var(--bg-input);border:1px solid var(--border);border-radius:6px;padding:7px 12px 7px 32px;font-size:0.82rem;color:var(--text);outline:none}
+    #gls-search:focus{border-color:var(--accent)}
+    #gls-search-icon{position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:14px;pointer-events:none}
+    #gls-search-wrap{position:relative}
+    #gls-no-results{display:none;text-align:center;padding:40px 0;font-size:0.82rem;color:var(--text-dim)}
+    /* TOC */
+    #gls-layout{display:flex;gap:20px;align-items:flex-start}
+    #gls-toc{width:140px;flex-shrink:0;position:sticky;top:52px;background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:10px 0;font-size:0.72rem;max-height:calc(100vh - 100px);overflow-y:auto}
+    #gls-toc a{display:block;padding:5px 12px;color:var(--text-dim);text-decoration:none;border-left:2px solid transparent;line-height:1.35;transition:color .15s,border-color .15s}
+    #gls-toc a:hover,#gls-toc a.toc-active{color:var(--accent-title);border-left-color:var(--accent-title)}
+    #gls-content{flex:1;min-width:0}
+    @media(max-width:600px){#gls-toc{display:none}#gls-layout{display:block}}
   </style>
   <div style="padding:4px 0 20px">
+  <div id="gls-search-wrap">
+    <span id="gls-search-icon">🔍</span>
+    <input id="gls-search" type="search" placeholder="搜尋名詞…" autocomplete="off">
+  </div>
+  <div id="gls-layout">
+  <nav id="gls-toc">
+    <a href="#gls-s-box">📦 箱形圖</a>
+    <a href="#gls-s-sim">🎲 模擬方法</a>
+    <a href="#gls-s-ret">📈 報酬率</a>
+    <a href="#gls-s-risk">⚠️ 風險指標</a>
+    <a href="#gls-s-lev">⚙️ 槓桿配置</a>
+    <a href="#gls-s-kelly">🎯 Kelly 準則</a>
+    <a href="#gls-s-cf">💵 現金流</a>
+    <a href="#gls-s-macro">🌐 總體指標</a>
+    <a href="#gls-s-mon">🏦 貨幣政策</a>
+    <a href="#gls-s-beh">🧠 行為心理</a>
+    <a href="#gls-s-ppl">👤 關鍵人物</a>
+  </nav>
+  <div id="gls-content">
+  <div id="gls-no-results">找不到符合的名詞 🔍</div>
 
-    <div class="gls-section">
+    <div class="gls-section" id="gls-s-box">
       <div class="gls-section-title">如何閱讀箱形圖（Box-Whisker Plot）</div>
 
       <!-- SVG diagram -->
@@ -698,7 +747,7 @@ tr:hover td{background:var(--bg-hover)}
       </div>
     </div>
 
-    <div class="gls-section">
+    <div class="gls-section" id="gls-s-sim">
       <div class="gls-section-title">模擬方法</div>
       <div class="gls-grid">
         <div class="gls-card">
@@ -712,38 +761,29 @@ tr:hover td{background:var(--bg-hover)}
         <div class="gls-card">
           <div class="gls-term">蒙地卡羅 vs 滾動歷史回測</div>
           <div class="gls-en">Monte Carlo vs Rolling Historical Backtest</div>
-          <div class="gls-def" style="font-size:0.88em;margin-top:4px">
-            <table style="width:100%;border-collapse:collapse">
-              <thead>
-                <tr style="border-bottom:1px solid var(--border)">
-                  <th style="padding:4px 8px;text-align:left;color:var(--text-dim);font-weight:600"></th>
-                  <th style="padding:4px 8px;text-align:left;color:var(--text-dim);font-weight:600">蒙地卡羅（本工具）</th>
-                  <th style="padding:4px 8px;text-align:left;color:var(--text-dim);font-weight:600">滾動歷史回測</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr style="border-bottom:1px solid var(--border)">
-                  <td style="padding:4px 8px;color:var(--text-dim)">假設</td>
-                  <td style="padding:4px 8px">IID（獨立同分布）</td>
-                  <td style="padding:4px 8px">路徑相依</td>
-                </tr>
-                <tr style="border-bottom:1px solid var(--border)">
-                  <td style="padding:4px 8px;color:var(--text-dim)">情境數量</td>
-                  <td style="padding:4px 8px">可生成數千條路徑</td>
-                  <td style="padding:4px 8px">受限於歷史樣本長度</td>
-                </tr>
-                <tr style="border-bottom:1px solid var(--border)">
-                  <td style="padding:4px 8px;color:var(--text-dim)">優點</td>
-                  <td style="padding:4px 8px">涵蓋歷史未曾出現的情境組合</td>
-                  <td style="padding:4px 8px">忠實反映真實歷史序列與事件</td>
-                </tr>
-                <tr>
-                  <td style="padding:4px 8px;color:var(--text-dim)">缺點</td>
-                  <td style="padding:4px 8px">忽略序列相關性（動能、危機蔓延）</td>
-                  <td style="padding:4px 8px">樣本少、易受選擇性偏誤影響</td>
-                </tr>
-              </tbody>
-            </table>
+          <div class="gls-def" style="font-size:0.85em;margin-top:6px;display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <div style="padding:8px 10px;border:1px solid var(--border);border-radius:6px">
+              <div style="font-weight:700;color:#60a5fa;margin-bottom:6px">🎲 蒙地卡羅模擬（本工具）</div>
+              <div style="color:var(--text-dim);margin-bottom:4px;font-size:0.9em">假設 IID（獨立同分布）</div>
+              <ul style="margin:0;padding-left:14px;color:var(--text);line-height:1.7">
+                <li>可生成數千條模擬路徑</li>
+                <li>涵蓋歷史未曾出現的情境組合</li>
+                <li>肥尾與偏態自然保留（Bootstrap）</li>
+              </ul>
+              <div style="margin-top:6px;color:var(--text-dim);font-size:0.9em">⚠ 忽略序列相關性（動能、危機蔓延）</div>
+              <div style="margin-top:4px;color:#60a5fa;font-size:0.88em">✓ 適合：策略壓力測試、尾部情境量化</div>
+            </div>
+            <div style="padding:8px 10px;border:1px solid var(--border);border-radius:6px">
+              <div style="font-weight:700;color:#a78bfa;margin-bottom:6px">📜 滾動歷史回測</div>
+              <div style="color:var(--text-dim);margin-bottom:4px;font-size:0.9em">Path-dependent（路徑相依）</div>
+              <ul style="margin:0;padding-left:14px;color:var(--text);line-height:1.7">
+                <li>忠實反映真實歷史序列與事件</li>
+                <li>保留危機蔓延、動能等序列效應</li>
+                <li>結果可回溯至具體歷史年份</li>
+              </ul>
+              <div style="margin-top:6px;color:var(--text-dim);font-size:0.9em">⚠ 樣本少、易受選擇性偏誤影響</div>
+              <div style="margin-top:4px;color:#a78bfa;font-size:0.88em">✓ 適合：策略驗證、過擬合檢查</div>
+            </div>
           </div>
           <div class="gls-def" style="margin-top:6px;color:var(--text-dim);font-size:0.85em">兩種方法互補而非對立。本工具採用 Bootstrap 抽樣，是蒙地卡羅的一種實作形式，同時保留了歷史報酬的真實統計特性（肥尾、偏態），比假設常態分布的純蒙地卡羅更貼近現實。</div>
         </div>
@@ -801,7 +841,7 @@ tr:hover td{background:var(--bg-hover)}
       </div>
     </div>
 
-    <div class="gls-section">
+    <div class="gls-section" id="gls-s-ret">
       <div class="gls-section-title">報酬率指標</div>
       <div class="gls-grid">
         <div class="gls-card">
@@ -864,7 +904,7 @@ tr:hover td{background:var(--bg-hover)}
       </div>
     </div>
 
-    <div class="gls-section">
+    <div class="gls-section" id="gls-s-risk">
       <div class="gls-section-title">風險指標</div>
       <div class="gls-grid">
         <div class="gls-card">
@@ -872,11 +912,78 @@ tr:hover td{background:var(--bg-hover)}
           <div class="gls-en">MDD — Maximum Drawdown</div>
           <div class="gls-def">從歷史高點到最低谷的最大跌幅百分比，衡量持有期間可能承受的最大虧損。槓桿倍數愈高，MDD 通常愈大。</div>
           <div class="gls-formula">MDD = (谷底 − 前高) / 前高</div>
+          <svg viewBox="0 0 300 120" style="width:100%;height:auto;display:block;margin-top:8px">
+            <!-- axes -->
+            <line x1="24" y1="10" x2="24" y2="98" stroke="var(--text-dim)" stroke-width="1"/>
+            <line x1="24" y1="98" x2="288" y2="98" stroke="var(--text-dim)" stroke-width="1"/>
+            <text x="13" y="55" font-size="7" fill="var(--text-dim)" text-anchor="middle" transform="rotate(-90,13,55)">資產淨值</text>
+            <text x="288" y="106" font-size="7" fill="var(--text-dim)" text-anchor="end">時間 →</text>
+            <!-- price path: rises to peak, drops to trough, partial recovery -->
+            <polyline points="24,82 50,74 75,62 100,48 125,36 150,28 152,28" fill="none" stroke="#60a5fa" stroke-width="2"/>
+            <!-- peak marker -->
+            <circle cx="152" cy="28" r="3" fill="#4ade80"/>
+            <line x1="152" y1="28" x2="152" y2="98" stroke="#4ade80" stroke-width="1" stroke-dasharray="3,3"/>
+            <text x="152" y="22" font-size="7" fill="#4ade80" text-anchor="middle">前高（Peak）</text>
+            <!-- drop to trough -->
+            <polyline points="152,28 170,40 188,55 205,68 218,78 228,84" fill="none" stroke="#ef4444" stroke-width="2"/>
+            <!-- trough marker -->
+            <circle cx="228" cy="84" r="3" fill="#ef4444"/>
+            <line x1="228" y1="84" x2="228" y2="98" stroke="#ef4444" stroke-width="1" stroke-dasharray="3,3"/>
+            <text x="228" y="112" font-size="7" fill="#ef4444" text-anchor="middle">谷底（Trough）</text>
+            <!-- partial recovery line (faded) -->
+            <polyline points="228,84 250,76 275,68" fill="none" stroke="#60a5fa" stroke-width="1.5" stroke-dasharray="4,3" opacity="0.5"/>
+            <!-- MDD vertical arrow: peak to trough at x=152 -->
+            <line x1="248" y1="28" x2="248" y2="84" stroke="#fbbf24" stroke-width="1.5"/>
+            <polygon points="248,28 245,36 251,36" fill="#fbbf24"/>
+            <polygon points="248,84 245,76 251,76" fill="#fbbf24"/>
+            <text x="264" y="50" font-size="7.5" fill="#fbbf24" text-anchor="middle" font-weight="bold">MDD</text>
+            <text x="264" y="60" font-size="7" fill="#fbbf24" text-anchor="middle">跌幅</text>
+            <!-- horizontal dashed at peak level -->
+            <line x1="152" y1="28" x2="248" y2="28" stroke="#4ade80" stroke-width="1" stroke-dasharray="3,3" opacity="0.5"/>
+            <line x1="228" y1="84" x2="248" y2="84" stroke="#ef4444" stroke-width="1" stroke-dasharray="3,3" opacity="0.5"/>
+          </svg>
         </div>
         <div class="gls-card">
           <div class="gls-term">恢復期</div>
           <div class="gls-en">Recovery Period / Drawdown Duration</div>
           <div class="gls-def">從回撤的最低谷重新回升至前高所需的時間（月數）。反映投資人需要忍受虧損的時間長度。</div>
+          <svg viewBox="0 0 300 130" style="width:100%;height:auto;display:block;margin-top:8px">
+            <!-- axes -->
+            <line x1="24" y1="10" x2="24" y2="100" stroke="var(--text-dim)" stroke-width="1"/>
+            <line x1="24" y1="100" x2="288" y2="100" stroke="var(--text-dim)" stroke-width="1"/>
+            <text x="13" y="55" font-size="7" fill="var(--text-dim)" text-anchor="middle" transform="rotate(-90,13,55)">資產淨值</text>
+            <text x="288" y="108" font-size="7" fill="var(--text-dim)" text-anchor="end">時間 →</text>
+            <!-- rise to peak -->
+            <polyline points="24,84 55,72 85,58 110,44 130,34 145,29" fill="none" stroke="#60a5fa" stroke-width="2"/>
+            <!-- peak -->
+            <circle cx="145" cy="29" r="3" fill="#4ade80"/>
+            <line x1="145" y1="29" x2="145" y2="100" stroke="#4ade80" stroke-width="1" stroke-dasharray="3,3"/>
+            <text x="145" y="23" font-size="7" fill="#4ade80" text-anchor="middle">前高</text>
+            <!-- drop to trough -->
+            <polyline points="145,29 162,42 178,57 192,68 202,76 210,80" fill="none" stroke="#ef4444" stroke-width="2"/>
+            <!-- trough -->
+            <circle cx="210" cy="80" r="3" fill="#ef4444"/>
+            <line x1="210" y1="80" x2="210" y2="100" stroke="#ef4444" stroke-width="1" stroke-dasharray="3,3"/>
+            <text x="210" y="114" font-size="7" fill="#ef4444" text-anchor="middle">谷底</text>
+            <!-- recovery back to peak level -->
+            <polyline points="210,80 222,72 234,62 245,50 254,40 262,29" fill="none" stroke="#a78bfa" stroke-width="2"/>
+            <!-- recovery end = peak level -->
+            <circle cx="262" cy="29" r="3" fill="#a78bfa"/>
+            <line x1="262" y1="29" x2="262" y2="100" stroke="#a78bfa" stroke-width="1" stroke-dasharray="3,3"/>
+            <text x="262" y="23" font-size="7" fill="#a78bfa" text-anchor="middle">回復前高</text>
+            <!-- peak level horizontal line -->
+            <line x1="145" y1="29" x2="262" y2="29" stroke="var(--border)" stroke-width="1" stroke-dasharray="4,3" opacity="0.6"/>
+            <!-- TTR bracket below x-axis: peak to recovery -->
+            <line x1="145" y1="118" x2="262" y2="118" stroke="#fbbf24" stroke-width="1.5"/>
+            <line x1="145" y1="114" x2="145" y2="122" stroke="#fbbf24" stroke-width="1.5"/>
+            <line x1="262" y1="114" x2="262" y2="122" stroke="#fbbf24" stroke-width="1.5"/>
+            <text x="203" y="128" font-size="7.5" fill="#fbbf24" text-anchor="middle" font-weight="bold">TTR（恢復期）</text>
+            <!-- MDD arrow at peak vs trough -->
+            <line x1="280" y1="29" x2="280" y2="80" stroke="#f472b6" stroke-width="1.5"/>
+            <polygon points="280,29 277,37 283,37" fill="#f472b6"/>
+            <polygon points="280,80 277,72 283,72" fill="#f472b6"/>
+            <text x="293" y="52" font-size="7" fill="#f472b6" text-anchor="middle">MDD</text>
+          </svg>
         </div>
         <div class="gls-card">
           <div class="gls-term">夏普比率</div>
@@ -900,29 +1007,82 @@ tr:hover td{background:var(--bg-hover)}
           <div class="gls-en">Fat Tail Risk / Heavy Tail Risk</div>
           <div class="gls-def">在統計學中，<strong>常態分布（鐘形曲線）的尾部極薄</strong>——極端事件發生的機率被視為近乎為零。然而真實金融市場的報酬分布呈現<strong>肥尾（Fat Tail）</strong>：極端漲跌發生的頻率遠超常態分布的預測，且幅度更大。</div>
           <div class="gls-def" style="margin-top:8px;font-size:0.88em">
-            <svg viewBox="0 0 320 110" style="width:100%;height:auto;display:block">
-              <!-- axes -->
-              <line x1="20" y1="95" x2="300" y2="95" stroke="var(--text-dim)" stroke-width="1"/>
-              <line x1="160" y1="10" x2="160" y2="95" stroke="var(--text-dim)" stroke-width="0.5" stroke-dasharray="3,3"/>
-              <!-- normal distribution curve -->
-              <path d="M30,93 C60,92 90,80 120,45 C140,20 150,10 160,9 C170,10 180,20 200,45 C230,80 260,92 290,93"
-                    fill="none" stroke="#60a5fa" stroke-width="2"/>
-              <!-- fat tail curve -->
-              <path d="M30,88 C55,86 85,78 115,50 C138,27 150,12 160,10 C170,12 182,27 205,50 C235,78 265,86 290,88"
-                    fill="none" stroke="#f472b6" stroke-width="2" stroke-dasharray="5,3"/>
-              <!-- left fat tail highlight -->
-              <path d="M30,88 C40,87 50,87 65,86 L65,95 L30,95 Z" fill="#f472b655"/>
-              <path d="M30,93 C40,93 50,93 65,93 L65,95 L30,95 Z" fill="#60a5fa33"/>
-              <!-- right fat tail highlight -->
-              <path d="M255,86 C270,87 280,87 290,88 L290,95 L255,95 Z" fill="#f472b655"/>
-              <path d="M255,93 C270,93 280,93 290,93 L290,95 L255,95 Z" fill="#60a5fa33"/>
-              <!-- labels -->
-              <text x="160" y="7" font-size="8" fill="var(--text-dim)" text-anchor="middle">中心（均值）</text>
-              <text x="45" y="83" font-size="7.5" fill="#f472b6" text-anchor="middle">肥尾</text>
-              <text x="275" y="83" font-size="7.5" fill="#f472b6" text-anchor="middle">肥尾</text>
-              <text x="75" y="105" font-size="7.5" fill="#60a5fa" text-anchor="middle">── 常態分布</text>
-              <text x="220" y="105" font-size="7.5" fill="#f472b6" text-anchor="middle">╌ 肥尾分布</text>
-            </svg>
+            <canvas id="fat-tail-canvas" style="width:100%;height:120px;display:block"></canvas>
+            <script>
+            (function(){
+              const cv = document.getElementById('fat-tail-canvas');
+              function draw(){
+                const dpr = window.devicePixelRatio||1;
+                const W = cv.offsetWidth, H = cv.offsetHeight||120;
+                cv.width = W*dpr; cv.height = H*dpr;
+                const ctx = cv.getContext('2d');
+                ctx.scale(dpr,dpr);
+                const isDark = document.documentElement.getAttribute('data-theme')!=='light';
+                const axisColor = isDark ? '#6b7280' : '#9ca3af';
+                const textColor = isDark ? '#9ca3af' : '#6b7280';
+                const pad = {l:28,r:12,t:14,b:28};
+                const cw = W-pad.l-pad.r, ch = H-pad.t-pad.b;
+                // Normal PDF
+                const normPDF = x => Math.exp(-0.5*x*x)/Math.sqrt(2*Math.PI);
+                // Student-t df=3 PDF (fat tail)
+                const tPDF = x => { const df=3; return Math.pow(1+x*x/df,-(df+1)/2) * 0.318310; };
+                const xMin=-4, xMax=4, steps=300;
+                // find max y for scaling
+                const yMax = normPDF(0)*1.05;
+                const toX = x => pad.l + (x-xMin)/(xMax-xMin)*cw;
+                const toY = y => pad.t + ch - (y/yMax)*ch;
+                // axes
+                ctx.strokeStyle = axisColor; ctx.lineWidth = 1;
+                ctx.beginPath(); ctx.moveTo(pad.l,pad.t+ch); ctx.lineTo(pad.l+cw,pad.t+ch); ctx.stroke();
+                // centre line
+                ctx.setLineDash([3,3]); ctx.lineWidth=0.7;
+                ctx.beginPath(); ctx.moveTo(toX(0),pad.t); ctx.lineTo(toX(0),pad.t+ch); ctx.stroke();
+                ctx.setLineDash([]);
+                // fat tail fill (t-dist tails only, x < -2 or x > 2)
+                ctx.fillStyle = 'rgba(244,114,182,0.25)';
+                ctx.beginPath();
+                for(let i=0;i<=steps;i++){
+                  const x=xMin+i*(xMax-xMin)/steps;
+                  if(Math.abs(x)>=2){ const y=tPDF(x); i===0?ctx.moveTo(toX(x),toY(y)):ctx.lineTo(toX(x),toY(y)); }
+                  else if(i===0) ctx.moveTo(toX(xMin),toY(0));
+                }
+                // fill tail regions
+                [[xMin,-2],[2,xMax]].forEach(([a,b])=>{
+                  ctx.beginPath();
+                  ctx.moveTo(toX(a),pad.t+ch);
+                  for(let i=0;i<=60;i++){const x=a+i*(b-a)/60;ctx.lineTo(toX(x),toY(tPDF(x)));}
+                  ctx.lineTo(toX(b),pad.t+ch); ctx.closePath(); ctx.fill();
+                });
+                // draw normal curve
+                ctx.strokeStyle='#60a5fa'; ctx.lineWidth=2; ctx.setLineDash([]);
+                ctx.beginPath();
+                for(let i=0;i<=steps;i++){
+                  const x=xMin+i*(xMax-xMin)/steps, y=normPDF(x);
+                  i===0?ctx.moveTo(toX(x),toY(y)):ctx.lineTo(toX(x),toY(y));
+                }
+                ctx.stroke();
+                // draw t-dist curve
+                ctx.strokeStyle='#f472b6'; ctx.lineWidth=2; ctx.setLineDash([6,3]);
+                ctx.beginPath();
+                for(let i=0;i<=steps;i++){
+                  const x=xMin+i*(xMax-xMin)/steps, y=tPDF(x);
+                  i===0?ctx.moveTo(toX(x),toY(y)):ctx.lineTo(toX(x),toY(y));
+                }
+                ctx.stroke(); ctx.setLineDash([]);
+                // labels
+                ctx.font=`${Math.max(9,W/38)}px sans-serif`; ctx.textAlign='center';
+                ctx.fillStyle='#60a5fa'; ctx.fillText('── 常態分布 N(0,1)',W*0.27,H-6);
+                ctx.fillStyle='#f472b6'; ctx.fillText('╌ 肥尾 t(df=3)',W*0.73,H-6);
+                ctx.fillStyle=textColor;
+                ctx.fillText('肥尾',toX(-3.2),pad.t+ch-8);
+                ctx.fillText('肥尾',toX(3.2),pad.t+ch-8);
+                ctx.fillText('μ',toX(0),pad.t+8);
+              }
+              if(cv.offsetWidth>0) draw();
+              else requestAnimationFrame(draw);
+              let roTimer; new ResizeObserver(()=>{clearTimeout(roTimer);roTimer=setTimeout(draw,50)}).observe(cv);
+            })();
+            </script>
           </div>
           <div class="gls-def" style="margin-top:6px;display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:0.88em">
             <div style="padding:6px 8px;border:1px solid var(--border);border-radius:6px">
@@ -945,31 +1105,66 @@ tr:hover td{background:var(--bg-hover)}
           <div class="gls-en">Financial Bubble Cycle — Rodrigue Model</div>
           <div class="gls-def">Jean-Paul Rodrigue 的泡沫模型將資產泡沫分為四個階段，每個階段的參與者心理截然不同：</div>
           <div style="margin:8px 0">
-            <svg viewBox="0 0 360 160" style="width:100%;height:auto;display:block">
+            <svg viewBox="0 0 370 170" style="width:100%;height:auto;display:block">
               <!-- axes -->
-              <line x1="20" y1="140" x2="345" y2="140" stroke="var(--text-dim)" stroke-width="1"/>
-              <line x1="20" y1="10"  x2="20"  y2="140" stroke="var(--text-dim)" stroke-width="1"/>
-              <!-- bubble curve -->
-              <path d="M20,130 C40,128 55,125 70,118 C85,110 95,105 105,100 C118,93 125,88 135,75 C143,64 148,52 155,38 C160,28 163,18 167,14 C171,10 174,12 178,18 C183,26 187,40 192,60 C197,78 200,95 205,108 C210,118 215,125 222,130 C232,136 245,138 260,132 C272,127 280,118 288,108 C298,95 305,85 315,78 C325,72 333,70 345,70"
+              <line x1="22" y1="145" x2="358" y2="145" stroke="var(--text-dim)" stroke-width="1"/>
+              <line x1="22" y1="8"   x2="22"  y2="145" stroke="var(--text-dim)" stroke-width="1"/>
+              <!-- y axis label -->
+              <text x="13" y="78" font-size="7" fill="var(--text-dim)" text-anchor="middle" transform="rotate(-90,13,78)">價格</text>
+              <!-- bubble curve:
+                   隱蔽期(22-100): slow rise, 起飛 near x=88
+                   覺醒期(100-175): faster rise, 首次拋售(dip)~x=115, 空頭陷阱(recovery)~x=135
+                   狂熱期(175-268): explosive rise to peak x≈228, sharp drop starts
+                   崩盤期(268-358): denial bounce~280, bull trap~290, capitulation~318, despair~330, mean~355
+              -->
+              <path d="M22,132 C38,130 58,126 72,120 C82,116 88,112 92,108
+                        C98,102 102,96 108,92 C112,88 115,91 118,95
+                        C121,99 125,94 130,88 C138,78 148,65 158,52
+                        C165,42 170,32 175,24 C180,16 188,10 196,8
+                        C204,6 215,8 224,10 C230,14 238,24 244,36
+                        C250,50 256,66 260,78 C264,88 266,96 268,102
+                        C271,95 274,88 278,85 C282,83 287,85 290,89
+                        C295,97 300,108 308,118 C315,125 322,130 330,133
+                        C338,135 347,132 355,128"
                     fill="none" stroke="#60a5fa" stroke-width="2.5"/>
               <!-- phase dividers -->
-              <line x1="105" y1="60" x2="105" y2="140" stroke="var(--border)" stroke-width="1" stroke-dasharray="3,3"/>
-              <line x1="200" y1="60" x2="200" y2="140" stroke="var(--border)" stroke-width="1" stroke-dasharray="3,3"/>
-              <line x1="265" y1="60" x2="265" y2="140" stroke="var(--border)" stroke-width="1" stroke-dasharray="3,3"/>
+              <line x1="100" y1="55" x2="100" y2="145" stroke="var(--border)" stroke-width="1" stroke-dasharray="3,3"/>
+              <line x1="175" y1="55" x2="175" y2="145" stroke="var(--border)" stroke-width="1" stroke-dasharray="3,3"/>
+              <line x1="268" y1="55" x2="268" y2="145" stroke="var(--border)" stroke-width="1" stroke-dasharray="3,3"/>
+              <!-- phase background bands -->
+              <rect x="22"  y="145" width="78"  height="4" fill="#6b728040" rx="1"/>
+              <rect x="100" y="145" width="75"  height="4" fill="#3b82f640" rx="1"/>
+              <rect x="175" y="145" width="93"  height="4" fill="#ef444440" rx="1"/>
+              <rect x="268" y="145" width="90"  height="4" fill="#f9731640" rx="1"/>
               <!-- phase labels -->
-              <text x="62"  y="152" font-size="7.5" fill="var(--text-dim)" text-anchor="middle">隱蔽期</text>
-              <text x="152" y="152" font-size="7.5" fill="var(--text-dim)" text-anchor="middle">覺醒期</text>
-              <text x="232" y="152" font-size="7.5" fill="var(--text-dim)" text-anchor="middle">狂熱期</text>
-              <text x="305" y="152" font-size="7.5" fill="var(--text-dim)" text-anchor="middle">崩盤期</text>
-              <!-- key points -->
-              <circle cx="167" cy="14" r="3" fill="#ef4444"/>
-              <text x="167" y="9" font-size="7" fill="#ef4444" text-anchor="middle">頂部</text>
-              <circle cx="222" cy="130" r="3" fill="#4ade80"/>
-              <text x="232" y="128" font-size="7" fill="#4ade80" text-anchor="start">「回調買點」幻覺</text>
-              <circle cx="345" cy="70" r="3" fill="#fbbf24"/>
-              <text x="342" y="65" font-size="7" fill="#fbbf24" text-anchor="end">新均衡</text>
-              <!-- y axis label -->
-              <text x="12" y="75" font-size="7.5" fill="var(--text-dim)" text-anchor="middle" transform="rotate(-90,12,75)">價格</text>
+              <text x="61"  y="158" font-size="7.5" fill="var(--text-dim)" text-anchor="middle">隱蔽期</text>
+              <text x="137" y="158" font-size="7.5" fill="var(--text-dim)" text-anchor="middle">覺醒期</text>
+              <text x="221" y="158" font-size="7.5" fill="var(--text-dim)" text-anchor="middle">狂熱期</text>
+              <text x="313" y="158" font-size="7.5" fill="var(--text-dim)" text-anchor="middle">崩盤期</text>
+              <!-- 隱蔽期 annotation: 起飛 -->
+              <circle cx="92" cy="108" r="2.5" fill="#a78bfa"/>
+              <text x="92" y="103" font-size="6.5" fill="#a78bfa" text-anchor="middle">起飛</text>
+              <!-- 覺醒期 annotations: 首次拋售, 空頭陷阱 -->
+              <circle cx="118" cy="95" r="2.5" fill="#fbbf24"/>
+              <text x="118" y="89" font-size="6.5" fill="#fbbf24" text-anchor="middle">首次拋售</text>
+              <circle cx="130" cy="88" r="2.5" fill="#fbbf24"/>
+              <text x="155" y="82" font-size="6.5" fill="#fbbf24" text-anchor="middle">空頭陷阱</text>
+              <!-- 狂熱期 annotations: 媒體關注, 熱情/貪婪, 新典範 peak -->
+              <circle cx="175" cy="24" r="2.5" fill="#f472b6"/>
+              <text x="175" y="19" font-size="6.5" fill="#f472b6" text-anchor="middle">媒體關注</text>
+              <circle cx="196" cy="8"  r="2.5" fill="#ef4444"/>
+              <text x="222" y="6"  font-size="6.5" fill="#ef4444" text-anchor="middle">貪婪 / 錯覺</text>
+              <circle cx="224" cy="10" r="3"   fill="#ef4444"/>
+              <text x="224" y="4"  font-size="7"   fill="#ef4444" text-anchor="middle" font-weight="bold">「新典範」!!!</text>
+              <!-- 崩盤期 annotations: 否認, 多頭陷阱, 絕望, 回歸均值 -->
+              <circle cx="278" cy="85" r="2.5" fill="#f97316"/>
+              <text x="278" y="80" font-size="6.5" fill="#f97316" text-anchor="middle">否認</text>
+              <circle cx="290" cy="89" r="2.5" fill="#f97316"/>
+              <text x="310" y="83" font-size="6.5" fill="#f97316" text-anchor="start">多頭陷阱</text>
+              <circle cx="330" cy="133" r="2.5" fill="#60a5fa"/>
+              <text x="330" y="128" font-size="6.5" fill="#60a5fa" text-anchor="middle">絕望</text>
+              <circle cx="355" cy="128" r="2.5" fill="#4ade80"/>
+              <text x="355" y="122" font-size="6.5" fill="#4ade80" text-anchor="end">回歸均值</text>
             </svg>
           </div>
           <div class="gls-def" style="font-size:0.85em;display:grid;grid-template-columns:1fr 1fr;gap:6px">
@@ -996,7 +1191,7 @@ tr:hover td{background:var(--bg-hover)}
       </div>
     </div>
 
-    <div class="gls-section">
+    <div class="gls-section" id="gls-s-lev">
       <div class="gls-section-title">槓桿與配置</div>
       <div class="gls-grid">
         <div class="gls-card">
@@ -1004,11 +1199,53 @@ tr:hover td{background:var(--bg-hover)}
           <div class="gls-en">Beta / Effective Leverage</div>
           <div class="gls-def">投資組合對基礎指數的實效曝險倍數。1× = 無槓桿，2× = 每日重置 2 倍槓桿 ETF。Beta 隨槓桿配置比例而變動。</div>
           <div class="gls-formula">Beta = 1×權重×1 + 2×權重×2 + 3×權重×3</div>
-          <div class="gls-def" style="margin-top:6px"><strong>期望報酬的數學推導：</strong>若原始資產超額報酬為 μ − r，槓桿倍數為 β，則：</div>
-          <div class="gls-formula">調整後超額期望報酬 ≈ β × (μ − r)
-調整後波動率 σ_β = β × σ
-Sharpe Ratio = (μ − r) / σ = β(μ − r) / βσ → 不變</div>
-          <div class="gls-def" style="margin-top:6px;color:var(--text-dim);font-size:0.85em"><strong>關鍵洞察：</strong>在純市場因子下，槓桿等比例放大報酬與波動，Sharpe Ratio 不因 β 縮放而改變。這意味著<em>槓桿本身不創造風險調整後的超額價值</em>——真正的優勢來自 Alpha，而非提高 Beta。然而幾何報酬（CAGR）因波動損耗而遞減：CAGR ≈ μ_β − σ_β²/2，β 越大損耗越重。</div>
+          <div class="gls-def" style="margin-top:8px"><strong>幾何報酬（CAGR）與 Volatility Drag：</strong></div>
+          <div class="gls-formula">g_L = r_f + L(μ − r_f) − L²σ²/2
+
+其中：
+  L(μ − r_f)  → 槓桿放大的算術超額報酬（線性）
+  L²σ²/2      → Volatility Drag，隨槓桿平方增長
+  最優槓桿 L* = (μ − r_f) / σ²  ← 即 Kelly Criterion</div>
+          <div class="gls-def" style="margin-top:8px">
+            <strong>互動示例</strong>（μ=10%, r_f=4%, σ=20%）——拖曳滑桿觀察 CAGR 變化：
+            <div style="display:flex;align-items:center;gap:8px;margin:6px 0">
+              <span style="font-size:0.8em;color:var(--text-dim);white-space:nowrap">L =</span>
+              <input type="range" id="beta-drag-l" min="0" max="40" value="10" style="flex:1;accent-color:#3b82f6" oninput="betaDragUpdate()">
+              <span id="beta-drag-lval" style="font-size:0.85em;font-weight:700;color:#60a5fa;min-width:30px">1.0×</span>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;font-size:0.82em;text-align:center">
+              <div style="padding:6px;border:1px solid var(--border);border-radius:6px">
+                <div style="color:var(--text-dim);margin-bottom:2px">算術超額報酬</div>
+                <div id="beta-drag-arith" style="font-weight:700;color:#60a5fa">6.0%</div>
+              </div>
+              <div style="padding:6px;border:1px solid var(--border);border-radius:6px">
+                <div style="color:var(--text-dim);margin-bottom:2px">Volatility Drag</div>
+                <div id="beta-drag-drag" style="font-weight:700;color:#f472b6">−2.0%</div>
+              </div>
+              <div style="padding:6px;border:1px solid var(--border);border-radius:6px">
+                <div style="color:var(--text-dim);margin-bottom:2px">CAGR (g_L)</div>
+                <div id="beta-drag-cagr" style="font-weight:700;color:#4ade80">8.0%</div>
+              </div>
+            </div>
+            <div style="margin-top:6px;font-size:0.78em;color:var(--text-dim)" id="beta-drag-note">L* (Kelly) = 1.5× → 最大 CAGR ≈ 8.5%</div>
+          </div>
+          <div class="gls-def" style="margin-top:6px;color:var(--text-dim);font-size:0.85em"><strong>Sharpe Ratio 不變：</strong>槓桿等比例放大超額報酬與波動，Sharpe = (μ−r)/σ = β(μ−r)/βσ 不隨 β 改變。槓桿本身不創造風險調整後的超額價值——但 Volatility Drag 使幾何報酬（CAGR）在超過 L* 後迅速下滑。→ 參見 <em>Kelly Fraction</em> 卡片。</div>
+          <script>
+          function betaDragUpdate(){
+            const L=parseInt(document.getElementById('beta-drag-l').value)/10;
+            const mu=0.10,rf=0.04,sig2=0.04;
+            const excess=L*(mu-rf), drag=L*L*sig2/2, gL=rf+excess-drag;
+            const Lstar=(mu-rf)/sig2;
+            document.getElementById('beta-drag-lval').textContent=L.toFixed(1)+'×';
+            document.getElementById('beta-drag-arith').textContent=(excess*100).toFixed(1)+'%';
+            document.getElementById('beta-drag-drag').textContent='−'+(drag*100).toFixed(1)+'%';
+            const cagrEl=document.getElementById('beta-drag-cagr');
+            cagrEl.textContent=(gL*100).toFixed(1)+'%';
+            cagrEl.style.color=gL>=rf+Lstar*(mu-rf)-Lstar*Lstar*sig2/2-0.001?'#4ade80':gL>rf?'#fbbf24':'#ef4444';
+            document.getElementById('beta-drag-note').textContent=`L* (Kelly) = ${Lstar.toFixed(1)}× → 最大 CAGR ≈ ${((rf+(mu-rf)*(mu-rf)/sig2/2)*100).toFixed(1)}%；目前 L=${L.toFixed(1)}× ${L<Lstar?'低於 Kelly，可適度提高曝險':L===Lstar?'= Kelly 最優':L<=2*Lstar?'超過 Kelly，注意 Drag 加速':'> 2×Kelly，期望幾何報酬低於無槓桿'}`;
+          }
+          betaDragUpdate();
+          </script>
         </div>
         <div class="gls-card">
           <div class="gls-term">每日重置槓桿</div>
@@ -1137,7 +1374,7 @@ Sharpe Ratio = (μ − r) / σ = β(μ − r) / βσ → 不變</div>
       </div>
     </div>
 
-    <div class="gls-section">
+    <div class="gls-section" id="gls-s-kelly">
       <div class="gls-section-title">Kelly 準則</div>
       <div class="gls-grid">
         <div class="gls-card">
@@ -1168,7 +1405,11 @@ Sharpe Ratio = (μ − r) / σ = β(μ − r) / βσ → 不變</div>
             </div>
             <div style="padding:6px 8px;border:1px solid var(--border);border-radius:6px">
               <div style="font-weight:600;margin-bottom:4px">📺 Archegos（2021）</div>
-              Bill Hwang 的家族辦公室，透過<strong>總報酬互換（TRS）</strong>繞過持倉揭露規定，實際槓桿達 <strong>5–8×</strong>，集中押注少數媒體股。2021 年 3 月維亞康姆股價下跌觸發追繳保證金，連鎖平倉造成各大投行合計虧損逾 <strong>100 億美元</strong>。
+              Bill Hwang 的家族辦公室，透過<strong>總報酬互換（TRS）</strong>繞過持倉揭露規定，實際槓桿達 <strong>5–8×</strong>，集中押注少數媒體股。2021 年 3 月維亞康姆股價下跌觸發追繳保證金，連鎖平倉造成各大投行合計虧損逾 <strong>100 億美元</strong>。<br><br>
+              <strong>外溢效應（交易對手風險）：</strong><br>
+              • <strong>瑞士信貸（Credit Suisse）</strong>未及時平倉 → 損失約 <strong>55 億美元</strong><br>
+              • <strong>野村證券</strong>損失約 <strong>29 億美元</strong><br>
+              TRS 持倉不透明使 Prime Broker 無法掌握整體曝險；Hwang 同時委託多家券商，各方均不知對方的集中部位規模。這是<strong>交易對手風險（Counterparty Risk）</strong>的經典案例：個人爆倉透過衍生品網絡造成系統性外溢，損害了對 Hwang 持倉毫無直接知情的機構。
             </div>
           </div>
           <div class="gls-def" style="margin-top:6px;color:var(--text-dim);font-size:0.85em"><strong>共同教訓：</strong>① 模型優秀不等於槓桿安全；② 流動性危機時「正常」的相關性假設會同步崩潰（肥尾事件）；③ Kelly 的核心價值在於<em>限制</em>槓桿上限，而非追求最大報酬。</div>
@@ -1176,7 +1417,7 @@ Sharpe Ratio = (μ − r) / σ = β(μ − r) / βσ → 不變</div>
       </div>
     </div>
 
-    <div class="gls-section">
+    <div class="gls-section" id="gls-s-cf">
       <div class="gls-section-title">現金流</div>
       <div class="gls-grid">
         <div class="gls-card">
@@ -1220,7 +1461,7 @@ Sharpe Ratio = (μ − r) / σ = β(μ − r) / βσ → 不變</div>
       </div>
     </div>
 
-    <div class="gls-section">
+    <div class="gls-section" id="gls-s-macro">
       <div class="gls-section-title">總體指標</div>
       <div class="gls-grid">
         <div class="gls-card">
@@ -1393,7 +1634,7 @@ Sharpe Ratio = (μ − r) / σ = β(μ − r) / βσ → 不變</div>
       </div>
     </div>
 
-    <div class="gls-section">
+    <div class="gls-section" id="gls-s-mon">
       <div class="gls-section-title">貨幣政策</div>
       <div class="gls-grid">
         <div class="gls-card">
@@ -1452,7 +1693,7 @@ Sharpe Ratio = (μ − r) / σ = β(μ − r) / βσ → 不變</div>
       </div>
     </div>
 
-    <div class="gls-section">
+    <div class="gls-section" id="gls-s-beh">
       <div class="gls-section-title">行為心理</div>
       <div class="gls-grid">
         <div class="gls-card">
@@ -1603,6 +1844,20 @@ Sharpe Ratio = (μ − r) / σ = β(μ − r) / βσ → 不變</div>
           <div class="gls-en">Opportunity Cost</div>
           <div class="gls-def">選擇方案 A 時，所<strong>放棄的最佳替代方案 B 的價值</strong>。機會成本不會出現在帳目上，卻是每一個決策真正的隱性代價。</div>
           <div class="gls-def" style="margin-top:6px;color:var(--text-dim);font-size:0.85em"><strong>投資應用：</strong>持有現金的機會成本是放棄的 NDX 報酬；使用 1× 槓桿的機會成本是放棄 1.5× 的超額報酬（若 Kelly 值為 1.5×）。低風險不代表低代價——長期通膨侵蝕下，過於保守本身就是一種虧損。</div>
+          <div class="gls-def" style="margin-top:8px;font-size:0.85em;display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">
+            <div style="padding:6px 8px;border:1px solid var(--border);border-radius:6px">
+              <div style="font-weight:600;margin-bottom:4px;color:var(--accent-title)">層次一：認知邊界</div>
+              機會成本的計算前提，是你能「看見」哪些選項。你看不見的選項，不會出現在你的機會成本計算中。
+            </div>
+            <div style="padding:6px 8px;border:1px solid var(--border);border-radius:6px">
+              <div style="font-weight:600;margin-bottom:4px;color:var(--accent-title)">層次二：Morgan Housel</div>
+              「沒有人是絕對的瘋子（No one is crazy）。」決策差異很大程度來自各人所掌握的<strong>選項集合不同</strong>，而非理性程度不同。
+            </div>
+            <div style="padding:6px 8px;border:1px solid var(--border);border-radius:6px">
+              <div style="font-weight:600;margin-bottom:4px;color:var(--accent-title)">層次三：實務啟示</div>
+              擴大機會成本意識 = 擴大能看見的選項集合 = 跨領域知識 + 多元人脈 + 刻意接觸不同視角
+            </div>
+          </div>
         </div>
         <div class="gls-card">
           <div class="gls-term">沉沒成本謬誤</div>
@@ -1613,7 +1868,7 @@ Sharpe Ratio = (μ − r) / σ = β(μ − r) / βσ → 不變</div>
       </div>
     </div>
 
-    <div class="gls-section">
+    <div class="gls-section" id="gls-s-ppl">
       <div class="gls-section-title">關鍵人物</div>
       <style>
         .gls-person{display:flex;gap:14px;align-items:flex-start}
@@ -1822,6 +2077,44 @@ f*：最優下注比例　b：賠率　p：勝率　q = 1−p</div>
           <div class="gls-person-bio" style="margin-top:8px">
             另一核心概念是<strong>第二層思維（Second-Level Thinking）</strong>：第一層思維說「這是好公司，買入」；第二層思維說「這是好公司，但所有人都知道，所以股價已反映，現在買划算嗎？」——與 Fama 的 EMH 形成有趣對話。
           </div>
+          <div style="margin:10px 0 2px">
+            <svg viewBox="0 0 320 160" style="width:100%;height:auto;display:block">
+              <!-- axes -->
+              <line x1="30" y1="140" x2="305" y2="140" stroke="var(--text-dim)" stroke-width="1"/>
+              <line x1="30" y1="10"  x2="30"  y2="140" stroke="var(--text-dim)" stroke-width="1"/>
+              <text x="305" y="148" font-size="8" fill="var(--text-dim)" text-anchor="end">風險 →</text>
+              <text x="12"  y="75"  font-size="8" fill="var(--text-dim)" text-anchor="middle" transform="rotate(-90,12,75)">預期報酬 ↑</text>
+              <!-- traditional view: straight diagonal -->
+              <line x1="30" y1="130" x2="290" y2="28" stroke="var(--text-dim)" stroke-width="1.5" stroke-dasharray="5,3"/>
+              <text x="294" y="25" font-size="7.5" fill="var(--text-dim)" text-anchor="start">傳統觀點</text>
+              <!-- Marks fan: upper bound (possible upside) -->
+              <path d="M30,130 C80,108 140,82 200,60 C240,45 270,32 305,16"
+                    fill="none" stroke="#4ade80" stroke-width="1.5" opacity="0.8"/>
+              <!-- Marks fan: lower bound (possible downside) -->
+              <path d="M30,130 C80,128 140,122 200,112 C240,104 270,95 305,82"
+                    fill="none" stroke="#ef4444" stroke-width="1.5" opacity="0.8"/>
+              <!-- fan fill -->
+              <path d="M30,130 C80,108 140,82 200,60 C240,45 270,32 305,16 L305,82 C270,95 240,104 200,112 C140,122 80,128 30,130 Z"
+                    fill="url(#marks-grad)" opacity="0.25"/>
+              <defs>
+                <linearGradient id="marks-grad" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0%" stop-color="#6b7280"/>
+                  <stop offset="100%" stop-color="#ef4444"/>
+                </linearGradient>
+              </defs>
+              <!-- width annotation at high risk -->
+              <line x1="305" y1="16" x2="305" y2="82" stroke="#fbbf24" stroke-width="1.5" stroke-dasharray="3,2"/>
+              <text x="310" y="50" font-size="7" fill="#fbbf24" text-anchor="start">結果</text>
+              <text x="310" y="59" font-size="7" fill="#fbbf24" text-anchor="start">離散度</text>
+              <!-- labels -->
+              <text x="195" y="55" font-size="7" fill="#4ade80" text-anchor="end">可能獲利上界</text>
+              <text x="195" y="118" font-size="7" fill="#ef4444" text-anchor="end">可能虧損下界</text>
+              <!-- annotation box -->
+              <rect x="55" y="32" width="118" height="28" rx="4" fill="var(--bg-input)" opacity="0.9"/>
+              <text x="114" y="45" font-size="7" fill="var(--text)" text-anchor="middle">高風險 ≠ 保證高報酬</text>
+              <text x="114" y="56" font-size="7" fill="var(--text-dim)" text-anchor="middle">高風險 = 結果範圍更大</text>
+            </svg>
+          </div>
           <div class="gls-person-bio" style="margin-top:8px;color:var(--text-dim)">
             每季發布投資備忘錄（Memo），長期被 Warren Buffett 等人視為必讀。代表作：《投資最重要的事》（The Most Important Thing, 2011）、《掌握市場週期》（Mastering the Market Cycle, 2018）。
           </div>
@@ -1830,8 +2123,72 @@ f*：最優下注比例　b：賠率　p：勝率　q = 1−p</div>
       </div>
     </div>
 
-  </div>
-  </div>
+  </div><!-- /#gls-content -->
+  </div><!-- /#gls-layout -->
+  </div><!-- /padding -->
+  <script>
+  (function(){
+    const inp = document.getElementById('gls-search');
+    const noRes = document.getElementById('gls-no-results');
+    if(!inp) return;
+    inp.addEventListener('input', function(){
+      const q = this.value.trim().toLowerCase();
+      let any = false;
+      document.querySelectorAll('#tab-gls .gls-card').forEach(card=>{
+        const match = !q || card.textContent.toLowerCase().includes(q);
+        card.classList.toggle('gls-hidden', !match);
+        if(match) any = true;
+      });
+      // show/hide sections based on whether any cards visible
+      document.querySelectorAll('#tab-gls .gls-section').forEach(sec=>{
+        const visible = [...sec.querySelectorAll('.gls-card')].some(c=>!c.classList.contains('gls-hidden'));
+        sec.style.display = visible ? '' : 'none';
+      });
+      noRes.style.display = (!any && q) ? 'block' : 'none';
+    });
+    // collapsible cards — wrap header/body dynamically
+    document.querySelectorAll('#tab-gls .gls-card').forEach(card=>{
+      const children = [...card.childNodes];
+      // find header nodes: .gls-term/.gls-person + optional .gls-en
+      let splitIdx = 0;
+      for(let i=0;i<children.length;i++){
+        const n=children[i];
+        if(n.nodeType===1 && (n.classList.contains('gls-term')||n.classList.contains('gls-person'))) { splitIdx=i+1; break; }
+      }
+      // include .gls-en in header if immediately after
+      if(children[splitIdx] && children[splitIdx].nodeType===1 && children[splitIdx].classList.contains('gls-en')) splitIdx++;
+      const hdr = document.createElement('div'); hdr.className='gls-card-header';
+      const btn = document.createElement('span'); btn.className='gls-collapse-btn'; btn.textContent='▾';
+      const hdrContent = document.createElement('div'); hdrContent.style.flex='1';
+      children.slice(0,splitIdx).forEach(n=>hdrContent.appendChild(n));
+      hdr.appendChild(hdrContent); hdr.appendChild(btn);
+      const body = document.createElement('div'); body.className='gls-card-body';
+      [...card.childNodes].forEach(n=>body.appendChild(n));
+      card.appendChild(hdr); card.appendChild(body);
+      hdr.addEventListener('click',()=>card.classList.toggle('collapsed'));
+    });
+    // TOC active highlight on scroll
+    const sections = [...document.querySelectorAll('#tab-gls .gls-section[id]')];
+    const tocLinks = [...document.querySelectorAll('#gls-toc a')];
+    const glsTab = document.getElementById('tab-gls');
+    if(glsTab && sections.length){
+      glsTab.addEventListener('scroll', function(){
+        let cur = sections[0].id;
+        sections.forEach(s=>{ if(s.offsetTop - glsTab.scrollTop <= 80) cur = s.id; });
+        tocLinks.forEach(a=>{ a.classList.toggle('toc-active', a.getAttribute('href')==='#'+cur); });
+      }, {passive:true});
+    }
+    // TOC click smooth scroll within tab
+    tocLinks.forEach(a=>{
+      a.addEventListener('click', function(e){
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if(target && glsTab) glsTab.scrollTo({top: target.offsetTop - 52, behavior:'smooth'});
+      });
+    });
+  })();
+  </script>
+  </div><!-- /#tab-gls -->
 
   <div class="footer">
     <div style="color:#6b7280;font-weight:600;margin-bottom:2px">⚠ 風險聲明 · Risk Disclaimer</div>
@@ -3907,7 +4264,8 @@ function renderResults(res) {
 
   drawFan(res);
   drawHist(finalV, init, cagrArr, mwrrArr);
-  drawDD(mddArr);
+  _ddMddArr = mddArr; _ddRecArr = recArr;
+  setDDView('mdd');
   drawBetaChart(res);
 }
 
@@ -4354,6 +4712,60 @@ function drawDD(mddArr) {
 let betaCache = null;
 function redrawBeta() { if (betaCache) drawBetaChart(betaCache); }
 
+let _ddMddArr = null, _ddRecArr = null;
+function setDDView(mode) {
+  document.getElementById('dd-btn-mdd').classList.toggle('btn-active', mode==='mdd');
+  document.getElementById('dd-btn-rec').classList.toggle('btn-active', mode==='rec');
+  document.getElementById('dd-chart-title').textContent = mode==='mdd' ? '最大回撤分佈 Histogram' : '恢復期分佈 Histogram（月）';
+  if (mode==='mdd' && _ddMddArr) drawDD(_ddMddArr);
+  if (mode==='rec' && _ddRecArr) drawRec(_ddRecArr);
+}
+function drawRec(recArr) {
+  const vals = Array.from(recArr).filter(v=>v>0).sort((a,b)=>a-b);
+  const n = vals.length;
+  if (!n) return;
+  const rPct = q => vals[Math.min(Math.floor(q*n), n-1)];
+  const p10=rPct(.10), p50=rPct(.50), p90=rPct(.90);
+  const maxR = Math.ceil(vals[n-1]/6)*6 || 60;
+  const BINS = 20, bw = maxR/BINS;
+  const counts = new Array(BINS).fill(0);
+  for (const v of vals) { const idx = Math.min(Math.floor(v/bw), BINS-1); counts[idx]++; }
+  const labels = Array.from({length:BINS}, (_,i)=>f2((i+0.5)*bw,0)+'月');
+  const midpts = Array.from({length:BINS}, (_,i)=>(i+0.5)*bw);
+  const colors = midpts.map(v => v>36?'#7f1d1dcc':v>24?'#ef4444cc':v>12?'#f97316cc':'#fbbf24cc');
+  const pLine = val => Math.min(Math.max(Math.floor(val/bw), 0), BINS-1);
+  if (CHARTS.dd) CHARTS.dd.destroy();
+  CHARTS.dd = new Chart(document.getElementById('dd-chart'), {
+    type:'bar',
+    data:{labels, datasets:[{data:counts, backgroundColor:colors, borderWidth:0}]},
+    options:{
+      animation:false, responsive:true,
+      plugins:{
+        legend:{display:false},
+        tooltip:{callbacks:{
+          title: items=>labels[items[0].dataIndex],
+          label: c=>`${c.raw} 次 (${(c.raw/n*100).toFixed(1)}%)`
+        }},
+        annotation:{annotations:{
+          lp10:{type:'line',xMin:pLine(p10)-0.5,xMax:pLine(p10)-0.5,
+            borderColor:'#a78bfa',borderWidth:1.5,borderDash:[4,3],
+            label:{content:`P10 ${p10.toFixed(0)}月`,display:true,position:'end',color:'#a78bfa',font:{size:9},backgroundColor:'transparent'}},
+          lp50:{type:'line',xMin:pLine(p50)-0.5,xMax:pLine(p50)-0.5,
+            borderColor:'#4ade80',borderWidth:2,
+            label:{content:`P50 ${p50.toFixed(0)}月`,display:true,position:'end',color:'#4ade80',font:{size:9},backgroundColor:'transparent'}},
+          lp90:{type:'line',xMin:pLine(p90)-0.5,xMax:pLine(p90)-0.5,
+            borderColor:'#fbbf24',borderWidth:1.5,borderDash:[4,3],
+            label:{content:`P90 ${p90.toFixed(0)}月`,display:true,position:'end',color:'#fbbf24',font:{size:9},backgroundColor:'transparent'}}
+        }}
+      },
+      scales:{
+        x:{title:{display:true,text:'恢復期（月）',color:_tc,font:{size:11}},ticks:{color:_tc,maxTicksLimit:8},grid:{display:false}},
+        y:{title:{display:true,text:'模擬次數',color:_tc,font:{size:11}},ticks:{color:_tc},grid:{color:_gc}}
+      }
+    }
+  });
+}
+
 function drawBetaChart(res) {
   betaCache = res;
   const useGross = document.getElementById('beta-view').value === 'gross';
@@ -4757,11 +5169,16 @@ function drawCompBoxPlots(all) {
     data: all.map(({res}) => makeBoxData(Float64Array.from(res.mddArr, v => -v * 100))),
     backgroundColor: all.map((_, i) => COLORS[i % COLORS.length] + '0.35)'),
     borderColor:     all.map((_, i) => COLORS[i % COLORS.length] + '0.9)'),
-    borderWidth: 1.5,
-    itemRadius: 0,
-    outlierRadius: 0,
-    medianColor: '#f8fafc',
+    borderWidth: 1.5, itemRadius: 0, outlierRadius: 0, medianColor: '#f8fafc',
   }];
+  const recDatasets = [{
+    label: '恢復期（月）',
+    data: all.map(({res}) => makeBoxData(Float64Array.from(res.recArr, v => v))),
+    backgroundColor: all.map((_, i) => COLORS[i % COLORS.length] + '0.35)'),
+    borderColor:     all.map((_, i) => COLORS[i % COLORS.length] + '0.9)'),
+    borderWidth: 1.5, itemRadius: 0, outlierRadius: 0, medianColor: '#f8fafc',
+  }];
+  window._cmpMddData = { mddDatasets, recDatasets, labels };
 
   const boxOpts = (titleText, unit, yMin) => ({
     animation: false, responsive: true,
@@ -4794,7 +5211,7 @@ function drawCompBoxPlots(all) {
   elRow.style.cssText = 'display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px';
   elRow.innerHTML =
     '<div class="chart-box" style="margin-bottom:0"><div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><span class="chart-title" style="margin:0">報酬分佈對比（P5–P95）</span><select id="cmp-box-left-metric" style="font-size:0.75rem" onchange="redrawCompBoxLeft()"><option value="cagr">CAGR</option><option value="mwrr" selected>MWRR</option></select></div><canvas id="cmp-box-cagr" height="260"></canvas></div>' +
-    '<div class="chart-box" style="margin-bottom:0"><div class="chart-title" style="margin-bottom:8px">MDD 分佈對比（P5 / P25 / P50 / P75 / P95）</div><canvas id="cmp-box-mdd" height="260"></canvas></div>';
+    '<div class="chart-box" style="margin-bottom:0"><div class="chart-header" style="margin-bottom:8px"><span class="chart-title" id="cmp-mdd-title" style="margin:0">MDD 分佈對比（P5–P95）</span><div style="display:flex;gap:4px"><button id="cmp-mdd-btn-mdd" class="btn-sm btn-active" onclick="setCmpMddView(\'mdd\')">MDD</button><button id="cmp-mdd-btn-rec" class="btn-sm" onclick="setCmpMddView(\'rec\')">恢復期</button></div></div><canvas id="cmp-box-mdd" height="260"></canvas></div>';
   document.getElementById('comp-results').appendChild(elRow);
 
   window._cmpBoxOpts = boxOpts;
@@ -4836,6 +5253,20 @@ function redrawCompBoxLeft() {
     type: 'boxplot',
     data: { labels: d.labels, datasets },
     options: window._cmpBoxOpts('%', '%', null),
+  });
+}
+
+function setCmpMddView(mode) {
+  const d = window._cmpMddData;
+  if (!d || !document.getElementById('cmp-box-mdd')) return;
+  document.getElementById('cmp-mdd-btn-mdd')?.classList.toggle('btn-active', mode==='mdd');
+  document.getElementById('cmp-mdd-btn-rec')?.classList.toggle('btn-active', mode==='rec');
+  document.getElementById('cmp-mdd-title').textContent = mode==='mdd' ? 'MDD 分佈對比（P5–P95）' : '恢復期對比（P5–P95，月）';
+  if (CHARTS.cmpBoxMdd) CHARTS.cmpBoxMdd.destroy();
+  CHARTS.cmpBoxMdd = new Chart(document.getElementById('cmp-box-mdd'), {
+    type: 'boxplot',
+    data: { labels: d.labels, datasets: mode==='mdd' ? d.mddDatasets : d.recDatasets },
+    options: window._cmpBoxOpts(mode==='mdd' ? '%' : '月', mode==='mdd' ? '%' : '月', null)
   });
 }
 
@@ -5167,7 +5598,7 @@ function kellyAnimDraw(idx) {
   // 解析度適配（最低 2×，避免初始縮圖模糊）
   const dpr = Math.max(window.devicePixelRatio || 1, 2);
   const W = canvas.offsetWidth || 600;
-  const H = parseInt(canvas.dataset.h) || 240; // 讀 data-h，不受 canvas.height 賦值影響
+  const H = canvas.offsetHeight || Math.max(220, Math.min(480, W * 0.6));
   if (W < 10) return; // tab 隱藏時 offsetWidth=0，跳過避免 crash
   canvas.width  = W * dpr;
   canvas.height = H * dpr;
