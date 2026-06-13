@@ -912,77 +912,70 @@ tr:hover td{background:var(--bg-hover)}
           <div class="gls-en">MDD — Maximum Drawdown</div>
           <div class="gls-def">從歷史高點到最低谷的最大跌幅百分比，衡量持有期間可能承受的最大虧損。槓桿倍數愈高，MDD 通常愈大。</div>
           <div class="gls-formula">MDD = (谷底 − 前高) / 前高</div>
-          <svg viewBox="0 0 300 120" style="width:100%;height:auto;display:block;margin-top:8px">
+          <svg viewBox="0 0 300 130" style="width:100%;height:auto;display:block;margin-top:8px">
             <!-- axes -->
-            <line x1="24" y1="10" x2="24" y2="98" stroke="var(--text-dim)" stroke-width="1"/>
-            <line x1="24" y1="98" x2="288" y2="98" stroke="var(--text-dim)" stroke-width="1"/>
-            <text x="13" y="55" font-size="7" fill="var(--text-dim)" text-anchor="middle" transform="rotate(-90,13,55)">資產淨值</text>
-            <text x="288" y="106" font-size="7" fill="var(--text-dim)" text-anchor="end">時間 →</text>
-            <!-- price path: rises to peak, drops to trough, partial recovery -->
-            <polyline points="24,82 50,74 75,62 100,48 125,36 150,28 152,28" fill="none" stroke="#60a5fa" stroke-width="2"/>
-            <!-- peak marker -->
-            <circle cx="152" cy="28" r="3" fill="#4ade80"/>
-            <line x1="152" y1="28" x2="152" y2="98" stroke="#4ade80" stroke-width="1" stroke-dasharray="3,3"/>
-            <text x="152" y="22" font-size="7" fill="#4ade80" text-anchor="middle">前高（Peak）</text>
-            <!-- drop to trough -->
-            <polyline points="152,28 170,40 188,55 205,68 218,78 228,84" fill="none" stroke="#ef4444" stroke-width="2"/>
-            <!-- trough marker -->
-            <circle cx="228" cy="84" r="3" fill="#ef4444"/>
-            <line x1="228" y1="84" x2="228" y2="98" stroke="#ef4444" stroke-width="1" stroke-dasharray="3,3"/>
-            <text x="228" y="112" font-size="7" fill="#ef4444" text-anchor="middle">谷底（Trough）</text>
-            <!-- partial recovery line (faded) -->
-            <polyline points="228,84 250,76 275,68" fill="none" stroke="#60a5fa" stroke-width="1.5" stroke-dasharray="4,3" opacity="0.5"/>
-            <!-- MDD vertical arrow: peak to trough at x=152 -->
-            <line x1="248" y1="28" x2="248" y2="84" stroke="#fbbf24" stroke-width="1.5"/>
-            <polygon points="248,28 245,36 251,36" fill="#fbbf24"/>
-            <polygon points="248,84 245,76 251,76" fill="#fbbf24"/>
-            <text x="264" y="50" font-size="7.5" fill="#fbbf24" text-anchor="middle" font-weight="bold">MDD</text>
-            <text x="264" y="60" font-size="7" fill="#fbbf24" text-anchor="middle">跌幅</text>
-            <!-- horizontal dashed at peak level -->
-            <line x1="152" y1="28" x2="248" y2="28" stroke="#4ade80" stroke-width="1" stroke-dasharray="3,3" opacity="0.5"/>
-            <line x1="228" y1="84" x2="248" y2="84" stroke="#ef4444" stroke-width="1" stroke-dasharray="3,3" opacity="0.5"/>
+            <line x1="28" y1="14" x2="28" y2="100" stroke="var(--text-dim)" stroke-width="1"/>
+            <line x1="28" y1="100" x2="292" y2="100" stroke="var(--text-dim)" stroke-width="1"/>
+            <text x="15" y="57" font-size="9" fill="var(--text-dim)" text-anchor="middle" transform="rotate(-90,15,57)">資產淨值</text>
+            <text x="292" y="111" font-size="9" fill="var(--text-dim)" text-anchor="end">時間 →</text>
+            <polyline points="28,84 54,76 79,64 104,50 129,38 152,30 154,30" fill="none" stroke="#60a5fa" stroke-width="2.2"/>
+            <circle cx="154" cy="30" r="3.5" fill="#4ade80"/>
+            <line x1="154" y1="30" x2="154" y2="100" stroke="#4ade80" stroke-width="1" stroke-dasharray="3,3"/>
+            <text x="154" y="22" font-size="9.5" fill="#4ade80" text-anchor="middle">前高（Peak）</text>
+            <polyline points="154,30 172,42 190,57 207,70 220,80 230,86" fill="none" stroke="#ef4444" stroke-width="2.2"/>
+            <circle cx="230" cy="86" r="3.5" fill="#ef4444"/>
+            <line x1="230" y1="86" x2="230" y2="100" stroke="#ef4444" stroke-width="1" stroke-dasharray="3,3"/>
+            <text x="230" y="116" font-size="9.5" fill="#ef4444" text-anchor="middle">谷底（Trough）</text>
+            <polyline points="230,86 252,78 277,70" fill="none" stroke="#60a5fa" stroke-width="1.5" stroke-dasharray="4,3" opacity="0.5"/>
+            <line x1="250" y1="30" x2="250" y2="86" stroke="#fbbf24" stroke-width="1.8"/>
+            <polygon points="250,30 247,39 253,39" fill="#fbbf24"/>
+            <polygon points="250,86 247,77 253,77" fill="#fbbf24"/>
+            <text x="268" y="52" font-size="10" fill="#fbbf24" text-anchor="middle" font-weight="bold">MDD</text>
+            <text x="268" y="64" font-size="9" fill="#fbbf24" text-anchor="middle">跌幅</text>
+            <line x1="154" y1="30" x2="250" y2="30" stroke="#4ade80" stroke-width="1" stroke-dasharray="3,3" opacity="0.5"/>
+            <line x1="230" y1="86" x2="250" y2="86" stroke="#ef4444" stroke-width="1" stroke-dasharray="3,3" opacity="0.5"/>
           </svg>
         </div>
         <div class="gls-card">
           <div class="gls-term">恢復期</div>
           <div class="gls-en">Recovery Period / Drawdown Duration</div>
           <div class="gls-def">從回撤的最低谷重新回升至前高所需的時間（月數）。反映投資人需要忍受虧損的時間長度。</div>
-          <svg viewBox="0 0 300 130" style="width:100%;height:auto;display:block;margin-top:8px">
+          <svg viewBox="0 0 300 145" style="width:100%;height:auto;display:block;margin-top:8px">
             <!-- axes -->
-            <line x1="24" y1="10" x2="24" y2="100" stroke="var(--text-dim)" stroke-width="1"/>
-            <line x1="24" y1="100" x2="288" y2="100" stroke="var(--text-dim)" stroke-width="1"/>
-            <text x="13" y="55" font-size="7" fill="var(--text-dim)" text-anchor="middle" transform="rotate(-90,13,55)">資產淨值</text>
-            <text x="288" y="108" font-size="7" fill="var(--text-dim)" text-anchor="end">時間 →</text>
+            <line x1="28" y1="14" x2="28" y2="102" stroke="var(--text-dim)" stroke-width="1"/>
+            <line x1="28" y1="102" x2="292" y2="102" stroke="var(--text-dim)" stroke-width="1"/>
+            <text x="15" y="57" font-size="9" fill="var(--text-dim)" text-anchor="middle" transform="rotate(-90,15,57)">資產淨值</text>
+            <text x="292" y="113" font-size="9" fill="var(--text-dim)" text-anchor="end">時間 →</text>
             <!-- rise to peak -->
-            <polyline points="24,84 55,72 85,58 110,44 130,34 145,29" fill="none" stroke="#60a5fa" stroke-width="2"/>
+            <polyline points="28,86 59,74 89,60 114,46 134,36 149,31" fill="none" stroke="#60a5fa" stroke-width="2.2"/>
             <!-- peak -->
-            <circle cx="145" cy="29" r="3" fill="#4ade80"/>
-            <line x1="145" y1="29" x2="145" y2="100" stroke="#4ade80" stroke-width="1" stroke-dasharray="3,3"/>
-            <text x="145" y="23" font-size="7" fill="#4ade80" text-anchor="middle">前高</text>
+            <circle cx="149" cy="31" r="3.5" fill="#4ade80"/>
+            <line x1="149" y1="31" x2="149" y2="102" stroke="#4ade80" stroke-width="1" stroke-dasharray="3,3"/>
+            <text x="149" y="23" font-size="9.5" fill="#4ade80" text-anchor="middle">前高</text>
             <!-- drop to trough -->
-            <polyline points="145,29 162,42 178,57 192,68 202,76 210,80" fill="none" stroke="#ef4444" stroke-width="2"/>
+            <polyline points="149,31 166,44 182,59 196,70 206,78 214,82" fill="none" stroke="#ef4444" stroke-width="2.2"/>
             <!-- trough -->
-            <circle cx="210" cy="80" r="3" fill="#ef4444"/>
-            <line x1="210" y1="80" x2="210" y2="100" stroke="#ef4444" stroke-width="1" stroke-dasharray="3,3"/>
-            <text x="210" y="114" font-size="7" fill="#ef4444" text-anchor="middle">谷底</text>
+            <circle cx="214" cy="82" r="3.5" fill="#ef4444"/>
+            <line x1="214" y1="82" x2="214" y2="102" stroke="#ef4444" stroke-width="1" stroke-dasharray="3,3"/>
+            <text x="214" y="117" font-size="9.5" fill="#ef4444" text-anchor="middle">谷底</text>
             <!-- recovery back to peak level -->
-            <polyline points="210,80 222,72 234,62 245,50 254,40 262,29" fill="none" stroke="#a78bfa" stroke-width="2"/>
-            <!-- recovery end = peak level -->
-            <circle cx="262" cy="29" r="3" fill="#a78bfa"/>
-            <line x1="262" y1="29" x2="262" y2="100" stroke="#a78bfa" stroke-width="1" stroke-dasharray="3,3"/>
-            <text x="262" y="23" font-size="7" fill="#a78bfa" text-anchor="middle">回復前高</text>
+            <polyline points="214,82 226,74 238,64 249,52 258,42 266,31" fill="none" stroke="#a78bfa" stroke-width="2.2"/>
+            <!-- recovery end -->
+            <circle cx="266" cy="31" r="3.5" fill="#a78bfa"/>
+            <line x1="266" y1="31" x2="266" y2="102" stroke="#a78bfa" stroke-width="1" stroke-dasharray="3,3"/>
+            <text x="266" y="23" font-size="9.5" fill="#a78bfa" text-anchor="middle">回復前高</text>
             <!-- peak level horizontal line -->
-            <line x1="145" y1="29" x2="262" y2="29" stroke="var(--border)" stroke-width="1" stroke-dasharray="4,3" opacity="0.6"/>
-            <!-- TTR bracket below x-axis: peak to recovery -->
-            <line x1="145" y1="118" x2="262" y2="118" stroke="#fbbf24" stroke-width="1.5"/>
-            <line x1="145" y1="114" x2="145" y2="122" stroke="#fbbf24" stroke-width="1.5"/>
-            <line x1="262" y1="114" x2="262" y2="122" stroke="#fbbf24" stroke-width="1.5"/>
-            <text x="203" y="128" font-size="7.5" fill="#fbbf24" text-anchor="middle" font-weight="bold">TTR（恢復期）</text>
-            <!-- MDD arrow at peak vs trough -->
-            <line x1="280" y1="29" x2="280" y2="80" stroke="#f472b6" stroke-width="1.5"/>
-            <polygon points="280,29 277,37 283,37" fill="#f472b6"/>
-            <polygon points="280,80 277,72 283,72" fill="#f472b6"/>
-            <text x="293" y="52" font-size="7" fill="#f472b6" text-anchor="middle">MDD</text>
+            <line x1="149" y1="31" x2="266" y2="31" stroke="var(--border)" stroke-width="1" stroke-dasharray="4,3" opacity="0.6"/>
+            <!-- TTR bracket -->
+            <line x1="149" y1="122" x2="266" y2="122" stroke="#fbbf24" stroke-width="1.8"/>
+            <line x1="149" y1="117" x2="149" y2="127" stroke="#fbbf24" stroke-width="1.8"/>
+            <line x1="266" y1="117" x2="266" y2="127" stroke="#fbbf24" stroke-width="1.8"/>
+            <text x="207" y="139" font-size="10" fill="#fbbf24" text-anchor="middle" font-weight="bold">TTR（恢復期）</text>
+            <!-- MDD arrow -->
+            <line x1="284" y1="31" x2="284" y2="82" stroke="#f472b6" stroke-width="1.8"/>
+            <polygon points="284,31 281,40 287,40" fill="#f472b6"/>
+            <polygon points="284,82 281,73 287,73" fill="#f472b6"/>
+            <text x="295" y="59" font-size="9.5" fill="#f472b6" text-anchor="middle">MDD</text>
           </svg>
         </div>
         <div class="gls-card">
@@ -1105,12 +1098,12 @@ tr:hover td{background:var(--bg-hover)}
           <div class="gls-en">Financial Bubble Cycle — Rodrigue Model</div>
           <div class="gls-def">Jean-Paul Rodrigue 的泡沫模型將資產泡沫分為四個階段，每個階段的參與者心理截然不同：</div>
           <div style="margin:8px 0">
-            <svg viewBox="0 0 370 170" style="width:100%;height:auto;display:block">
+            <svg viewBox="0 0 370 178" style="width:100%;height:auto;display:block">
               <!-- axes -->
               <line x1="22" y1="145" x2="358" y2="145" stroke="var(--text-dim)" stroke-width="1"/>
               <line x1="22" y1="8"   x2="22"  y2="145" stroke="var(--text-dim)" stroke-width="1"/>
               <!-- y axis label -->
-              <text x="13" y="78" font-size="7" fill="var(--text-dim)" text-anchor="middle" transform="rotate(-90,13,78)">價格</text>
+              <text x="13" y="78" font-size="9" fill="var(--text-dim)" text-anchor="middle" transform="rotate(-90,13,78)">價格</text>
               <!-- bubble curve:
                    隱蔽期(22-100): slow rise, 起飛 near x=88
                    覺醒期(100-175): faster rise, 首次拋售(dip)~x=115, 空頭陷阱(recovery)~x=135
@@ -1137,34 +1130,34 @@ tr:hover td{background:var(--bg-hover)}
               <rect x="175" y="145" width="93"  height="4" fill="#ef444440" rx="1"/>
               <rect x="268" y="145" width="90"  height="4" fill="#f9731640" rx="1"/>
               <!-- phase labels -->
-              <text x="61"  y="158" font-size="7.5" fill="var(--text-dim)" text-anchor="middle">隱蔽期</text>
-              <text x="137" y="158" font-size="7.5" fill="var(--text-dim)" text-anchor="middle">覺醒期</text>
-              <text x="221" y="158" font-size="7.5" fill="var(--text-dim)" text-anchor="middle">狂熱期</text>
-              <text x="313" y="158" font-size="7.5" fill="var(--text-dim)" text-anchor="middle">崩盤期</text>
+              <text x="61"  y="160" font-size="9.5" fill="var(--text-dim)" text-anchor="middle">隱蔽期</text>
+              <text x="137" y="160" font-size="9.5" fill="var(--text-dim)" text-anchor="middle">覺醒期</text>
+              <text x="221" y="160" font-size="9.5" fill="var(--text-dim)" text-anchor="middle">狂熱期</text>
+              <text x="313" y="160" font-size="9.5" fill="var(--text-dim)" text-anchor="middle">崩盤期</text>
               <!-- 隱蔽期 annotation: 起飛 -->
-              <circle cx="92" cy="108" r="2.5" fill="#a78bfa"/>
-              <text x="92" y="103" font-size="6.5" fill="#a78bfa" text-anchor="middle">起飛</text>
+              <circle cx="92" cy="108" r="3" fill="#a78bfa"/>
+              <text x="92" y="101" font-size="9" fill="#a78bfa" text-anchor="middle">起飛</text>
               <!-- 覺醒期 annotations: 首次拋售, 空頭陷阱 -->
-              <circle cx="118" cy="95" r="2.5" fill="#fbbf24"/>
-              <text x="118" y="89" font-size="6.5" fill="#fbbf24" text-anchor="middle">首次拋售</text>
-              <circle cx="130" cy="88" r="2.5" fill="#fbbf24"/>
-              <text x="155" y="82" font-size="6.5" fill="#fbbf24" text-anchor="middle">空頭陷阱</text>
+              <circle cx="118" cy="95" r="3" fill="#fbbf24"/>
+              <text x="118" y="87" font-size="9" fill="#fbbf24" text-anchor="middle">首次拋售</text>
+              <circle cx="130" cy="88" r="3" fill="#fbbf24"/>
+              <text x="155" y="80" font-size="9" fill="#fbbf24" text-anchor="middle">空頭陷阱</text>
               <!-- 狂熱期 annotations: 媒體關注, 熱情/貪婪, 新典範 peak -->
-              <circle cx="175" cy="24" r="2.5" fill="#f472b6"/>
-              <text x="175" y="19" font-size="6.5" fill="#f472b6" text-anchor="middle">媒體關注</text>
-              <circle cx="196" cy="8"  r="2.5" fill="#ef4444"/>
-              <text x="222" y="6"  font-size="6.5" fill="#ef4444" text-anchor="middle">貪婪 / 錯覺</text>
-              <circle cx="224" cy="10" r="3"   fill="#ef4444"/>
-              <text x="224" y="4"  font-size="7"   fill="#ef4444" text-anchor="middle" font-weight="bold">「新典範」!!!</text>
+              <circle cx="175" cy="24" r="3" fill="#f472b6"/>
+              <text x="175" y="17" font-size="9" fill="#f472b6" text-anchor="middle">媒體關注</text>
+              <circle cx="196" cy="8"  r="3" fill="#ef4444"/>
+              <text x="220" y="20"  font-size="9" fill="#ef4444" text-anchor="middle">貪婪/錯覺</text>
+              <circle cx="224" cy="10" r="3.5" fill="#ef4444"/>
+              <text x="224" y="6"  font-size="9.5" fill="#ef4444" text-anchor="middle" font-weight="bold">「新典範」!!!</text>
               <!-- 崩盤期 annotations: 否認, 多頭陷阱, 絕望, 回歸均值 -->
-              <circle cx="278" cy="85" r="2.5" fill="#f97316"/>
-              <text x="278" y="80" font-size="6.5" fill="#f97316" text-anchor="middle">否認</text>
-              <circle cx="290" cy="89" r="2.5" fill="#f97316"/>
-              <text x="310" y="83" font-size="6.5" fill="#f97316" text-anchor="start">多頭陷阱</text>
-              <circle cx="330" cy="133" r="2.5" fill="#60a5fa"/>
-              <text x="330" y="128" font-size="6.5" fill="#60a5fa" text-anchor="middle">絕望</text>
-              <circle cx="355" cy="128" r="2.5" fill="#4ade80"/>
-              <text x="355" y="122" font-size="6.5" fill="#4ade80" text-anchor="end">回歸均值</text>
+              <circle cx="278" cy="85" r="3" fill="#f97316"/>
+              <text x="278" y="78" font-size="9" fill="#f97316" text-anchor="middle">否認</text>
+              <circle cx="290" cy="89" r="3" fill="#f97316"/>
+              <text x="312" y="81" font-size="9" fill="#f97316" text-anchor="start">多頭陷阱</text>
+              <circle cx="330" cy="133" r="3" fill="#60a5fa"/>
+              <text x="330" y="126" font-size="9" fill="#60a5fa" text-anchor="middle">絕望</text>
+              <circle cx="355" cy="128" r="3" fill="#4ade80"/>
+              <text x="355" y="121" font-size="9" fill="#4ade80" text-anchor="end">回歸均值</text>
             </svg>
           </div>
           <div class="gls-def" style="font-size:0.85em;display:grid;grid-template-columns:1fr 1fr;gap:6px">
@@ -1707,22 +1700,22 @@ tr:hover td{background:var(--bg-hover)}
           <div class="gls-en">Dunning–Kruger Effect — David Dunning &amp; Justin Kruger (1999)</div>
           <div class="gls-def">一種認知偏誤：<strong>能力越低的人，越容易高估自己的能力</strong>；而真正有能力的人，反而因為意識到知識的複雜性而傾向低估自己。兩人在康乃爾大學的實驗顯示，表現最差的受試者對自己排名的預估，遠高於實際結果。</div>
           <div class="gls-def" style="margin-top:8px;font-size:0.88em">
-            <div style="position:relative;width:100%;height:110px;margin-bottom:4px">
-              <svg viewBox="0 0 340 110" style="width:100%;height:100%">
+            <div style="position:relative;width:100%;margin-bottom:4px">
+              <svg viewBox="0 0 340 120" style="width:100%;height:auto;display:block">
                 <!-- axes -->
                 <line x1="30" y1="100" x2="320" y2="100" stroke="var(--text-dim)" stroke-width="1"/>
-                <line x1="30" y1="10"  x2="30"  y2="100" stroke="var(--text-dim)" stroke-width="1"/>
-                <!-- curve: novice spike → valley of despair → slope of enlightenment → plateau -->
-                <path d="M30,90 C60,85 75,15 95,12 C115,9 120,75 150,80 C190,86 230,40 270,32 C295,28 310,30 320,30"
+                <line x1="30" y1="14"  x2="30"  y2="100" stroke="var(--text-dim)" stroke-width="1"/>
+                <!-- curve -->
+                <path d="M30,90 C60,85 75,18 95,15 C115,12 120,76 150,81 C190,87 230,43 270,35 C295,31 310,33 320,33"
                       fill="none" stroke="#60a5fa" stroke-width="2.2"/>
                 <!-- labels -->
-                <text x="95"  y="8"  font-size="8" fill="var(--text-dim)" text-anchor="middle">愚昧山峰</text>
-                <text x="150" y="95" font-size="8" fill="var(--text-dim)" text-anchor="middle">絕望谷</text>
-                <text x="270" y="27" font-size="8" fill="var(--text-dim)" text-anchor="middle">開悟坡</text>
-                <text x="316" y="26" font-size="8" fill="var(--text-dim)" text-anchor="middle">穩定台</text>
+                <text x="95"  y="11"  font-size="10" fill="var(--text-dim)" text-anchor="middle">愚昧山峰</text>
+                <text x="150" y="96"  font-size="10" fill="var(--text-dim)" text-anchor="middle">絕望谷</text>
+                <text x="268" y="30"  font-size="10" fill="var(--text-dim)" text-anchor="middle">開悟坡</text>
+                <text x="316" y="29"  font-size="10" fill="var(--text-dim)" text-anchor="middle">穩定台</text>
                 <!-- axis labels -->
-                <text x="175" y="110" font-size="8" fill="var(--text-dim)" text-anchor="middle">經驗 / 知識量</text>
-                <text x="10"  y="55"  font-size="8" fill="var(--text-dim)" text-anchor="middle" transform="rotate(-90,10,55)">自信心</text>
+                <text x="175" y="113" font-size="10" fill="var(--text-dim)" text-anchor="middle">經驗 / 知識量</text>
+                <text x="12"  y="57"  font-size="10" fill="var(--text-dim)" text-anchor="middle" transform="rotate(-90,12,57)">自信心</text>
               </svg>
             </div>
           </div>
