@@ -5751,11 +5751,11 @@ function kellyAnimDraw(idx) {
     // 曲線上的點
     ctx.beginPath(); ctx.arc(x, yOf(v), 4, 0, Math.PI * 2);
     ctx.fillStyle = color; ctx.fill();
-    // 標籤：畫在垂直線頂端圖內，避免與 x 軸 ticker 重疊
+    // 標籤：畫在 y=1/4 高度處
     ctx.fillStyle = color; ctx.font = 'bold 10px sans-serif'; ctx.textAlign = 'center';
-    ctx.fillText(name, x, PAD.t + 14);
+    ctx.fillText(name, x, PAD.t + ch * 0.25);
     ctx.font = '10px sans-serif';
-    ctx.fillText(sub, x, PAD.t + 26);
+    ctx.fillText(sub, x, PAD.t + ch * 0.25 + 12);
   }
 
   // ── 軸標籤 ──
@@ -5784,8 +5784,8 @@ function kellyAnimDraw(idx) {
   // ── 年份 + 統計 ──
   ctx.fillStyle = _T.label; ctx.font = 'bold 14px sans-serif'; ctx.textAlign = 'left';
   ctx.fillText(f.qLabel || f.year + '年', PAD.l + 6, PAD.t + 16);
-  ctx.fillStyle = _T.stats; ctx.font = '10px sans-serif';
-  ctx.fillText(`μ=${(f.mu*100).toFixed(1)}%  σ=${(Math.sqrt(f.sig2)*100).toFixed(1)}%`, PAD.l + 6, PAD.t + 30);
+  ctx.fillStyle = _T.stats; ctx.font = '10px sans-serif'; ctx.textAlign = 'right';
+  ctx.fillText(`μ=${(f.mu*100).toFixed(1)}%  σ=${(Math.sqrt(f.sig2)*100).toFixed(1)}%`, PAD.l + cw - 4, PAD.t + 16);
 
   // 更新 scrubber 和年份標籤
   const scrub = document.getElementById('kelly-anim-scrub');
