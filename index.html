@@ -678,6 +678,7 @@ tr:hover td{background:var(--bg-hover)}
           <div class="gls-term">鬚（Whiskers）</div>
           <div class="gls-en">Whiskers — P5 to P95</div>
           <div class="gls-def">從箱體延伸出的線段，代表資料的主體範圍（本圖為 P5–P95）。落在鬚之外的點為離群值（極端情境）。</div>
+          <div class="gls-def" style="margin-top:6px;color:var(--text-dim);font-size:0.85em"><strong>鬚的長度 = 技能 + 運氣（Mauboussin 框架）：</strong>Michael Mauboussin 在《成功與運氣》中指出，任何結果都可分解為技能（可重複的策略優勢）與運氣（隨機性）。箱形圖的 IQR 與鬚長正是這個隨機性的視覺化——即使策略完全相同，不同的隨機抽樣路徑仍會產生巨大的結果差異。鬚越長代表運氣成分越大、結果越難預測；壓縮鬚長的唯一方式是增加模擬次數或拉長投資期間。</div>
         </div>
         <div class="gls-card">
           <div class="gls-term">離群值（Outliers）</div>
@@ -707,6 +708,44 @@ tr:hover td{background:var(--bg-hover)}
           </div>
           <div class="gls-en">Monte Carlo Simulation</div>
           <div class="gls-def">透過重複隨機抽樣，模擬資產在未來各種可能情境下的價值路徑，從而估計收益分布與風險。本工具從歷史日報酬率中直接Bootstrap抽樣，保留其統計特性。</div>
+        </div>
+        <div class="gls-card">
+          <div class="gls-term">蒙地卡羅 vs 滾動歷史回測</div>
+          <div class="gls-en">Monte Carlo vs Rolling Historical Backtest</div>
+          <div class="gls-def" style="font-size:0.88em;margin-top:4px">
+            <table style="width:100%;border-collapse:collapse">
+              <thead>
+                <tr style="border-bottom:1px solid var(--border)">
+                  <th style="padding:4px 8px;text-align:left;color:var(--text-dim);font-weight:600"></th>
+                  <th style="padding:4px 8px;text-align:left;color:var(--text-dim);font-weight:600">蒙地卡羅（本工具）</th>
+                  <th style="padding:4px 8px;text-align:left;color:var(--text-dim);font-weight:600">滾動歷史回測</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr style="border-bottom:1px solid var(--border)">
+                  <td style="padding:4px 8px;color:var(--text-dim)">假設</td>
+                  <td style="padding:4px 8px">IID（獨立同分布）</td>
+                  <td style="padding:4px 8px">路徑相依</td>
+                </tr>
+                <tr style="border-bottom:1px solid var(--border)">
+                  <td style="padding:4px 8px;color:var(--text-dim)">情境數量</td>
+                  <td style="padding:4px 8px">可生成數千條路徑</td>
+                  <td style="padding:4px 8px">受限於歷史樣本長度</td>
+                </tr>
+                <tr style="border-bottom:1px solid var(--border)">
+                  <td style="padding:4px 8px;color:var(--text-dim)">優點</td>
+                  <td style="padding:4px 8px">涵蓋歷史未曾出現的情境組合</td>
+                  <td style="padding:4px 8px">忠實反映真實歷史序列與事件</td>
+                </tr>
+                <tr>
+                  <td style="padding:4px 8px;color:var(--text-dim)">缺點</td>
+                  <td style="padding:4px 8px">忽略序列相關性（動能、危機蔓延）</td>
+                  <td style="padding:4px 8px">樣本少、易受選擇性偏誤影響</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="gls-def" style="margin-top:6px;color:var(--text-dim);font-size:0.85em">兩種方法互補而非對立。本工具採用 Bootstrap 抽樣，是蒙地卡羅的一種實作形式，同時保留了歷史報酬的真實統計特性（肥尾、偏態），比假設常態分布的純蒙地卡羅更貼近現實。</div>
         </div>
         <div class="gls-card">
           <div class="gls-term">🎲 Bootstrap 抽樣</div>
@@ -742,6 +781,22 @@ tr:hover td{background:var(--bg-hover)}
             </div>
           </div>
           <div class="gls-def" style="margin-top:6px;color:var(--text-dim);font-size:0.85em"><strong>與本工具的關聯：</strong>逐日 Bootstrap 假設各日報酬率獨立，隱含不存在短期均值回歸。若真實市場存在明顯均值回歸，區塊 Bootstrap 會更準確；若動能效應更強，逐日版本反而更保守。</div>
+        </div>
+        <div class="gls-card">
+          <div class="gls-term">大數法則 ＆ 中央極限定理</div>
+          <div class="gls-en">Law of Large Numbers &amp; Central Limit Theorem</div>
+          <div class="gls-def">Bootstrap 與蒙地卡羅模擬的兩大統計基礎：</div>
+          <div class="gls-def" style="margin-top:6px;display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:0.88em">
+            <div style="padding:6px 8px;border:1px solid var(--border);border-radius:6px">
+              <div style="font-weight:600;margin-bottom:4px">📏 大數法則（LLN）</div>
+              隨著模擬次數 n 增大，樣本統計量（如存活率、P50）會<strong>收斂至真實母體值</strong>。這是為何本工具預設 1,000 次模擬——次數越多，結果越穩定可信
+            </div>
+            <div style="padding:6px 8px;border:1px solid var(--border);border-radius:6px">
+              <div style="font-weight:600;margin-bottom:4px">🔔 中央極限定理（CLT）</div>
+              無論原始分布形狀如何，大量獨立隨機變數的<strong>總和趨近常態分布</strong>。解釋了為何長期 CAGR 分布接近鐘形，即使單日報酬率呈肥尾分布
+            </div>
+          </div>
+          <div class="gls-def" style="margin-top:6px;color:var(--text-dim);font-size:0.85em">實務意涵：100 次模擬的 P5 估計值可能相差甚遠；1,000 次已相當穩定；10,000 次以上才能精確估計極端尾部（P1、P99）。增加模擬次數的邊際效益會隨 n 遞減（√n 關係）。</div>
         </div>
       </div>
     </div>
@@ -885,6 +940,59 @@ tr:hover td{background:var(--bg-hover)}
           </div>
           <div class="gls-def" style="margin-top:6px;color:var(--text-dim);font-size:0.85em"><strong>與本工具的關聯：</strong>Bootstrap 直接從歷史日報酬率抽樣，自然保留了肥尾特性與聚集波動，不假設常態分布。P5 情境即為模擬捕捉的左尾極端情境，是槓桿投資者最需關注的風險區域。</div>
         </div>
+        <div class="gls-card">
+          <div class="gls-term">金融泡沫與崩盤週期</div>
+          <div class="gls-en">Financial Bubble Cycle — Rodrigue Model</div>
+          <div class="gls-def">Jean-Paul Rodrigue 的泡沫模型將資產泡沫分為四個階段，每個階段的參與者心理截然不同：</div>
+          <div style="margin:8px 0">
+            <svg viewBox="0 0 360 160" style="width:100%;height:auto;display:block">
+              <!-- axes -->
+              <line x1="20" y1="140" x2="345" y2="140" stroke="var(--text-dim)" stroke-width="1"/>
+              <line x1="20" y1="10"  x2="20"  y2="140" stroke="var(--text-dim)" stroke-width="1"/>
+              <!-- bubble curve -->
+              <path d="M20,130 C40,128 55,125 70,118 C85,110 95,105 105,100 C118,93 125,88 135,75 C143,64 148,52 155,38 C160,28 163,18 167,14 C171,10 174,12 178,18 C183,26 187,40 192,60 C197,78 200,95 205,108 C210,118 215,125 222,130 C232,136 245,138 260,132 C272,127 280,118 288,108 C298,95 305,85 315,78 C325,72 333,70 345,70"
+                    fill="none" stroke="#60a5fa" stroke-width="2.5"/>
+              <!-- phase dividers -->
+              <line x1="105" y1="60" x2="105" y2="140" stroke="var(--border)" stroke-width="1" stroke-dasharray="3,3"/>
+              <line x1="200" y1="60" x2="200" y2="140" stroke="var(--border)" stroke-width="1" stroke-dasharray="3,3"/>
+              <line x1="265" y1="60" x2="265" y2="140" stroke="var(--border)" stroke-width="1" stroke-dasharray="3,3"/>
+              <!-- phase labels -->
+              <text x="62"  y="152" font-size="7.5" fill="var(--text-dim)" text-anchor="middle">隱蔽期</text>
+              <text x="152" y="152" font-size="7.5" fill="var(--text-dim)" text-anchor="middle">覺醒期</text>
+              <text x="232" y="152" font-size="7.5" fill="var(--text-dim)" text-anchor="middle">狂熱期</text>
+              <text x="305" y="152" font-size="7.5" fill="var(--text-dim)" text-anchor="middle">崩盤期</text>
+              <!-- key points -->
+              <circle cx="167" cy="14" r="3" fill="#ef4444"/>
+              <text x="167" y="9" font-size="7" fill="#ef4444" text-anchor="middle">頂部</text>
+              <circle cx="222" cy="130" r="3" fill="#4ade80"/>
+              <text x="232" y="128" font-size="7" fill="#4ade80" text-anchor="start">「回調買點」幻覺</text>
+              <circle cx="345" cy="70" r="3" fill="#fbbf24"/>
+              <text x="342" y="65" font-size="7" fill="#fbbf24" text-anchor="end">新均衡</text>
+              <!-- y axis label -->
+              <text x="12" y="75" font-size="7.5" fill="var(--text-dim)" text-anchor="middle" transform="rotate(-90,12,75)">價格</text>
+            </svg>
+          </div>
+          <div class="gls-def" style="font-size:0.85em;display:grid;grid-template-columns:1fr 1fr;gap:6px">
+            <div style="padding:6px 8px;border:1px solid var(--border);border-radius:6px">
+              <div style="font-weight:600;margin-bottom:4px">🌱 隱蔽期</div>
+              機構悄悄建倉；散戶尚未注意；價格緩慢上漲
+            </div>
+            <div style="padding:6px 8px;border:1px solid var(--border);border-radius:6px">
+              <div style="font-weight:600;margin-bottom:4px">👁️ 覺醒期</div>
+              媒體開始報導；散戶進場；FOMO 情緒升溫；估值開始偏離基本面
+            </div>
+            <div style="padding:6px 8px;border:1px solid var(--border);border-radius:6px">
+              <div style="font-weight:600;margin-bottom:4px">🔥 狂熱期</div>
+              「這次不同了」；揚棄傳統估值；槓桿全開；頂部往往悄然到來
+            </div>
+            <div style="padding:6px 8px;border:1px solid var(--border);border-radius:6px">
+              <div style="font-weight:600;margin-bottom:4px">💥 崩盤期</div>
+              流動性枯竭；強制平倉；恐慌踩踏；最終在新均衡價格穩定
+            </div>
+          </div>
+          <div class="gls-def" style="margin-top:6px;font-size:0.85em"><strong>泡沫形成四條件：</strong>① 低利率環境；② 技術或金融創新帶來真實敘事；③ 距上次泡沫夠久，記憶淡化；④ 投資人揚棄傳統估值指標（「本益比不適用於這個時代」）。</div>
+          <div class="gls-def" style="margin-top:6px;color:var(--text-dim);font-size:0.85em"><strong>與本工具的關聯：</strong>NDX 2000 年泡沫（−83%）與 2021–2022 年修正（−33%）均符合此模型。蒙地卡羅的 P5 情境正是捕捉崩盤期的極端路徑；MDD 直方圖則顯示歷史上崩盤幅度的分布。</div>
+        </div>
       </div>
     </div>
 
@@ -896,6 +1004,11 @@ tr:hover td{background:var(--bg-hover)}
           <div class="gls-en">Beta / Effective Leverage</div>
           <div class="gls-def">投資組合對基礎指數的實效曝險倍數。1× = 無槓桿，2× = 每日重置 2 倍槓桿 ETF。Beta 隨槓桿配置比例而變動。</div>
           <div class="gls-formula">Beta = 1×權重×1 + 2×權重×2 + 3×權重×3</div>
+          <div class="gls-def" style="margin-top:6px"><strong>期望報酬的數學推導：</strong>若原始資產超額報酬為 μ − r，槓桿倍數為 β，則：</div>
+          <div class="gls-formula">調整後超額期望報酬 ≈ β × (μ − r)
+調整後波動率 σ_β = β × σ
+Sharpe Ratio = (μ − r) / σ = β(μ − r) / βσ → 不變</div>
+          <div class="gls-def" style="margin-top:6px;color:var(--text-dim);font-size:0.85em"><strong>關鍵洞察：</strong>在純市場因子下，槓桿等比例放大報酬與波動，Sharpe Ratio 不因 β 縮放而改變。這意味著<em>槓桿本身不創造風險調整後的超額價值</em>——真正的優勢來自 Alpha，而非提高 Beta。然而幾何報酬（CAGR）因波動損耗而遞減：CAGR ≈ μ_β − σ_β²/2，β 越大損耗越重。</div>
         </div>
         <div class="gls-card">
           <div class="gls-term">每日重置槓桿</div>
@@ -1043,6 +1156,22 @@ tr:hover td{background:var(--bg-hover)}
           <div class="gls-term">超越 Kelly 的風險</div>
           <div class="gls-en">Over-Betting / Ruin Risk</div>
           <div class="gls-def">槓桿超過 Kelly 值後，隨著時間增加，財富的幾何平均成長率反而下降，長期面臨破產風險（即使期望報酬為正）。</div>
+        </div>
+        <div class="gls-card">
+          <div class="gls-term">經典爆倉案例：LTCM ＆ Archegos</div>
+          <div class="gls-en">Over-Betting in Practice — LTCM &amp; Bill Hwang</div>
+          <div class="gls-def">兩個教科書級的「超越 Kelly」現實案例，說明過度槓桿如何將理論上的正期望值策略送入破產：</div>
+          <div class="gls-def" style="margin-top:6px;display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:0.88em">
+            <div style="padding:6px 8px;border:1px solid var(--border);border-radius:6px">
+              <div style="font-weight:600;margin-bottom:4px">🏦 LTCM（1998）</div>
+              長期資本管理公司，由諾貝爾獎得主 Merton &amp; Scholes 共同創立。採用統計套利策略，槓桿一度高達 <strong>25×</strong>。1998 年俄羅斯債券違約引發流動性危機，六週內虧損 46 億美元，瀕臨破產。Fed 被迫協調 14 家銀行聯合紓困，以防系統性風險蔓延。
+            </div>
+            <div style="padding:6px 8px;border:1px solid var(--border);border-radius:6px">
+              <div style="font-weight:600;margin-bottom:4px">📺 Archegos（2021）</div>
+              Bill Hwang 的家族辦公室，透過<strong>總報酬互換（TRS）</strong>繞過持倉揭露規定，實際槓桿達 <strong>5–8×</strong>，集中押注少數媒體股。2021 年 3 月維亞康姆股價下跌觸發追繳保證金，連鎖平倉造成各大投行合計虧損逾 <strong>100 億美元</strong>。
+            </div>
+          </div>
+          <div class="gls-def" style="margin-top:6px;color:var(--text-dim);font-size:0.85em"><strong>共同教訓：</strong>① 模型優秀不等於槓桿安全；② 流動性危機時「正常」的相關性假設會同步崩潰（肥尾事件）；③ Kelly 的核心價值在於<em>限制</em>槓桿上限，而非追求最大報酬。</div>
         </div>
       </div>
     </div>
@@ -1390,6 +1519,22 @@ tr:hover td{background:var(--bg-hover)}
           <div class="gls-def" style="margin-top:6px;color:var(--text-dim);font-size:0.85em"><strong>投資應用：</strong>解釋為何人願意買彩票（低機率高報酬）卻不願持有槓桿 ETF（中機率高報酬）；也說明為何尾部風險（P5 情境）在心理上比統計數字顯示的更難承受。</div>
         </div>
         <div class="gls-card">
+          <div class="gls-term">模糊規避</div>
+          <div class="gls-en">Ambiguity Aversion — Ellsberg Paradox (1961)</div>
+          <div class="gls-def">人對「<strong>已知機率的風險</strong>」與「<strong>未知機率的不確定性</strong>」反應截然不同——即使期望值相同，面對未知機率時人們會更保守，寧願選擇機率已知的選項。Daniel Ellsberg 以著名的甕球實驗揭示此現象：</div>
+          <div class="gls-def" style="margin-top:6px;display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:0.88em">
+            <div style="padding:6px 8px;border:1px solid var(--border);border-radius:6px">
+              <div style="font-weight:600;margin-bottom:4px">🎯 風險規避（Risk Aversion）</div>
+              已知機率下偏好確定結果。例：確定得 $50 優於 50% 機率得 $100
+            </div>
+            <div style="padding:6px 8px;border:1px solid var(--border);border-radius:6px">
+              <div style="font-weight:600;margin-bottom:4px">🌫️ 模糊規避（Ambiguity Aversion）</div>
+              未知機率下更加保守。例：寧選已知 50/50 的甕，也不選未知比例的甕
+            </div>
+          </div>
+          <div class="gls-def" style="margin-top:6px;color:var(--text-dim);font-size:0.85em"><strong>與 Kelly 的張力：</strong>Kelly 準則需要「已知的邊際優勢（μ, σ）」作為輸入。現實中這些參數本身就是估計值，具有不確定性——模糊規避解釋了為何即使理論上應該加槓桿，投資人仍「不敢下注」，而使用歷史 Bootstrap 的分布正是試圖量化這份不確定性。</div>
+        </div>
+        <div class="gls-card">
           <div class="gls-term">近因偏誤</div>
           <div class="gls-en">Recency Bias</div>
           <div class="gls-def">過度依賴<strong>最近發生的事件</strong>來預測未來，忽略更長期的歷史基準。牛市末期時認為「股市只會漲」，熊市底部時認為「一切都完了」。</div>
@@ -1452,6 +1597,18 @@ tr:hover td{background:var(--bg-hover)}
             </div>
           </div>
           <div class="gls-def" style="margin-top:6px;color:var(--text-dim);font-size:0.85em"><strong>與本工具的關聯：</strong>蒙地卡羅的 P50 存活率與長期路徑分布，可作為 FUD 時期的理性錨點——在恐慌中確認「歷史上持有者最終存活的機率」，而非跟隨市場情緒出場。</div>
+        </div>
+        <div class="gls-card">
+          <div class="gls-term">機會成本</div>
+          <div class="gls-en">Opportunity Cost</div>
+          <div class="gls-def">選擇方案 A 時，所<strong>放棄的最佳替代方案 B 的價值</strong>。機會成本不會出現在帳目上，卻是每一個決策真正的隱性代價。</div>
+          <div class="gls-def" style="margin-top:6px;color:var(--text-dim);font-size:0.85em"><strong>投資應用：</strong>持有現金的機會成本是放棄的 NDX 報酬；使用 1× 槓桿的機會成本是放棄 1.5× 的超額報酬（若 Kelly 值為 1.5×）。低風險不代表低代價——長期通膨侵蝕下，過於保守本身就是一種虧損。</div>
+        </div>
+        <div class="gls-card">
+          <div class="gls-term">沉沒成本謬誤</div>
+          <div class="gls-en">Sunk Cost Fallacy</div>
+          <div class="gls-def"><strong>已發生且無法回收的成本</strong>（沉沒成本）不應影響未來決策，因為無論如何選擇，這筆成本都已永久消失。繼續投入資源只因「已付出太多」是非理性的。</div>
+          <div class="gls-def" style="margin-top:6px;color:var(--text-dim);font-size:0.85em"><strong>投資應用：</strong>「我在 $200 買進的，現在跌到 $80，我不能賣，不然就虧了」——這正是沉沒成本謬誤。持有或賣出的決策應基於未來的期望報酬，而非過去的買入成本。與處置效應相互強化，是投資人死抱虧損部位的心理根源。</div>
         </div>
       </div>
     </div>
@@ -1636,6 +1793,37 @@ f*：最優下注比例　b：賠率　p：勝率　q = 1−p</div>
           </div>
           <div class="gls-person-bio" style="margin-top:8px;color:var(--text-dim)">
             AMH 解釋了為何 Jim Simons 能長期獲取 Alpha（持續尋找並快速利用市場的暫時性失效），也解釋了為何大多數主動基金長期跑輸指數（Alpha 機會稍縱即逝）。著作《適應性市場》（Adaptive Markets, 2017）是行為金融與演化生物學跨域融合的里程碑。
+          </div>
+        </div>
+        <div class="gls-card">
+          <div class="gls-person">
+            <div class="gls-avatar">🌊</div>
+            <div class="gls-person-body">
+              <div class="gls-person-name">Howard Marks</div>
+              <div class="gls-person-meta">1946 –　美國投資人、橡樹資本（Oaktree Capital）共同創辦人</div>
+              <span class="gls-tag">風險哲學</span><span class="gls-tag">市場週期</span><span class="gls-tag">投資備忘錄</span><span class="gls-tag">第二層思維</span>
+            </div>
+          </div>
+          <div class="gls-person-bio" style="margin-top:10px">
+            橡樹資本創辦人，以管理不良債券起家，長期年化報酬超過 19%。Marks 最重要的貢獻是重新定義「風險」：他認為<strong>風險不等於波動度（Volatility）</strong>，而是<strong>永久性損失的機率</strong>——這與現代投資組合理論（MPT）的標準差框架形成根本差異。
+          </div>
+          <div class="gls-def" style="margin-top:8px;display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:0.85em">
+            <div style="padding:6px 8px;border:1px solid var(--border);border-radius:6px">
+              <div style="font-weight:600;margin-bottom:4px">📊 MPT 的風險觀</div>
+              風險 = 波動度（σ）<br>可量化、可最佳化<br>
+              <span style="color:var(--text-dim)">缺點：短期震盪與永久虧損被視為等價</span>
+            </div>
+            <div style="padding:6px 8px;border:1px solid var(--border);border-radius:6px">
+              <div style="font-weight:600;margin-bottom:4px">🌊 Marks 的風險觀</div>
+              風險 = 永久性損失的機率<br>難以量化，需靠判斷<br>
+              <span style="color:var(--text-dim)">重點：好資產暫時下跌 ≠ 風險；爛資產永久歸零才是風險</span>
+            </div>
+          </div>
+          <div class="gls-person-bio" style="margin-top:8px">
+            另一核心概念是<strong>第二層思維（Second-Level Thinking）</strong>：第一層思維說「這是好公司，買入」；第二層思維說「這是好公司，但所有人都知道，所以股價已反映，現在買划算嗎？」——與 Fama 的 EMH 形成有趣對話。
+          </div>
+          <div class="gls-person-bio" style="margin-top:8px;color:var(--text-dim)">
+            每季發布投資備忘錄（Memo），長期被 Warren Buffett 等人視為必讀。代表作：《投資最重要的事》（The Most Important Thing, 2011）、《掌握市場週期》（Mastering the Market Cycle, 2018）。
           </div>
         </div>
 
