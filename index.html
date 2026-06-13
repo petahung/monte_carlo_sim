@@ -2065,81 +2065,40 @@ f*：最優下注比例　b：賠率　p：勝率　q = 1−p</div>
             </div>
           </div>
           <div style="margin:10px 0 2px">
-            <!--
-              Investment Styles (Howard Marks) — Chinese version.
-              Diagonal: (55,265)→(465,95), slope≈-0.414.
-              Bell centers on diagonal: (135,232),(220,197),(315,157),(415,116).
-              Bell 4 asymmetric: sUp=100 (long upper tail), sDown=55.
-              JS computes true gaussian PDF paths at runtime.
-            -->
-            <svg id="hm-svg" viewBox="0 0 500 330" style="width:100%;height:auto;display:block">
-              <defs>
-                <!-- clip to chart area only; title + labels outside -->
-                <clipPath id="hm-clip"><rect x="55" y="35" width="415" height="235"/></clipPath>
-              </defs>
-              <!-- Title with underline -->
-              <text x="248" y="24" font-size="15" fill="var(--text-bright)" text-anchor="middle" font-weight="600">投資風格</text>
-              <line x1="192" y1="28" x2="304" y2="28" stroke="var(--text-bright)" stroke-width="1.2"/>
-              <!-- Axes -->
-              <line x1="55" y1="270" x2="472" y2="270" stroke="var(--text-dim)" stroke-width="1.5"/>
-              <line x1="55" y1="35"  x2="55"  y2="270" stroke="var(--text-dim)" stroke-width="1.5"/>
-              <!-- Origin -->
-              <text x="48" y="275" font-size="11" fill="var(--text-dim)" text-anchor="end">0</text>
-              <!-- Axis labels -->
-              <text x="470" y="284" font-size="11" fill="var(--text-dim)" text-anchor="end">風險</text>
-              <text x="22"  y="155" font-size="11" fill="var(--text-dim)" text-anchor="middle" transform="rotate(-90,22,155)">報酬</text>
-              <!-- Chart content (clipped) -->
-              <g clip-path="url(#hm-clip)">
-                <!-- bell paths — filled by JS; bg-card fill lets diagonal show on top -->
-                <path id="hm-bell1" fill="var(--bg-card)" stroke="var(--text-dim)" stroke-width="1.5"/>
-                <path id="hm-bell2" fill="var(--bg-card)" stroke="var(--text-dim)" stroke-width="1.5"/>
-                <path id="hm-bell3" fill="var(--bg-card)" stroke="var(--text-dim)" stroke-width="1.5"/>
-                <path id="hm-bell4" fill="var(--bg-card)" stroke="var(--text-dim)" stroke-width="1.5"/>
-                <!-- diagonal: market expected return line (drawn after bells, on top) -->
-                <line x1="55" y1="265" x2="465" y2="95" stroke="var(--text-bright)" stroke-width="2.5"/>
-                <!-- dots at bell centers on diagonal -->
-                <circle cx="135" cy="232" r="3.5" fill="var(--text-bright)"/>
-                <circle cx="220" cy="197" r="3.5" fill="var(--text-bright)"/>
-                <circle cx="315" cy="157" r="3.5" fill="var(--text-bright)"/>
-                <circle cx="415" cy="116" r="3.5" fill="var(--text-bright)"/>
-              </g>
-              <!-- Bottom labels -->
-              <text x="120" y="300" font-size="13" fill="var(--text-dim)" text-anchor="middle">避免輸家</text>
-              <text x="400" y="300" font-size="13" fill="var(--text-dim)" text-anchor="middle">追求贏家</text>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 650" style="width:100%;height:auto;display:block;font-family:ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,'Microsoft JhengHei',sans-serif">
+              <style>
+                .hm-axis{stroke:var(--text-dim);stroke-width:2.5;stroke-linecap:square;fill:none}
+                .hm-trend{stroke:var(--text-bright);stroke-width:2;fill:none}
+                .hm-base{stroke:var(--text-dim);stroke-width:2;fill:none;stroke-linecap:round}
+                .hm-bell{stroke:var(--text-dim);stroke-width:2;fill:none;stroke-linejoin:round}
+                .hm-mean{stroke:var(--text-dim);stroke-width:1.5;fill:none}
+              </style>
+              <text x="400" y="55" font-size="36" font-weight="700" fill="var(--text-bright)" text-anchor="middle" text-decoration="underline">投資風格</text>
+              <path d="M 80,100 L 80,520" class="hm-axis"/>
+              <text x="35" y="310" font-size="26" font-weight="600" fill="var(--text-dim)" transform="rotate(-90 35 310)" text-anchor="middle">報酬</text>
+              <path d="M 80,520 L 760,520" class="hm-axis"/>
+              <text x="420" y="570" font-size="26" font-weight="600" fill="var(--text-dim)" text-anchor="middle">風險</text>
+              <text x="50" y="545" font-size="22" font-weight="500" fill="var(--text-dim)">0</text>
+              <path d="M 80,470 L 760,300" class="hm-trend"/>
+              <!-- Bell 1 -->
+              <path d="M 200,400 L 200,480" class="hm-base"/>
+              <path d="M 200,400 C 200,415 110,425 110,440 C 110,455 200,465 200,480" class="hm-bell"/>
+              <path d="M 110,440 L 200,440" class="hm-mean"/>
+              <!-- Bell 2 -->
+              <path d="M 360,330 L 360,470" class="hm-base"/>
+              <path d="M 360,330 C 360,360 290,375 290,400 C 290,425 360,440 360,470" class="hm-bell"/>
+              <path d="M 290,400 L 360,400" class="hm-mean"/>
+              <!-- Bell 3 -->
+              <path d="M 520,240 L 520,480" class="hm-base"/>
+              <path d="M 520,240 C 520,290 470,320 470,360 C 470,400 520,430 520,480" class="hm-bell"/>
+              <path d="M 470,360 L 520,360" class="hm-mean"/>
+              <!-- Bell 4 (asymmetric — long upper tail) -->
+              <path d="M 680,100 L 680,540" class="hm-base"/>
+              <path d="M 680,100 C 680,190 650,250 650,320 C 650,390 680,450 680,540" class="hm-bell"/>
+              <path d="M 650,320 L 680,320" class="hm-mean"/>
+              <text x="200" y="625" font-size="32" font-weight="500" fill="var(--text-dim)" text-anchor="middle">規避輸家</text>
+              <text x="680" y="625" font-size="32" font-weight="500" fill="var(--text-dim)" text-anchor="middle">追求贏家</text>
             </svg>
-            <script>(function(){
-              /* symmetric gaussian bell */
-              function gSym(cx,cy,s,amp){
-                var n=100,r=3.5*s,rp=[],lp=[];
-                for(var i=0;i<=n;i++){
-                  var y=cy-r+2*r*i/n;
-                  var w=amp*Math.exp(-(y-cy)*(y-cy)/(2*s*s));
-                  rp.push((cx+w).toFixed(1)+','+y.toFixed(1));
-                  lp.unshift((cx-w).toFixed(1)+','+y.toFixed(1));
-                }
-                return 'M '+rp.concat(lp).join(' L ')+' Z';
-              }
-              /* asymmetric bell: sU for upper tail (y<cy), sD for lower tail */
-              function gAsym(cx,cy,sU,sD,amp){
-                var n=120,rU=3.5*sU,rD=3.5*sD,rp=[],lp=[];
-                for(var i=0;i<=n;i++){
-                  var y=cy-rU+(rU+rD)*i/n;
-                  var s=y<cy?sU:sD;
-                  var w=amp*Math.exp(-(y-cy)*(y-cy)/(2*s*s));
-                  rp.push((cx+w).toFixed(1)+','+y.toFixed(1));
-                  lp.unshift((cx-w).toFixed(1)+','+y.toFixed(1));
-                }
-                return 'M '+rp.concat(lp).join(' L ')+' Z';
-              }
-              var e1=document.getElementById('hm-bell1');
-              var e2=document.getElementById('hm-bell2');
-              var e3=document.getElementById('hm-bell3');
-              var e4=document.getElementById('hm-bell4');
-              if(e1) e1.setAttribute('d',gSym(135,232,11,11));
-              if(e2) e2.setAttribute('d',gSym(220,197,20,19));
-              if(e3) e3.setAttribute('d',gSym(315,157,32,28));
-              if(e4) e4.setAttribute('d',gAsym(415,116,38,55,40));
-            })();</script>
           </div>
           <div class="gls-person-bio" style="margin-top:8px">
             另一核心概念是<strong>第二層思維（Second-Level Thinking）</strong>：第一層思維說「這是好公司，買入」；第二層思維說「這是好公司，但所有人都知道，所以股價已反映，現在買划算嗎？」——與 Fama 的 EMH 形成有趣對話。
