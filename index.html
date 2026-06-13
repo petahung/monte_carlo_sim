@@ -1093,63 +1093,76 @@ tr:hover td{background:var(--bg-hover)}
           <div class="gls-en">Financial Bubble Cycle — Rodrigue Model</div>
           <div class="gls-def">Jean-Paul Rodrigue 的泡沫模型將資產泡沫分為四個階段，每個階段的參與者心理截然不同：</div>
           <div style="margin:8px 0">
-            <svg viewBox="0 0 370 200" style="width:100%;height:auto;display:block">
-              <!-- axes -->
-              <line x1="22" y1="160" x2="358" y2="160" stroke="var(--text-dim)" stroke-width="1"/>
-              <line x1="22" y1="12"  x2="22"  y2="160" stroke="var(--text-dim)" stroke-width="1"/>
-              <!-- y axis label -->
-              <text x="13" y="88" font-size="10" fill="var(--text-dim)" text-anchor="middle" transform="rotate(-90,13,88)">價格</text>
-              <!-- bubble curve (y +15 vs original) -->
-              <path d="M22,147 C38,145 58,141 72,135 C82,131 88,127 92,123
-                        C98,117 102,111 108,107 C112,103 115,106 118,110
-                        C121,114 125,109 130,103 C138,93 148,80 158,67
-                        C165,57 170,47 175,39 C180,31 188,25 196,23
-                        C204,21 215,23 224,25 C230,29 238,39 244,51
-                        C250,65 256,81 260,93 C264,103 266,111 268,117
-                        C271,110 274,103 278,100 C282,98 287,100 290,104
-                        C295,112 300,123 308,133 C315,140 322,145 330,148
-                        C338,150 347,147 355,143"
-                    fill="none" stroke="#60a5fa" stroke-width="2.5"/>
-              <!-- phase dividers -->
-              <line x1="100" y1="60" x2="100" y2="160" stroke="var(--border)" stroke-width="1" stroke-dasharray="3,3"/>
-              <line x1="175" y1="60" x2="175" y2="160" stroke="var(--border)" stroke-width="1" stroke-dasharray="3,3"/>
-              <line x1="268" y1="60" x2="268" y2="160" stroke="var(--border)" stroke-width="1" stroke-dasharray="3,3"/>
-              <!-- phase background bands -->
-              <rect x="22"  y="160" width="78"  height="5" fill="#6b728040" rx="1"/>
-              <rect x="100" y="160" width="75"  height="5" fill="#3b82f640" rx="1"/>
-              <rect x="175" y="160" width="93"  height="5" fill="#ef444440" rx="1"/>
-              <rect x="268" y="160" width="90"  height="5" fill="#f9731640" rx="1"/>
-              <!-- phase labels -->
-              <text x="61"  y="177" font-size="11" fill="var(--text-dim)" text-anchor="middle">隱蔽期</text>
-              <text x="137" y="177" font-size="11" fill="var(--text-dim)" text-anchor="middle">覺醒期</text>
-              <text x="221" y="177" font-size="11" fill="var(--text-dim)" text-anchor="middle">狂熱期</text>
-              <text x="313" y="177" font-size="11" fill="var(--text-dim)" text-anchor="middle">崩盤期</text>
-              <!-- 隱蔽期: 起飛 — right of circle -->
-              <circle cx="92" cy="123" r="3" fill="#a78bfa"/>
-              <text x="98" y="119" font-size="10" fill="#a78bfa" text-anchor="start">起飛</text>
-              <!-- 覺醒期: 首次拋售 left, 空頭陷阱 right-above -->
-              <circle cx="118" cy="110" r="3" fill="#fbbf24"/>
-              <text x="112" y="104" font-size="10" fill="#fbbf24" text-anchor="end">首次拋售</text>
-              <circle cx="130" cy="103" r="3" fill="#fbbf24"/>
-              <text x="136" y="90" font-size="10" fill="#fbbf24" text-anchor="start">空頭陷阱</text>
-              <!-- 狂熱期: 媒體關注 left-of-peak, 新典範 top -->
-              <circle cx="175" cy="39" r="3" fill="#f472b6"/>
-              <text x="168" y="33" font-size="10" fill="#f472b6" text-anchor="end">媒體關注</text>
-              <!-- 貪婪/錯覺 — label below curve to avoid peak crowding -->
-              <circle cx="196" cy="23" r="3" fill="#ef4444"/>
-              <text x="198" y="48" font-size="10" fill="#ef4444" text-anchor="start">貪婪/錯覺</text>
-              <circle cx="224" cy="25" r="3.5" fill="#ef4444"/>
-              <text x="224" y="14" font-size="11" fill="#ef4444" text-anchor="middle" font-weight="bold">「新典範」!!!</text>
-              <!-- 崩盤期: 否認 left-above, 多頭陷阱 right -->
-              <circle cx="278" cy="100" r="3" fill="#f97316"/>
-              <text x="272" y="91" font-size="10" fill="#f97316" text-anchor="end">否認</text>
-              <circle cx="290" cy="104" r="3" fill="#f97316"/>
-              <text x="298" y="99" font-size="10" fill="#f97316" text-anchor="start">多頭陷阱</text>
-              <!-- 絕望 above circle, 回歸均值 above its circle -->
-              <circle cx="330" cy="148" r="3" fill="#60a5fa"/>
-              <text x="324" y="142" font-size="10" fill="#60a5fa" text-anchor="end">絕望</text>
-              <circle cx="355" cy="143" r="3" fill="#4ade80"/>
-              <text x="352" y="133" font-size="10" fill="#4ade80" text-anchor="end">回歸均值</text>
+            <svg viewBox="0 0 900 620" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,'Microsoft YaHei','PingFang TC','LiHei Pro',sans-serif">
+              <defs>
+                <marker id="bc-arrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                  <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--text-dim)"/>
+                </marker>
+              </defs>
+              <!-- 座標軸 -->
+              <g stroke="var(--text-dim)" stroke-width="2">
+                <line x1="50" y1="50" x2="50" y2="550" marker-start="url(#bc-arrow)"/>
+                <line x1="50" y1="550" x2="850" y2="550" marker-end="url(#bc-arrow)"/>
+              </g>
+              <!-- 軸標籤 -->
+              <text x="55" y="80" font-size="24" font-weight="bold" fill="var(--text-dim)">價值</text>
+              <text x="830" y="590" font-size="24" font-weight="bold" fill="var(--text-dim)" text-anchor="end">時間</text>
+              <!-- 階段分隔線 -->
+              <g stroke="var(--border)" stroke-width="1.5" stroke-dasharray="6,4">
+                <line x1="260" y1="80" x2="260" y2="550"/>
+                <line x1="520" y1="80" x2="520" y2="550"/>
+                <line x1="720" y1="80" x2="720" y2="550"/>
+              </g>
+              <!-- 底部階段標籤 -->
+              <g font-size="18" fill="var(--text-dim)" text-anchor="middle">
+                <text x="155" y="530">隱秘階段</text>
+                <text x="390" y="530">覺醒階段</text>
+                <text x="620" y="530">狂熱階段</text>
+                <text x="785" y="530">崩盤階段</text>
+              </g>
+              <!-- 投資者類型標籤 -->
+              <g font-size="22" font-weight="bold" font-style="italic" fill="#6B78A1" text-anchor="middle">
+                <text x="155" y="240">私人投資者</text>
+                <text x="390" y="240">機構投資者</text>
+                <text x="620" y="240">公眾</text>
+              </g>
+              <!-- 中值趨勢線 -->
+              <line x1="50" y1="485" x2="840" y2="430" stroke="var(--text-dim)" stroke-width="2" stroke-dasharray="8,6"/>
+              <text x="540" y="450" font-size="16" fill="var(--text-dim)" text-anchor="middle">中值</text>
+              <!-- 主曲線 -->
+              <path d="M 50 495
+                       C 150 490, 220 465, 260 440
+                       C 310 410, 350 385, 390 385
+                       C 420 385, 430 420, 450 420
+                       C 470 420, 500 375, 530 350
+                       C 560 325, 590 280, 610 200
+                       C 625 140, 640 60, 660 60
+                       C 670 60, 675 165, 685 165
+                       C 695 165, 705 115, 715 115
+                       C 730 115, 740 350, 750 440
+                       C 760 530, 765 530, 775 530
+                       C 790 530, 810 450, 835 400"
+                    stroke="#E33E2B" stroke-width="4.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+              <!-- 曲線節點文字標籤 -->
+              <g font-size="15" fill="var(--text-bright)">
+                <text x="220" y="435">起飛</text>
+                <text x="385" y="375" text-anchor="end">首次拋售</text>
+                <text x="440" y="440">空頭陷阱</text>
+                <text x="480" y="330">媒體關注</text>
+                <text x="560" y="270">熱情</text>
+                <text x="590" y="180">貪婪</text>
+                <text x="605" y="110">錯覺</text>
+                <text x="660" y="45" font-weight="bold" font-size="16" text-anchor="middle">"新典範"!!!</text>
+                <text x="690" y="75">否定</text>
+                <text x="685" y="195" text-anchor="middle">多頭陷阱</text>
+                <text x="730" y="95">回到"正常"</text>
+                <text x="755" y="225">恐懼</text>
+                <text x="765" y="310">認輸</text>
+                <text x="790" y="440">絕望</text>
+                <text x="835" y="380" text-anchor="end">返回中值</text>
+              </g>
+              <!-- 資料來源 -->
+              <text x="120" y="585" font-size="11" fill="var(--text-dim)">Source: Dr. Jean-Paul Rodrigue Dept. of Global Studies &amp; Geography Hofstra University</text>
             </svg>
           </div>
           <div class="gls-def" style="font-size:0.85em;display:grid;grid-template-columns:1fr 1fr;gap:6px">
