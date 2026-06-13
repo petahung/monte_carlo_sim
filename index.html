@@ -2068,10 +2068,10 @@ f*：最優下注比例　b：賠率　p：勝率　q = 1−p</div>
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 650" style="width:100%;height:auto;display:block;font-family:ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,'Microsoft JhengHei',sans-serif">
               <style>
                 .hm-axis{stroke:var(--text-dim);stroke-width:2.5;stroke-linecap:square;fill:none}
-                .hm-trend{stroke:var(--text-bright);stroke-width:2;fill:none}
-                .hm-base{stroke:var(--text-dim);stroke-width:2;fill:none;stroke-linecap:round}
-                .hm-bell{stroke:var(--text-dim);stroke-width:2;fill:none;stroke-linejoin:round}
-                .hm-mean{stroke:var(--text-dim);stroke-width:1.5;fill:none}
+                .hm-trend{stroke:var(--accent);stroke-width:2;fill:none}
+                .hm-base{stroke-width:2;fill:none;stroke-linecap:round}
+                .hm-bell{stroke-width:2;fill:none;stroke-linejoin:round}
+                .hm-mean{stroke-width:1.5;fill:none}
               </style>
               <text x="400" y="55" font-size="36" font-weight="700" fill="var(--text-bright)" text-anchor="middle" text-decoration="underline">投資風格</text>
               <path d="M 80,100 L 80,520" class="hm-axis"/>
@@ -2080,22 +2080,22 @@ f*：最優下注比例　b：賠率　p：勝率　q = 1−p</div>
               <text x="420" y="570" font-size="26" font-weight="600" fill="var(--text-dim)" text-anchor="middle">風險</text>
               <text x="50" y="545" font-size="22" font-weight="500" fill="var(--text-dim)">0</text>
               <path d="M 80,470 L 760,300" class="hm-trend"/>
-              <!-- Bell 1 -->
-              <path d="M 200,400 L 200,480" class="hm-base"/>
-              <path d="M 200,400 C 200,415 110,425 110,440 C 110,455 200,465 200,480" class="hm-bell"/>
-              <path d="M 110,440 L 200,440" class="hm-mean"/>
-              <!-- Bell 2 -->
-              <path d="M 360,330 L 360,470" class="hm-base"/>
-              <path d="M 360,330 C 360,360 290,375 290,400 C 290,425 360,440 360,470" class="hm-bell"/>
-              <path d="M 290,400 L 360,400" class="hm-mean"/>
-              <!-- Bell 3 -->
-              <path d="M 520,240 L 520,480" class="hm-base"/>
-              <path d="M 520,240 C 520,290 470,320 470,360 C 470,400 520,430 520,480" class="hm-bell"/>
-              <path d="M 470,360 L 520,360" class="hm-mean"/>
-              <!-- Bell 4 (asymmetric — long upper tail) -->
-              <path d="M 680,100 L 680,540" class="hm-base"/>
-              <path d="M 680,100 C 680,190 650,250 650,320 C 650,390 680,450 680,540" class="hm-bell"/>
-              <path d="M 650,320 L 680,320" class="hm-mean"/>
+              <!-- Bell 1 — green -->
+              <path d="M 200,400 L 200,480" class="hm-base" stroke="#22c55e"/>
+              <path d="M 200,400 C 200,415 110,425 110,440 C 110,455 200,465 200,480" class="hm-bell" stroke="#22c55e"/>
+              <path d="M 110,440 L 200,440" class="hm-mean" stroke="#22c55e"/>
+              <!-- Bell 2 — yellow-green -->
+              <path d="M 360,330 L 360,470" class="hm-base" stroke="#a3e635"/>
+              <path d="M 360,330 C 360,360 290,375 290,400 C 290,425 360,440 360,470" class="hm-bell" stroke="#a3e635"/>
+              <path d="M 290,400 L 360,400" class="hm-mean" stroke="#a3e635"/>
+              <!-- Bell 3 — orange -->
+              <path d="M 520,240 L 520,480" class="hm-base" stroke="#f97316"/>
+              <path d="M 520,240 C 520,290 470,320 470,360 C 470,400 520,430 520,480" class="hm-bell" stroke="#f97316"/>
+              <path d="M 470,360 L 520,360" class="hm-mean" stroke="#f97316"/>
+              <!-- Bell 4 — red -->
+              <path d="M 680,100 L 680,540" class="hm-base" stroke="#ef4444"/>
+              <path d="M 680,100 C 680,190 650,250 650,320 C 650,390 680,450 680,540" class="hm-bell" stroke="#ef4444"/>
+              <path d="M 650,320 L 680,320" class="hm-mean" stroke="#ef4444"/>
               <text x="200" y="625" font-size="32" font-weight="500" fill="var(--text-dim)" text-anchor="middle">規避輸家</text>
               <text x="680" y="625" font-size="32" font-weight="500" fill="var(--text-dim)" text-anchor="middle">追求贏家</text>
             </svg>
