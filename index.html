@@ -1129,30 +1129,32 @@ tr:hover td{background:var(--bg-hover)}
               <text x="137" y="177" font-size="11" fill="var(--text-dim)" text-anchor="middle">覺醒期</text>
               <text x="221" y="177" font-size="11" fill="var(--text-dim)" text-anchor="middle">狂熱期</text>
               <text x="313" y="177" font-size="11" fill="var(--text-dim)" text-anchor="middle">崩盤期</text>
-              <!-- 隱蔽期 annotation: 起飛 -->
+              <!-- 隱蔽期: 起飛 — right of circle -->
               <circle cx="92" cy="123" r="3" fill="#a78bfa"/>
-              <text x="92" y="115" font-size="10" fill="#a78bfa" text-anchor="middle">起飛</text>
-              <!-- 覺醒期 annotations: 首次拋售, 空頭陷阱 -->
+              <text x="98" y="119" font-size="10" fill="#a78bfa" text-anchor="start">起飛</text>
+              <!-- 覺醒期: 首次拋售 left, 空頭陷阱 right-above -->
               <circle cx="118" cy="110" r="3" fill="#fbbf24"/>
-              <text x="118" y="101" font-size="10" fill="#fbbf24" text-anchor="middle">首次拋售</text>
+              <text x="112" y="104" font-size="10" fill="#fbbf24" text-anchor="end">首次拋售</text>
               <circle cx="130" cy="103" r="3" fill="#fbbf24"/>
-              <text x="156" y="94" font-size="10" fill="#fbbf24" text-anchor="middle">空頭陷阱</text>
-              <!-- 狂熱期 annotations: 媒體關注, 貪婪/錯覺, 新典範 peak -->
+              <text x="136" y="90" font-size="10" fill="#fbbf24" text-anchor="start">空頭陷阱</text>
+              <!-- 狂熱期: 媒體關注 left-of-peak, 新典範 top -->
               <circle cx="175" cy="39" r="3" fill="#f472b6"/>
-              <text x="175" y="31" font-size="10" fill="#f472b6" text-anchor="middle">媒體關注</text>
+              <text x="168" y="33" font-size="10" fill="#f472b6" text-anchor="end">媒體關注</text>
+              <!-- 貪婪/錯覺 — label below curve to avoid peak crowding -->
               <circle cx="196" cy="23" r="3" fill="#ef4444"/>
-              <text x="222" y="15" font-size="10" fill="#ef4444" text-anchor="middle">貪婪/錯覺</text>
+              <text x="198" y="48" font-size="10" fill="#ef4444" text-anchor="start">貪婪/錯覺</text>
               <circle cx="224" cy="25" r="3.5" fill="#ef4444"/>
-              <text x="224" y="19" font-size="11" fill="#ef4444" text-anchor="middle" font-weight="bold">「新典範」!!!</text>
-              <!-- 崩盤期 annotations: 否認, 多頭陷阱, 絕望, 回歸均值 -->
+              <text x="224" y="14" font-size="11" fill="#ef4444" text-anchor="middle" font-weight="bold">「新典範」!!!</text>
+              <!-- 崩盤期: 否認 left-above, 多頭陷阱 right -->
               <circle cx="278" cy="100" r="3" fill="#f97316"/>
-              <text x="278" y="92" font-size="10" fill="#f97316" text-anchor="middle">否認</text>
+              <text x="272" y="91" font-size="10" fill="#f97316" text-anchor="end">否認</text>
               <circle cx="290" cy="104" r="3" fill="#f97316"/>
-              <text x="314" y="96" font-size="10" fill="#f97316" text-anchor="start">多頭陷阱</text>
+              <text x="298" y="99" font-size="10" fill="#f97316" text-anchor="start">多頭陷阱</text>
+              <!-- 絕望 above circle, 回歸均值 above its circle -->
               <circle cx="330" cy="148" r="3" fill="#60a5fa"/>
-              <text x="330" y="140" font-size="10" fill="#60a5fa" text-anchor="middle">絕望</text>
+              <text x="324" y="142" font-size="10" fill="#60a5fa" text-anchor="end">絕望</text>
               <circle cx="355" cy="143" r="3" fill="#4ade80"/>
-              <text x="355" y="135" font-size="10" fill="#4ade80" text-anchor="end">回歸均值</text>
+              <text x="352" y="133" font-size="10" fill="#4ade80" text-anchor="end">回歸均值</text>
             </svg>
           </div>
           <div class="gls-def" style="font-size:0.85em;display:grid;grid-template-columns:1fr 1fr;gap:6px">
