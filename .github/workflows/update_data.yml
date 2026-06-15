@@ -1,0 +1,57 @@
+name: Daily Data Update
+
+on:
+  schedule:
+    - cron: '0 1 * * *'   # UTC 01:00 = 台灣時間 09:00
+  workflow_dispatch:       # 允許手動觸發
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install yfinance pandas requests
+
+      - name: "[1/8] NDX Nasdaq 100 (embed index.html)"
+        run: python scripts/update_data.py
+
+      - name: "[2/8] S&P500 TR"
+        run: python scripts/update_ticker_data.py --ticker ^SP500TR --name "S&P500 TR" --lev2-name "2x S&P500 TR" --lev3-name "3x S&P500 TR"
+
+      - name: "[3/8] TSLA"
+        run: python scripts/update_ticker_data.py --ticker TSLA
+
+      - name: "[4/8] NVDA"
+        run: python scripts/update_ticker_data.py --ticker NVDA
+
+      - name: "[5/8] TAIEX TR"
+        run: python scripts/update_ticker_data.py --ticker IR0001.TW --name "TAIEX TR" --lev2-name "2x TAIEX TR" --lev3-name "3x TAIEX TR"
+
+      - name: "[6/8] Bitcoin"
+        run: python scripts/update_ticker_data.py --ticker BTC-USD --name "bitcoin" --lev2-name "2x bitcoin" --lev3-name "3x bitcoin"
+
+      - name: "[7/8] VT"
+        run: python scripts/update_ticker_data.py --ticker VT
+
+      - name: "[8/8] 元大台50 TR"
+        run: python scripts/update_ticker_data.py --ticker 0050.TW --name "元大台50 TR" --lev2-name "2x 元大台50 TR" --lev3-name "3x 元大台50 TR" --total-return
+
+      - name: Commit and push updated data
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/ index.html
+          git diff --cached --quiet || git commit -m "chore: auto update data $(date -u +%Y-%m-%d)"
+          git push
