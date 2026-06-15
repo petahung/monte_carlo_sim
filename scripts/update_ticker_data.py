@@ -191,7 +191,36 @@ def fetch_twse(stock_no: str, start_date: str, end_date: str):
 
 # ── 資料抓取：yfinance ──────────────────────────────────────────
 
-def fetch_yfinance(ticker, start, end):
+def fix_adjustment_discontinuities(df, threshold=0.50):
+    """
+    偵測並校正 yfinance auto_adjust 錯誤造成的價格斷層。
+    當相鄰兩日的漲跌幅絕對值超過 threshold（預設 50%）時，
+    視為調整係數套錯，將斷層前的所有價格乘以校正倍數，使曲線連續。
+    可處理多個斷層（由新到舊逐一修正）。
+    """
+    prices = df['Price'].values.copy()
+    dates  = df.index.tolist()
+    n = len(prices)
+    breaks = []  # 記錄斷層位置（index of the first "wrong" day = i+1）
+    for i in range(n - 1):
+        ratio = prices[i + 1] / prices[i]
+        if ratio < (1 - threshold) or ratio > (1 + threshold):
+            breaks.append(i + 1)
+            print(f"  ⚠ 偵測到調整斷層：{dates[i].date()} {prices[i]:.4f} → "
+                  f"{dates[i+1].date()} {prices[i+1]:.4f}  "
+                  f"（{(ratio-1)*100:+.1f}%）")
+
+    # 由後往前修正，每個斷層把其前段數據校正到與後段連續
+    for break_idx in reversed(breaks):
+        correction = prices[break_idx] / prices[break_idx - 1]
+        prices[:break_idx] *= correction
+        print(f"  → 斷層前 {break_idx} 筆數據乘以校正係數 {correction:.6f}")
+
+    df = df.copy()
+    df['Price'] = prices
+    return df
+
+def fetch_yfinance(ticker, start, end, fix_discontinuities=False):
     try:
         import yfinance as yf
         # Yahoo Finance limits daily data to ~100 years; clamp start date if needed
@@ -206,6 +235,8 @@ def fetch_yfinance(ticker, start, end):
         df.columns = ['Price']
         df = df.dropna()           # 移除 NaN 價格（IPO 日、分割日、停牌日）
         df = df[df['Price'] > 0]   # 移除零或負值
+        if fix_discontinuities:
+            df = fix_adjustment_discontinuities(df)
         return df
     except Exception as e:
         print(f"  yfinance error: {e}")
@@ -364,6 +395,8 @@ def main():
                     help='起始日期（全量下載用），預設從標的有資料的最早日期')
     ap.add_argument('--rebuild',   action='store_true',
                     help='忽略現有檔案，重新全量下載')
+    ap.add_argument('--total-return', action='store_true', dest='total_return',
+                    help='台股：改用 yfinance 還原股價（含股息再投資），適用 0050.TW 等配息 ETF')
     args = ap.parse_args()
 
     ticker       = args.ticker
@@ -424,10 +457,20 @@ def main():
             print("  TWSE 指數抓取失敗，請確認端點或日期範圍。")
             return
 
+    elif is_tw and args.total_return:
+        print(f"台股標的（含息再投資模式），使用 yfinance 還原股價抓取 {ticker}（{fetch_from} → {today}）")
+        print(f"  ※ yfinance auto_adjust=True，除息日股價已還原（等同股息再投入）")
+        print(f"  ※ 自動偵測並校正調整係數錯誤造成的價格斷層")
+        prices = fetch_yfinance(ticker, fetch_from, fetch_end, fix_discontinuities=True)
+        if prices is None or prices.empty:
+            print("  yfinance 抓取失敗，請確認 ticker 代碼或網路連線。")
+            sys.exit(1)
+
     elif is_tw:
         stock_no = _stock_no
         print(f"台股標的，使用 TWSE API 抓取 {stock_no}（{fetch_from} → {today}）")
         print(f"  ※ TWSE 資料為未還原股價，除息日含價格跌幅（不含配息回報）")
+        print(f"  ※ 若需含息再投資報酬，請加 --total-return 旗標改用 yfinance")
         print(f"  正在逐月抓取，請稍候 ...")
         prices = fetch_twse(stock_no, fetch_from, fetch_end)
         if prices is None or prices.empty:
