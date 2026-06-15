@@ -10,12 +10,12 @@ Write-Host ""
 $steps = @(
     @{ label = "[1/8] NDX Nasdaq 100 (embed index.html)";  cmd = "python scripts/update_data.py" },
     @{ label = "[2/8] S&P500 TR  (^SP500TR)";              cmd = 'python scripts/update_ticker_data.py --ticker ^SP500TR  --name "S&P500 TR"  --lev2-name "2x S&P500 TR"  --lev3-name "3x S&P500 TR"' },
-    @{ label = "[3/8] S&P500     (^GSPC)";                 cmd = 'python scripts/update_ticker_data.py --ticker ^GSPC     --name "S&P500"      --lev2-name "2x S&P500"      --lev3-name "3x S&P500"' },
-    @{ label = "[4/8] TSLA";                               cmd = "python scripts/update_ticker_data.py --ticker TSLA" },
-    @{ label = "[5/8] NVDA";                               cmd = "python scripts/update_ticker_data.py --ticker NVDA" },
-    @{ label = "[6/8] TAIEX TR   (IR0001.TW)";            cmd = 'python scripts/update_ticker_data.py --ticker IR0001.TW --name "TAIEX TR" --lev2-name "2x TAIEX TR" --lev3-name "3x TAIEX TR"' },
-    @{ label = "[7/8] Bitcoin    (BTC-USD)";               cmd = 'python scripts/update_ticker_data.py --ticker BTC-USD   --name "bitcoin"   --lev2-name "2x bitcoin"   --lev3-name "3x bitcoin"' },
-    @{ label = "[8/8] VT";                                 cmd = "python scripts/update_ticker_data.py --ticker VT" }
+    @{ label = "[3/8] TSLA";                               cmd = "python scripts/update_ticker_data.py --ticker TSLA" },
+    @{ label = "[4/8] NVDA";                               cmd = "python scripts/update_ticker_data.py --ticker NVDA" },
+    @{ label = "[5/8] TAIEX TR   (IR0001.TW)";            cmd = 'python scripts/update_ticker_data.py --ticker IR0001.TW --name "TAIEX TR" --lev2-name "2x TAIEX TR" --lev3-name "3x TAIEX TR"' },
+    @{ label = "[6/8] Bitcoin    (BTC-USD)";               cmd = 'python scripts/update_ticker_data.py --ticker BTC-USD   --name "bitcoin"   --lev2-name "2x bitcoin"   --lev3-name "3x bitcoin"' },
+    @{ label = "[7/8] VT";                                 cmd = "python scripts/update_ticker_data.py --ticker VT" },
+    @{ label = "[8/8] 元大台50 TR (0050.TW)";              cmd = 'python scripts/update_ticker_data.py --ticker 0050.TW --name "元大台50 TR" --lev2-name "2x 元大台50 TR" --lev3-name "3x 元大台50 TR" --total-return' }
 )
 
 $failed = @()
