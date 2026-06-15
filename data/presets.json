@@ -54,5 +54,12 @@
     "file": "vt_leveraged.csv",
     "lev2": "2x VT",
     "lev3": "3x VT"
+  },
+  {
+    "key": "0050_tw",
+    "label": "元大台50 TR",
+    "file": "0050_tw_leveraged.csv",
+    "lev2": "2x 元大台50 TR",
+    "lev3": "3x 元大台50 TR"
   }
 ]
