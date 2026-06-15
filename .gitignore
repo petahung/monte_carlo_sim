@@ -2,3 +2,4 @@
 *.b64
 *.zip
 __pycache__/
+data/gspc_leveraged.csv

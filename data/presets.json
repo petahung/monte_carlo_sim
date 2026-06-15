@@ -14,13 +14,6 @@
     "lev3": "3x S&P500 TR"
   },
   {
-    "key": "gspc",
-    "label": "S&P500",
-    "file": "gspc_leveraged.csv",
-    "lev2": "2x S&P500",
-    "lev3": "3x S&P500"
-  },
-  {
     "key": "tsla",
     "label": "TSLA",
     "file": "tsla_leveraged.csv",
