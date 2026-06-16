@@ -255,6 +255,8 @@ tr:hover td{background:var(--bg-hover)}
         <option value="1000" selected>1,000</option>
         <option value="3000">3,000</option>
         <option value="5000">5,000</option>
+        <option value="10000">10,000</option>
+        <option value="50000">50,000</option>
       </select>
     </div>
     <div class="row"><label>取樣方式</label>
@@ -4591,15 +4593,38 @@ function drawFan(res) {
         tooltip:{
           position: 'followP50',
           filter: item => !item.dataset.label.startsWith('hist-'),
-          callbacks:{label:c=>{
-            const fmt = v => '$'+Math.round(v).toLocaleString();
-            const lbl = c.dataset.label;
-            const rawVal = v => typeof v==='object' ? v?.y : v;
-            if (lbl==='總投入') return `總投入: ${fmt(rawVal(c.raw))}`;
-            if (lbl==='累積取款 P50') { const v=rawVal(c.raw); return (v==null||!isFinite(v)||v===0) ? null : `累積取款 P50: ${fmt(v)}`; }
-            if (lbl==='累積債務 P50') { const v=rawVal(c.raw); return (v==null||!isFinite(v)||v===0) ? null : `累積債務 P50: ${fmt(v)}`; }
-            return `${lbl}: ${fmt(rawVal(c.raw))}`;
-          }}}
+          callbacks:{
+            label: c => {
+              const fmt = v => '$'+Math.round(v).toLocaleString();
+              const lbl = c.dataset.label;
+              const rawVal = v => typeof v==='object' ? v?.y : v;
+              if (lbl==='總投入') return `總投入: ${fmt(rawVal(c.raw))}`;
+              if (lbl==='累積取款 P50') { const v=rawVal(c.raw); return (v==null||!isFinite(v)||v===0) ? null : `累積取款 P50: ${fmt(v)}`; }
+              if (lbl==='累積債務 P50') { const v=rawVal(c.raw); return (v==null||!isFinite(v)||v===0) ? null : `累積債務 P50: ${fmt(v)}`; }
+              return `${lbl}: ${fmt(rawVal(c.raw))}`;
+            },
+            afterBody: (items) => {
+              if (!items.length) return [];
+              const chart = items[0].chart;
+              const idx = items[0].dataIndex;
+              const histDs = chart.data.datasets.filter(ds => ds.label?.startsWith('hist-'));
+              if (!histDs.length) return [];
+              const mouseY = chart.tooltip._eventPosition?.y;
+              const mouseVal = mouseY != null ? chart.scales.y.getValueForPixel(mouseY) : null;
+              let nearest = null, minDist = Infinity;
+              histDs.forEach(ds => {
+                const raw = ds.data[idx];
+                const v = typeof raw === 'object' ? raw?.y : raw;
+                if (v != null && isFinite(v)) {
+                  const dist = mouseVal != null ? Math.abs(v - mouseVal) : 0;
+                  if (dist < minDist) { minDist = dist; nearest = { yr: ds.label.replace('hist-', ''), v }; }
+                }
+              });
+              if (!nearest) return [];
+              const fmtH = v => v >= 1e6 ? '$'+(v/1e6).toFixed(2)+'M' : v >= 1e3 ? '$'+Math.round(v/1e3)+'K' : '$'+Math.round(v).toLocaleString();
+              return ['', `歷史路徑 起始 ${nearest.yr}: ${fmtH(nearest.v)}`];
+            }
+          }}
       }
     }
   });
